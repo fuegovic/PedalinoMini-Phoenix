@@ -837,16 +837,19 @@ void spiffs_load_profile(byte profile) {
 //
 void load_factory_default()
 {
-  host               = getChipId();
+  // host               = getChipId();
+  host               = "pedalino";
   bootMode           = PED_BOOT_NORMAL;
-  bleServer          = "";
+  bleServer          = "PedalinoBLE";
   wifiSSID           = "";
   wifiPassword       = "";
-  ssidSoftAP         = String("Pedalino-") + getChipId();
-  passwordSoftAP     = getChipId();
+  // ssidSoftAP         = String("Pedalino-") + getChipId();
+  ssidSoftAP         = String("Pedalino");
+  // passwordSoftAP     = getChipId();
+  passwordSoftAP     = "pedalino";
   httpUsername       = "";
   httpPassword       = "";
-  theme              = "bootstrap";
+  theme              = "phoenix";
   currentBank        = 1;
   currentProfile     = 0;
   pressTime          = PED_PRESS_TIME;
@@ -854,7 +857,7 @@ void load_factory_default()
   longPressTime      = PED_LONG_PRESS_TIME;
   repeatPressTime    = PED_REPEAT_PRESS_TIME;
   encoderSensitivity = 5;
-  rgbOrder           = RGB;
+  rgbOrder           = GRB;
   ledsOnBrightness   = 5;
   ledsOffBrightness  = 1;
   tapDanceMode       = false;
@@ -1095,7 +1098,7 @@ void load_factory_default()
   act = actions[0] = (action*)malloc(sizeof(action));
   act->tag0[0]      = 0;
   act->tag1[0]      = 0;
-  act->control      = 37;
+  act->control      = 14;
   act->led          = LEDS;
   act->color0       = CRGB::Black;
   act->color1       = CRGB::Black;
@@ -1108,26 +1111,26 @@ void load_factory_default()
   act->oscAddress[0] = 0;
   act->slot         = SLOTS;
   act->next         = (action*)malloc(sizeof(action));
+  // act = act->next;
+  // act->tag0[0]      = 0;
+  // act->tag1[0]      = 0;
+  // act->control      = 37;
+  // act->led          = LEDS;
+  // act->color0       = CRGB::Black;
+  // act->color1       = CRGB::Black;
+  // act->event        = PED_EVENT_DOUBLE_CLICK;
+  // act->midiMessage  = PED_ACTION_PROFILE_MINUS;
+  // act->midiChannel  = 1;
+  // act->midiCode     = 0;
+  // act->midiValue1   = 0;
+  // act->midiValue2   = 127;
+  // act->oscAddress[0] = 0;
+  // act->slot         = SLOTS;
+  // act->next         = (action*)malloc(sizeof(action));
   act = act->next;
   act->tag0[0]      = 0;
   act->tag1[0]      = 0;
-  act->control      = 37;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_DOUBLE_CLICK;
-  act->midiMessage  = PED_ACTION_PROFILE_MINUS;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 0;
-  act->midiValue2   = 127;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 37;
+  act->control      = 14;
   act->led          = LEDS;
   act->color0       = CRGB::Black;
   act->color1       = CRGB::Black;
@@ -1153,7 +1156,7 @@ void load_factory_default()
   }
 
   byte c = 0;
-  for (byte p = 0; p < 6; p++) {
+  for (byte p = 0; p < PEDALS; p++) {
     byte b = 0;
     switch (pedals[p].mode) {
       case PED_NONE:                b = 0; break;
@@ -1213,7 +1216,8 @@ void load_factory_default()
   ladderLevels[6] = ADC_RESOLUTION - 1;
 }
 
-void eeprom_update_device_name(const String& name = getChipId())
+//void eeprom_update_device_name(const String& name = getChipId())
+void eeprom_update_device_name(const String& name = "pedalino")
 {
 #ifdef NVS
   DPRINT("Updating NVS ... ");
@@ -1275,7 +1279,25 @@ void eeprom_update_sta_wifi_credentials(const String& ssid = wifiSSID, const Str
 #endif
 }
 
-void eeprom_update_ap_wifi_credentials(const String& ssid = String("Pedalino-") + getChipId(), const String& pass = getChipId())
+// void eeprom_update_ap_wifi_credentials(const String& ssid = String("Pedalino-") + getChipId(), const String& pass = getChipId())
+// {
+// #ifdef NVS
+//   DPRINT("Updating NVS ... ");
+//   preferences.begin("Global", false);
+//   preferences.putString("AP SSID", ssid);
+//   preferences.putString("AP Password", pass);
+//   preferences.end();
+//   DPRINT("done\n");
+//   DPRINT("[NVS][Global][AP SSID]:     %s\n", ssid.c_str());
+//   DPRINT("[NVS][Global][AP Password]: %s\n", pass.c_str());
+// #else
+//   ssidSoftAP     = ssid;
+//   passwordSoftAP = pass;
+//   spiffs_save_globals();
+// #endif
+// }
+
+void eeprom_update_ap_wifi_credentials(const String& ssid = "Pedalino", const String& pass = "pedalino")
 {
 #ifdef NVS
   DPRINT("Updating NVS ... ");
@@ -1419,7 +1441,7 @@ void eeprom_update_press_time(long p1 = DEBOUNCE_INTERVAL,
 #endif
 }
 
-void eeprom_update_theme(const String& t = "bootstrap")
+void eeprom_update_theme(const String& t = "phoenix")
 {
 #ifdef NVS
   DPRINT("Updating NVS ... ");

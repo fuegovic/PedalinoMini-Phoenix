@@ -304,38 +304,50 @@ void setup()
     newBootMode = PED_BOOT_NORMAL;
     display_progress_bar_title2("Release button for", "Normal Boot");
   }
-  while ((digitalRead(FACTORY_DEFAULT_PIN) == LOW) && (duration < 16000)) {
-    if (duration > 1000 && duration < 3000 && newBootMode != PED_BOOT_BLE) {
+  while ((digitalRead(FACTORY_DEFAULT_PIN) == LOW)) {
+    duration = millis() - milliStart;
+    
+    if (duration >= 20000) {
+      duration = 0;
+      milliStart = millis();
+      continue;
+    }
+
+    if (duration > 2500 && duration < 5000 && newBootMode != PED_BOOT_BLE) {
       newBootMode = PED_BOOT_BLE;
       display_progress_bar_title2("Release button for", "Bluetooth Only");
     }
-    else if (duration > 3000 && duration < 5000 && newBootMode != PED_BOOT_WIFI) {
+    else if (duration > 5000 && duration < 7500 && newBootMode != PED_BOOT_WIFI) {
       newBootMode = PED_BOOT_WIFI;
       display_progress_bar_title2("Release button for", "WiFi Only");
     }
-    else if (duration > 5000 && duration < 7000 && newBootMode != PED_BOOT_AP) {
+    else if (duration > 7500 && duration < 10000 && newBootMode != PED_BOOT_AP) {
       newBootMode = PED_BOOT_AP;
       display_progress_bar_title2("Release button for", "Access Point");
     }
-    else if (duration > 7000 && duration < 9000 && newBootMode != PED_BOOT_AP_NO_BLE) {
+    else if (duration > 10000 && duration < 12500 && newBootMode != PED_BOOT_AP_NO_BLE) {
       newBootMode = PED_BOOT_AP_NO_BLE;
       display_progress_bar_title2("Release button for", "AP without BLE");
     }
-    else if (duration > 9000 && duration < 11000 && newBootMode != PED_BOOT_RESET_WIFI) {
+    else if (duration > 12500 && duration < 15000 && newBootMode != PED_BOOT_RESET_WIFI) {
       newBootMode = PED_BOOT_RESET_WIFI;
       display_progress_bar_title2("Release button for", "WiFi Reset");
     }
-    else if (duration > 11000 && duration < 13000 && newBootMode != PED_BOOT_LADDER_CONFIG) {
+    else if (duration > 15000 && duration < 17500 && newBootMode != PED_BOOT_LADDER_CONFIG) {
       newBootMode = PED_BOOT_LADDER_CONFIG;
       display_progress_bar_title2("Release button for", "Ladder Config");
     }
-    else if (duration > 13000 && duration < 16000 && newBootMode != PED_FACTORY_DEFAULT) {
+    else if (duration > 17500 && duration < 20000 && newBootMode != PED_FACTORY_DEFAULT) {
       newBootMode = PED_FACTORY_DEFAULT;
-      display_progress_bar_title2("Hold button for", "Factory Default");
+      display_progress_bar_title2("Release button for", "Factory Default");
     }
+    else if (duration == 0) {
+      newBootMode = PED_BOOT_NORMAL;
+      display_progress_bar_title2("Release button for", "Normal Boot");
+    }
+
     DPRINT("#");
-    display_progress_bar_update(duration, 16000);
-    duration = millis() - milliStart;
+    display_progress_bar_update(duration, 20000);
   }
 
   //display_clear();
@@ -411,13 +423,9 @@ void setup()
       break;
 
     case PED_FACTORY_DEFAULT:
-      if (duration > 15000) {
-        DPRINT("\nReset EEPROM to factory default\n");
-        eeprom_initialize();
-        ESP.restart();
-      }
-      else
-        bootMode = PED_BOOT_NORMAL;
+      DPRINT("\nReset EEPROM to factory default\n");
+      eeprom_initialize();
+      ESP.restart();
       break;
 
   }
@@ -506,6 +514,7 @@ void setup()
 #endif
 
   set_initial_led_color();
+  update_profile_led();
 
   xTaskCreatePinnedToCore(
                     loop1,       /* Task function. */
@@ -548,13 +557,18 @@ void loop()
     if (scrollingMode && !displayOff) {
       switch (currentProfile) {
         case 0:
+          fireocean_loop();
+          //plasma();
+          //pride();
           //blendwave();
-          ease2();
+          //ease2();
           break;
         case 1:
-          pacifica_loop();
+          pacifica_loop(); 
           break;
         case 2:
+          //blur();
+          //confetti_pal();
           pride();
           break;
       }

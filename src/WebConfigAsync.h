@@ -1,15 +1,4 @@
-/*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2024 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
-
-String theme         = "bootstrap";
+String theme         = "phoenix";
 String httpUsername  = "";
 String httpPassword  = "";
 bool   authenticated = false;
@@ -35,13 +24,6 @@ AsyncWebServer          httpServer(80);
 
 #ifdef WEBCONFIG
 
-#ifdef WEBSOCKET
-AsyncWebSocket               webSocket("/ws");
-AsyncEventSource             events("/events");    // EventSource is single direction, text-only protocol.
-AsyncWebSocketMessageBuffer *buffer = NULL;
-AsyncWebSocketClient        *wsClient = NULL;
-#endif
-
 #define WEBPAGE_MEMORY_ALLOCATION 8192    // To avoid memory fragmentation keep web page chunk smaller than allocated space
 
 String page          = "";
@@ -53,7 +35,7 @@ String uicontrol     = "All";
 String uicontrolpage = "1";
 String uisequence    = "1";
 
-#define CONTROLS_PER_PAGE   10
+#define CONTROLS_PER_PAGE   15
 
 bool fullPageCompleted = false;
 
@@ -109,17 +91,19 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
   page = "";
 
   page += F("<!doctype html>");
-  page += F("<html lang='en'>");
+  page += F("<html lang='en' data-bs-theme='dark'>");
   page += F("<head>");
   page += F("<title>PedalinoMini&trade;</title>");
   page += F("<meta charset='utf-8'>");
   page += F(" <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>");
-  if ( theme == "bootstrap" ) {
-  #ifdef BOOTSTRAP_LOCAL
-    page += F("<link rel='stylesheet' href='/css/bootstrap.min.css' integrity='sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH' crossorigin='anonymous'>");
-  #else
+  if (theme == "phoenix") {
+    #ifdef BOOTSTRAP_LOCAL
+      page += F("<link rel='stylesheet' href='/css/bootstrap.min.css' crossorigin='anonymous'>");
+    #else
+      page += F("<link href='https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css' rel='stylesheet' crossorigin='anonymous'>");
+    #endif
+  } else if (theme == "bootstrap") {
     page += F("<link href='https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css' rel='stylesheet' crossorigin='anonymous'>");
-  #endif
   } else {
     page += F("<link href='https://cdn.jsdelivr.net/npm/bootswatch@latest/dist/");
     page += theme;
@@ -131,23 +115,39 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
   page += F("<body>");
 
   if (trim_page(start, len)) return true;
+  
+  // // Home nav item - home btn
+  // if (p >= 0) {
+  // page += F("<div class='container-fluid mt-3 mb-3'>");
 
+  // page += F("<nav class='navbar navbar-expand-md navbar-dark bg-dark mb-3'>");
+  // page += F("<div class='container-fluid'>");
+  // page += F("<ul class='navbar-nav mr-auto'>");
+
+  // page += F("<li class='nav-item");
+  // page += (p == 0 ? F(" active'>") : F("'>"));
+  // page += F("<a class='nav-link' href='/'>");
+  // page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-house' viewBox='0 0 16 16'>");
+  // page += F("<path d='M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z'/>");
+  // page += F("</svg>");
+  // page += F(" Home</a>");
+  // page += F("</li>");
+  // //
+
+  // Home nav item alt - logo.webp
   if (p >= 0) {
-  page += F("<div class='container-fluid mt-3 mb-3'>");
-
-  page += F("<nav class='navbar navbar-expand-md navbar-light bg-light mb-3'>");
-  page += F("<div class='container-fluid'>");
-  page += F("<a class='navbar-brand' href='/'>");
-  page += F("<img src='/logo.png' width='30' height='30' class='d-inline-block align-top' alt=''></a>");
-  page += F("<button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>");
-  page += F("<span class='navbar-toggler-icon'></span>");
-  page += F("</button>");
-  page += F("<div class='collapse navbar-collapse' id='navbarNavDropdown'>");
-  page += F("<ul class='navbar-nav mr-auto'>");
-  //page += F("<li class='nav-item");
-  //page += (p == 1 ? F(" active'>") : F("'>"));
-  //page += F("<a class='nav-link' href='/live'>Live</a>");
-  //page += F("</li>");
+    page += F("<div class='container-fluid mt-3 mb-3'>");
+  
+    page += F("<nav class='navbar navbar-expand-md mb-3'>");
+    page += F("<div class='container-fluid'>");
+    page += F("<a class='navbar-brand' href='/'>");
+    page += F("<img src='/logo.webp' width='30' height='30' class='d-inline-block align-top' alt=''></a>");
+    page += F("<button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNavDropdown' aria-controls='navbarNavDropdown' aria-expanded='false' aria-label='Toggle navigation'>");
+    page += F("<span class='navbar-toggler-icon'></span>");
+    page += F("</button>");
+    page += F("<div class='collapse navbar-collapse' id='navbarNavDropdown'>");
+    page += F("<ul class='navbar-nav mr-auto'>");
+  //  
 
   if (trim_page(start, len)) return true;
 
@@ -233,6 +233,17 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
   page += F("</svg>");
   page += F(" Configurations</a>");
   page += F("</li>");
+
+  page += F("<li class='nav-item");
+  page += (p == 9 ? F(" active'>") : F("'>"));
+  page += F("<a class='nav-link' href='/update'>");
+  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-cloud-upload' viewBox='0 0 16 16'>");
+  page += F("<path fill-rule='evenodd' d='M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383z'/>");
+  page += F("<path fill-rule='evenodd' d='M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3z'/>");
+  page += F("</svg>");
+  page += F(" Update</a>");
+  page += F("</li>");
+
   page += F("</ul>");
   }
   page += F("</div>");
@@ -251,95 +262,6 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
   }
   page += F("</div>");
   page += F("</nav>");
-
-
-/*
-  page += F("<div class='d-flex flex-column bg-light' style='width: 4.5rem;'>");
-  page += F("<a href='/' id='bootstrap' class='d-block p-3 link-dark text-decoration-none' title='PedalinoMini' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<img src='/logo.png' width='32' height='32'>");
-  page += F("<span class='visually-hidden'>Icon-only</span>");
-  page += F("</a>");
-  page += F("<ul class='nav nav-pills nav-flush flex-column mb-auto text-center'>");
-  page += F("<li class='nav-item'>");
-  page += F("<a href='/actions' class='nav-link active py-3 border-bottom' title='Actions' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-clipboard-check' viewBox='0 0 16 16'>");
-  page += F("<path fill-rule='evenodd' d='M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z'/>");
-  page += F("<path d='M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z'/>");
-  page += F("<path d='M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z'/>");
-  page += F("<use xlink:href='#home'/></svg>");
-  page += F("</a>");
-  page += F("</li>");
-  page += F("<li class='nav-item'>");
-  page += F("<a href='/pedals' class='nav-link py-3 border-bottom' title='Pedals' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-controller' viewBox='0 0 16 16'>");
-  page += F("<path d='M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1v-1z'/>");
-  page += F("<path d='M3.051 3.26a.5.5 0 0 1 .354-.613l1.932-.518a.5.5 0 0 1 .62.39c.655-.079 1.35-.117 2.043-.117.72 0 1.443.041 2.12.126a.5.5 0 0 1 .622-.399l1.932.518a.5.5 0 0 1 .306.729c.14.09.266.19.373.297.408.408.78 1.05 1.095 1.772.32.733.599 1.591.805 2.466.206.875.34 1.78.364 2.606.024.816-.059 1.602-.328 2.21a1.42 1.42 0 0 1-1.445.83c-.636-.067-1.115-.394-1.513-.773-.245-.232-.496-.526-.739-.808-.126-.148-.25-.292-.368-.423-.728-.804-1.597-1.527-3.224-1.527-1.627 0-2.496.723-3.224 1.527-.119.131-.242.275-.368.423-.243.282-.494.575-.739.808-.398.38-.877.706-1.513.773a1.42 1.42 0 0 1-1.445-.83c-.27-.608-.352-1.395-.329-2.21.024-.826.16-1.73.365-2.606.206-.875.486-1.733.805-2.466.315-.722.687-1.364 1.094-1.772a2.34 2.34 0 0 1 .433-.335.504.504 0 0 1-.028-.079zm2.036.412c-.877.185-1.469.443-1.733.708-.276.276-.587.783-.885 1.465a13.748 13.748 0 0 0-.748 2.295 12.351 12.351 0 0 0-.339 2.406c-.022.755.062 1.368.243 1.776a.42.42 0 0 0 .426.24c.327-.034.61-.199.929-.502.212-.202.4-.423.615-.674.133-.156.276-.323.44-.504C4.861 9.969 5.978 9.027 8 9.027s3.139.942 3.965 1.855c.164.181.307.348.44.504.214.251.403.472.615.674.318.303.601.468.929.503a.42.42 0 0 0 .426-.241c.18-.408.265-1.02.243-1.776a12.354 12.354 0 0 0-.339-2.406 13.753 13.753 0 0 0-.748-2.295c-.298-.682-.61-1.19-.885-1.465-.264-.265-.856-.523-1.733-.708-.85-.179-1.877-.27-2.913-.27-1.036 0-2.063.091-2.913.27z'/>");
-  page += F("</svg>");
-  page += F("</a>");
-  page += F("</li>");
-  page += F("<li class='nav-item'>");
-  page += F("<a href='/interfaces' class='nav-link py-3 border-bottom' title='Interfaces' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-hdd-network' viewBox='0 0 16 16'>");
-  page += F("<path d='M4.5 5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zM3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z'/>");
-  page += F("<path d='M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8.5v3a1.5 1.5 0 0 1 1.5 1.5h5.5a.5.5 0 0 1 0 1H10A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5H.5a.5.5 0 0 1 0-1H6A1.5 1.5 0 0 1 7.5 10V7H2a2 2 0 0 1-2-2V4zm1 0v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1zm6 7.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5z'/>");
-  page += F("</svg>");
-  page += F("</a>");
-  page += F("</li>");
-  page += F("<li class='nav-item'>");
-  page += F("<a href='/sequences' class='nav-link py-3 border-bottom' title='Sequences' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-camera-reels' viewBox='0 0 16 16'>");
-  page += F("<path d='M6 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM1 3a2 2 0 1 0 4 0 2 2 0 0 0-4 0z'/>");
-  page += F("<path d='M9 6h.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 7.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 16H2a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h7zm6 8.73V7.27l-3.5 1.555v4.35l3.5 1.556zM1 8v6a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1z'/>");
-  page += F("<path d='M9 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM7 3a2 2 0 1 1 4 0 2 2 0 0 1-4 0z'/>");
-  page += F("</svg>");
-  page += F("</a>");
-  page += F("</li>");
-  page += F("<li class='nav-item'>");
-  page += F("<a href='/options' class='nav-link py-3 border-bottom' title='Options' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-gear' viewBox='0 0 16 16'>");
-  page += F("<path d='M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z'/>");
-  page += F("<path d='M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z'/>");
-  page += F("</svg>");
-  page += F("</a>");
-  page += F("</li>");
-  page += F("<li class='nav-item'>");
-  page += F("<a href='/configurations' class='nav-link py-3 border-bottom' title='Configurations' data-bs-toggle='tooltip' data-bs-placement='right'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-file-code' viewBox='0 0 16 16'>");
-  page += F("<path d='M6.646 5.646a.5.5 0 1 1 .708.708L5.707 8l1.647 1.646a.5.5 0 0 1-.708.708l-2-2a.5.5 0 0 1 0-.708l2-2zm2.708 0a.5.5 0 1 0-.708.708L10.293 8 8.646 9.646a.5.5 0 0 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2z'/>");
-  page += F("<path d='M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z'/>");
-  page += F("</svg>");
-  page += F("</a>");
-  page += F("</li>");
-
-  page += F("</ul>");
-  page += F("<div class='dropdown border-top'>");
-  page += F("<a href='#' class='d-flex align-items-center justify-content-center p-3 link-dark text-decoration-none dropdown-toggle' id='dropdownUser3' data-bs-toggle='dropdown' aria-expanded='false'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' class='bi bi-stack' viewBox='0 0 16 16'>");
-  page += F("<path d='m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.598.598 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.598.598 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.598.598 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535L7.733.063z'/>");
-  page += F("<path d='m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.598.598 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.659z'/>");
-  page += F("</svg>");
-  page += F("</a>");
-  page += F("<ul class='dropdown-menu text-small shadow' aria-labelledby='dropdownUser3'>");
-  page += F("<li><a class='dropdown-item' href='#'>Profile A</a></li>");
-  page += F("<li><a class='dropdown-item' href='#'>Profile B</a></li>");
-  page += F("<li><a class='dropdown-item' href='#'>Profile C</a></li>");
-  page += F("<li><hr class='dropdown-divider'></li>");
-  page += F("<li><a class='dropdown-item' href='#'>Sign out</a></li>");
-  page += F("</ul>");
-  page += F("</div>");
-  page += F("</div>");
-  page += F("<script>");
-  page += F("(function () {\n"
-              "'use strict'\n"
-              "var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]'))\n"
-              "tooltipTriggerList.forEach(function (tooltipTriggerEl) {\n"
-                "new bootstrap.Tooltip(tooltipTriggerEl)\n"
-              "})\n"
-            "})()\n");
-  page += F("</script>");
-
-  page += F("<div class='container mt-3 mb-3'>");
-*/
 
   if (alert != "") {
     page += F("<div class='alert alert-success alert-dismissible fade show' role='alert'>");
@@ -360,10 +282,9 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
 }
 
 void get_footer_page() {
-
-  page += F("</div>");
+  page += F("</div>"); // Close container-fluid from get_top_page
 #ifdef BOOTSTRAP_LOCAL
-  page += F("<script defer src='/js/bootstrap.bundle.min.js' integrity='sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz' crossorigin='anonymous'></script>");
+  page += F("<script defer src='/js/bootstrap.bundle.min.js' integrity='' crossorigin='anonymous'></script>");
 #else
   page += F("<script src='https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js' crossorigin='anonymous'></script>");
 #endif
@@ -381,7 +302,7 @@ void get_login_page() {
   page += F("<div class='col-4'>");
   page += F("<form class='form-signin'>");
   page += F("<div class='text-center mb-4'>");
-  page += F("<img class='mb-4' src='/logo.png' alt='' width='64' height='64'>");
+  page += F("<img class='mb-4' src='/logo.webp' alt='' width='64' height='64'>");
   page += F("<h1 class='h3 mb-3 font-weight-normal'>PedalinoMini&trade;</h1>");
   page += F("<p>Wireless MIDI foot controller <a href='https://github.com/alf45tar/PedalinoMini'>More info</a></p>");
   page += F("</div>");
@@ -412,566 +333,266 @@ void get_login_page() {
   get_footer_page();
 }
 
-void get_root_page(unsigned int start, unsigned int len) {
-
-  if (get_top_page(0, start, len)) return;
-
-  page += F("<h4 class='display-4'>Wireless MIDI foot controller</h4>");
-
-  page += F("<div class='row row-cols-1 row-cols-sm-2 row-cols-lg-4'>");
-
-  page += F("<div class='col'>");
-  page += F("<h3>Product</h3>");
-  page += F("<dt>Model</dt><dd>");
-  page += MODEL;
-  page += F("</dd>");
-  page += F("<dt>Profiles</dt><dd>");
-  page += PROFILES;
-  page += F("</dd>");
-  page += F("<dt>Banks</dt><dd>");
-  page += BANKS;
-  page += F("</dd>");
-  page += F("<dt>Pedals</dt><dd>");
-  page += PEDALS;
-  page += F("</dd>");
-  page += F("<dt>Controls</dt><dd>");
-  page += CONTROLS;
-  page += F("</dd>");
-  page += F("<dt>Sequences</dt><dd>");
-  page += SEQUENCES;
-  page += F("</dd>");
-  page += F("<dt>Leds</dt><dd>");
-  page += LEDS;
-  page += F("</dd>");
-  page += F("<dt>Boot Mode</dt><dd>");
-  switch (bootMode) {
-    case PED_BOOT_NORMAL:
-      page += F("Normal");
-      break;
-    case PED_BOOT_BLE:
-      page += F("BLE only");
-      break;
-    case PED_BOOT_WIFI:
-      page += F("WiFi only");
-      break;
-    case PED_BOOT_AP:
-      page += F("Access Point and BLE");
-      break;
-    case PED_BOOT_AP_NO_BLE:
-      page += F("Access Point without BLE");
-      break;
-  }
-  page += F("</dd>");
-  page += F("<dt>PlatformIO ESP32 Platform</dt><dd>");
-  page += xstr(ESP32_PLATFORM_VERSION);
-  page += F("</dd>");
-  page += F("<dt>IDF Version</dt><dd>");
-  page += ESP_IDF_VERSION_MAJOR;
-  page += F(".");
-  page += ESP_IDF_VERSION_MINOR;
-  page += F(".");
-  page += ESP_IDF_VERSION_PATCH;
-  page += F("</dd>");
-  page += F("<dt>SDK Version</dt><dd>");
-  page += ESP.getSdkVersion();
-  page += F("</dd>");
-/*
-  page += F("<dt>Arduino Version</dt><dd>");
-  page += ESP_ARDUINO_VERSION_MAJOR;
-  page += F(".");
-  page += ESP_ARDUINO_VERSION_MINOR;
-  page += F(".");
-  page += ESP_ARDUINO_VERSION_PATCH;
-  page += F("</dd>");
-*/
-  page += F("<dt>PlatformIO Build Env</dt><dd>");
-  page += xstr(PLATFORMIO_ENV);
-  page += F("</dd>");
-
-  page += F("<dt>Bootstrap Version</dt><dd><span id='bootstrap-version'></span></dd>");
-  page += F("<script>"
-            "   document.addEventListener('DOMContentLoaded', function() {"
-            "     if (typeof bootstrap !== 'undefined') {"
-            "       document.getElementById('bootstrap-version').textContent = bootstrap.Tooltip.VERSION;"
-            "     } else {"
-            "       document.getElementById('bootstrap-version').textContent = 'Not available';"
-            "     }"
-            "   });"
-            "</script>");
-
-  page += F("<dt>Firmware</dt><dd>");
-  page += PEDALINO_VERSION_MAJOR;
-  page += F(".");
-  page += PEDALINO_VERSION_MINOR;
-  page += F(".");
-  page += PEDALINO_VERSION_PATCH;
-  page += F("</dd>");
-  page += F("<dt>Firmware Size</dt><dd>");
-  page += sketchSize;
-  page += F(" bytes</dd>");
-  page += F("<dt>Firmware Hash</dt><dd>");
-  page += sketchMD5;
-  page += F("</dd>");
-  page += F("</div>");
-  
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='col'>");
-  page += F("<h3>Hardware</h3>");
-  page += F("<dt>Board</dt><dd>");
-  page += ARDUINO_BOARD;
-  page += F("</dd>");
-  page += F("<dt>Chip</dt><dd>");
-  page += ESP.getChipModel();
-  page += F("</dd>");
-  page += F("<dt>Chip Revision</dt><dd>");
-  page += ESP.getChipRevision();
-  page += F("</dd>");
-  page += F("</dd>");
-  page += F("<dt>Chip ID</dt><dd>");
-  page += getChipId();
-  page += F("</dd>");
-  page += F("<dt>CPU Frequency</dt><dd>");
-  page += ESP.getCpuFreqMHz();
-  page += F(" MHz</dd>");
-  page += F("<dt>Flash Chip Frequency</dt><dd>");
-  page += ESP.getFlashChipSpeed() / 1000000;
-  page += F(" MHz</dd>");
-  page += F("<dt>Flash Size</dt><dd>");
-  page += ESP.getFlashChipSize() / (1024 * 1024);
-  page += F(" MB</dd>");
-  page += F("<dt>PSRAM Used/Total</dt><dd>");
-  page += (ESP.getPsramSize() - ESP.getFreePsram()) / 1024;
-  page += F("/");
-  page += ESP.getPsramSize() / 1024;
-  page += F(" kB</dd>");
-  nvs_stats_t nvs_stats;
-  if (nvs_get_stats("nvs", &nvs_stats) == ESP_OK) {
-    page += F("<dt>NVS Used/Total</dt><dd>");
-    page += nvs_stats.used_entries;
-    page += F("/");
-    page += nvs_stats.total_entries;
-    page += F(" entries</dd>");
-  }
-  page += F("<dt>SPIFFS Used/Total</dt><dd>");
-  page += SPIFFS.usedBytes() / 1024;
-  page += F("/");
-  page += SPIFFS.totalBytes() / 1024;
-  page += F(" kB</dd>");
-  page += F("<dt>Free Heap Size (Max Allocation)</dt><dd>");
-  page += freeMemory / 1024;
-  page += F(" kB (");
-  page += maxAllocation / 1024;
-  page += F(" kB)</dd>");
-#ifdef BATTERY
-#ifdef ARDUINO_BPI_LEAF_S3
-  page += F("<dt>Battery Voltage</dt><dd>");
-  page += String(batteryVoltage / 1000.0, 1);
-  page += F(" V ");
-  page += F("</dd>");
-#else
-  page += F("<dt>Input Voltage</dt><dd>");
-  page += String(batteryVoltage / 1000.0, 1);
-  page += F(" V ");
-  page += batteryVoltage > 4300 ? F("plugged") : F("on battery");
-  page += F("</dd>");
-#endif // ARDUINO_BPI_LEAF_S3
-#endif // BATTERY
-  page += F("<dt>Uptime</dt><dd>");
-  unsigned long sec = (millis() / 1000) % 60;
-  unsigned long min = (millis() / 1000 / 60) % 60;
-  unsigned long h   = (millis() / 1000 / 60 / 60) % 24;
-  unsigned long day = (millis() / 1000 / 60 / 60 / 24);
-  if (day > 0) { page += day; page += F("d "); }
-  if (h   > 0) { page += h;   page += F("h "); }
-  if (min > 0) { page += min; page += F("m "); }
-  page += sec;
-  page += F("s");
-  page += F("</dd>");
-  page += F("<dt>Webserver Running On Core</dt><dd>");
-  page += xPortGetCoreID();
-  page += F("</dd>");
-  page += F("</div>");
-
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='col'>");
-  if (WiFi.getMode() == WIFI_STA || WiFi.getMode() == WIFI_AP_STA) {
-  page += F("<h3>Wireless STA</h3>");
-  page += F("<dt>SSID</dt><dd>");
-  page += wifiSSID;
-  page += F("</dd>");
-  page += F("<dt>BSSID</dt><dd>");
-  page += WiFi.BSSIDstr();
-  page += F("</dd>");
-  page += F("<dt>RSSI</dt><dd>");
-  page += WiFi.RSSI();
-  page += F(" dBm</dd>");
-  page += F("<dt>Channel</dt><dd>");
-  page += WiFi.channel();
-  page += F("</dd>");
-  page += F("<dt>Station MAC</dt><dd>");
-  page += WiFi.macAddress();
-  page += F("</dd>");
-  }
-
-  if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
-  page += F("<h3>Wireless AP</h3>");
-  page += F("<dt>AP SSID</dt><dd>");
-  page += ssidSoftAP;
-  page += F("</dd>");
-  page += F("<dt>AP MAC Address</dt><dd>");
-  page += WiFi.softAPmacAddress();
-  page += F("</dd>");
-  page += F("<dt>AP IP Address</dt><dd>");
-  page += WiFi.softAPIP().toString();
-  page += F("</dd>");
-  page += F("<dt>Channel</dt><dd>");
-  page += WiFi.channel();
-  page += F("</dd>");
-  page += F("<dt>Hostname</dt><dd>");
-  page += WiFi.softAPgetHostname();
-  page += F("</dd>");
-  page += F("<dt>Connected Stations</dt><dd>");
-  page += WiFi.softAPgetStationNum();
-  page += F("</dd>");
-  }
-  page += F("</div>");
-
-  page += F("<div class='col'>");
-  page += F("<h3>Network</h3>");
-  page += F("<dt>Hostname</dt><dd>");
-  page += WiFi.getHostname();
-  page += F(".local");
-  page += F("</dd>");
-  page += F("<dt>IP address</dt><dd>");
-  page += WiFi.localIP().toString();
-  page += F("</dd>");
-  page += F("<dt>Subnet mask</dt><dd>");
-  page += WiFi.subnetMask().toString();
-  page += F("</dd>");
-  page += F("<dt>Gataway IP</dt><dd>");
-  page += WiFi.gatewayIP().toString();
-  page += F("</dd>");
-  page += F("<dt>DNS 1</dt><dd>");
-  page += WiFi.dnsIP(0).toString();
-  page += F("</dd>");
-  page += F("<dt>DNS 2</dt><dd>");
-  page += WiFi.dnsIP(1).toString();
-  page += F("</dd>");
-  page += F("<dt>MIDI Network</dt><dd>");
-  if (appleMidiConnected) {
-    page += F("Connected to<br>");
-    page += appleMidiSessionName;
-  }
-  else page += F("Disconnected");
-  page += F("</dd>");
-#ifdef BLE
-  page += F("<dt>Bluetooth LE MIDI</dt><dd>");
-  if (bleMidiConnected) page += F("Connected");
-  else page += F("Disconnected");
-  page += F("</dd>");
-#endif
-  page += F("</div>");
-
-  page += F("</div>");
-
-  get_footer_page();
-
-  if (trim_page(start, len, true)) return;
+// Optimized status item helper
+void addStatusItem(const char* label, const String& value) {
+  page += F("<div class='row g-1 mb-2'><div class='col-6'>");
+  page += label;
+  page += F("</div><div class='col-6 text-end'>");
+  page += value;
+  page += F("</div></div>");
 }
 
-void get_live_page(unsigned int start, unsigned int len) {
+// Reusable SVG icons stored in PROGMEM to save RAM
+const char INFO_ICON[] PROGMEM = "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-info-circle' viewBox='0 0 16 16'><path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/><path d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z'/></svg>";
+const char HARDWARE_ICON[] PROGMEM = "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-cpu' viewBox='0 0 16 16'><path d='M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3z'/></svg>";
+const char NETWORK_ICON[] PROGMEM = "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-wifi' viewBox='0 0 16 16'>"
+"<path d='M15.384 6.115a.485.485 0 0 0-.047-.736A12.444 12.444 0 0 0 8 3c-2.82 0-5.432.952-7.337 2.38a.485.485 0 0 0-.047.735.518.518 0 0 0 .668.05A11.448 11.448 0 0 1 8 4c2.597 0 4.99.883 6.766 2.166a.518.518 0 0 0 .668-.05'/>"
+"<path d='M13.229 8.271a.482.482 0 0 0-.063-.745A9.455 9.455 0 0 0 8 6c-2.086 0-4.02.666-5.166 1.526a.48.48 0 0 0-.063.745.525.525 0 0 0 .652.065A8.46 8.46 0 0 1 8 7a8.46 8.46 0 0 1 4.576 1.336c.206.132.48.108.653-.065zm-2.183 2.183c.226-.226.185-.605-.1-.75A6.473 6.473 0 0 0 8 9c-1.06 0-2.062.254-2.946.704-.285.145-.326.524-.1.75l.015.015c.16.16.407.19.611.09A5.478 5.478 0 0 1 8 10c.868 0 1.69.201 2.42.56.203.1.45.07.61-.091l.016-.015zM9.06 12.44c.196-.196.198-.52-.04-.66A1.99 1.99 0 0 0 8 11.5a1.99 1.99 0 0 0-1.02.28c-.238.14-.236.464-.04.66l.706.706a.5.5 0 0 0 .707 0l.707-.707z'/>"
+"</svg>";
+const char SYSTEM_ICON[] PROGMEM = "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-gear' viewBox='0 0 16 16'>"
+"<path d='M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z'/>"
+"<path d='M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z'/>"
+"</svg>";
 
-  if (get_top_page(1, start, len)) return;
+// Reusable card component
+void addCard(const char* icon, const char* title) {
+  page += F("<div class='col'><div class='card h-100'><h5 class='card-header'>");
+  page += FPSTR(icon);
+  page += F(" ");
+  page += title;
+  page += F("</h5><div class='card-body'>");
+}
 
-  page += F("<div aria-live='polite' aria-atomic='true' style='position: relative;'>"
-            "<div id='remotedisplay' class='toast' style='position: absolute; top: 0; right: 0; max-width: 600px;' data-autohide='false'>"
-            "<div class='toast-header'>"
-            "<strong class='me-auto'>Remote Display</strong>"
-            "<small class='text-muted'>128x64</small>"
-            "<button type='button' class='btn-close' data-bs-dismiss='toast' aria-label='Close'></button>"
-            "</div>"
-            "<div class='toast-body'>"
-            "<canvas id='screen' height='64' width='128'>"
-            "Sorry, your browser does not support canvas."
-            "</canvas><br><small>"
-            "<a id='zoom1' href='#' role='button'>1x</a> "
-            "<a id='zoom2' href='#' role='button'>2x</a> "
-            "<a id='zoom4' href='#' role='button'>4x</a> "
-            "<a id='invert' href='#' role='button'>Invert</a></small>"
-            "</div>"
-            "</div>"
-            "</div>"
+void closeCard() {
+  page += F("</div>"); // Close card-body
+  page += F("</div>"); // Close card
+  page += F("</div>"); // Close col
+}
 
-            "<div id='live'>"
-            "<a id='showremotedisplay' href='#' role='button'>Remote Display</a>"
-            "<p></p>"
-            "<small>Bank</small><br>"
-            "<div class='btn-group btn-group-toggle' data-toggle='buttons'>");
+void get_root_page(unsigned int start, unsigned int len) {
+  if (get_top_page(0, start, len)) return;
+
+  // Minimal CSS using utility classes instead
+  page += F("<h4 class='display-4 text-center mb-4'>PedalinoMini™ 🐦‍🔥<br class='mb-0'>");
+  page += F("<small class='text-muted fs-5'>Wireless MIDI foot controller</small></h4>");
+  page += F("<div class='row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-2 g-md-3 mx-3'>");
+
+  // Product Information Card
+  addCard(INFO_ICON, "Product Information");
+  addStatusItem("Model", String(MODEL));
+  page += F("<div class='row g-1 mb-2'><div class='col-6'>Source Code</div>");
+  page += F("<div class='col-6 text-end'><a href='");
+  page += PEDALINO_GITHUB_URL;
+  page += F("' target='_blank'>GitHub</a></div></div><hr class='my-2'>");
+  
+  addStatusItem("Profiles", String(PROFILES));
+  addStatusItem("Banks", String(BANKS));
+  addStatusItem("Pedals", String(PEDALS));
+  addStatusItem("Controls", String(CONTROLS));
+  addStatusItem("Sequences", String(SEQUENCES));
+  addStatusItem("LEDs", String(LEDS));
+  closeCard();
 
   if (trim_page(start, len)) return;
 
-  for (unsigned int i = 1; i < BANKS; i++) {
-    page += F("<div class='col text-center g-0'>");
-    page += F("<div class='grid-square'>");
-    page += F("<button type='button' class='btn btn-outline-primary btn-sm' id='bank");
-    page += i;
-    page += F("'>");
-    if (String(banknames[i]).isEmpty())
-      page += i;
-    else
-      page += banknames[i];
-    page += F("</button>");
-    page += F("</div>");
-    page += F("</div>");
+  // Hardware Information Card
+  addCard(HARDWARE_ICON, "Hardware");
 
-    if (trim_page(start, len)) return;
+  // Board Information
+  page += F("<h6 class='border-bottom pb-2 fw-bold'>Board Information</h6>");
+  addStatusItem("Board", ARDUINO_BOARD);
+  addStatusItem("Chip", ESP.getChipModel());
+  addStatusItem("Chip ID", getChipId());
+
+  // CPU Information Section  
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>CPU Information</h6>");
+  addStatusItem("CPU Core", String(xPortGetCoreID()));
+  addStatusItem("CPU Frequency", String(ESP.getCpuFreqMHz()) + " MHz");
+
+  // Memory Information Section
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Memory Information</h6>");
+  addStatusItem("Flash Size", String(ESP.getFlashChipSize() / (1024 * 1024)) + " MB");
+  addStatusItem("Flash Frequency", String(ESP.getFlashChipSpeed() / 1000000) + " MHz");
+  addStatusItem("Memory Used", String((ESP.getHeapSize() - ESP.getFreeHeap()) / 1024) + "/" + String(ESP.getHeapSize() / 1024) + " kB");
+  addStatusItem("Max Memory Allocation", String(maxAllocation / 1024) + " kB");
+
+  // Storage Information
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Storage Information</h6>");
+  addStatusItem("SPIFFS Used", String(SPIFFS.usedBytes() / 1024) + "/" + String(SPIFFS.totalBytes() / 1024) + " kB");
+  addStatusItem("SPIFFS Type", F("LittleFS"));
+  nvs_stats_t nvs_stats;
+  if (nvs_get_stats("nvs", &nvs_stats) == ESP_OK) {
+    addStatusItem("NVS Used", String(nvs_stats.used_entries) + "/" + String(nvs_stats.total_entries));
   }
-  page += F("</div>"
-            "<p></p>"
-
-            "<div class='btn-group'>"
-            "<button type='button' class='btn btn-primary dropdown-toggle' data-bs-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"
-            "MIDI Clock</button>"
-            "<ul class='dropdown-menu'>"
-            "<li><a id='clock-master' class='dropdown-item' href='#'>Master</a></li>"
-            "<li><a id='clock-slave'  class='dropdown-item' href='#'>Slave</a></li>"
-            "</ul>"
-            "</div>"
-
-            "<div class='btn-group'>"
-            "<button type='button' class='btn btn-outline-primary dropdown-toggle' data-bs-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"
-            "Time Signature</button>"
-            "<ul class='dropdown-menu'>"
-            "<li><a id='4_4' class='dropdown-item' href='#'>4/4 Common Time</a></li>"
-            "<li><a id='3_4' class='dropdown-item' href='#'>3/4 Waltz Time</a></li>"
-            "<li><a id='2_4' class='dropdown-item' href='#'>2/4 March Time</a></li>"
-            "<li><a id='3_8' class='dropdown-item' href='#'>3/8</a></li>"
-            "<li><a id='6_8' class='dropdown-item' href='#'>6/8</a></li>"
-            "<li><a id='9_8' class='dropdown-item' href='#'>9/8</a></li>"
-            "<li><a id='12_8' class='dropdown-item' href='#'>12/8</a></li>"
-            "</ul>"
-            "</div>");
+  closeCard();
 
   if (trim_page(start, len)) return;
 
-  page += F("<div class='btn-group'>"
-            "<button type='button' class='btn btn-primary dropdown-toggle' data-bs-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>"
-            "MTC</button>"
-            "<ul class='dropdown-menu'>"
-            "<li><a id='mtc-master' class='dropdown-item' href='#'>Master</a></li>"
-            "<li><a id='mtc-slave' class='dropdown-item' href='#'>Slave</a></li>"
-            "</ul>"
-            "</div>"
-            "<p></p>"
+  // Network Status Card
+  addCard(NETWORK_ICON, "Network");
+  // First show Station info if connected
+  if (WiFi.getMode() == WIFI_STA || WiFi.getMode() == WIFI_AP_STA) {
+    page += F("<h6 class='border-bottom pb-2 fw-bold'>WiFi Client</h6>");
+    addStatusItem("SSID", wifiSSID);
+    addStatusItem("IP", WiFi.localIP().toString());
+    addStatusItem("Signal", String(WiFi.RSSI()) + " dBm");
+    addStatusItem("BSSID", WiFi.BSSIDstr());
+    addStatusItem("Channel", String(WiFi.channel()));
+    addStatusItem("MAC Address", WiFi.macAddress());
+    addStatusItem("Subnet Mask", WiFi.subnetMask().toString());
+    addStatusItem("Gateway", WiFi.gatewayIP().toString());
+    addStatusItem("DNS", WiFi.dnsIP().toString());
+    addStatusItem("Hostname", WiFi.getHostname());
+  }
 
-            "<div>"
-            "<h1 id='bpm'></h1> bpm"
-            "<h1 id='timesignature'></h1>"
-            "<h1 id='beat'></h1>"
-            "<h1 id='mtc'></h1>"
-            "</div>"
-            "<p></p>"
+  // Then show AP info if enabled, regardless of Station status
+  if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+    // Add section header if we showed Station info
+    if (WiFi.getMode() == WIFI_AP_STA) {
+      page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Access Point</h6>");
+    }
+    addStatusItem("AP SSID", ssidSoftAP);
+    addStatusItem("AP IP", WiFi.softAPIP().toString());
+    addStatusItem("AP MAC", WiFi.softAPmacAddress());
+    addStatusItem("Connected Clients", String(WiFi.softAPgetStationNum()));
+  }
 
-            "<button id='start' type='button' class='btn btn-outline-primary'>Start</button>"
-            "<button id='stop' type='button' class='btn btn-outline-primary'>Stop</button>"
-            "<button id='continue' type='button' class='btn btn-outline-primary'>Continue</button>"
-            "<button id='tap' type='button' class='btn btn-outline-primary'>Tap</button>"
-            "</div>");
+  // MIDI Status section
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>MIDI Connections</h6>");
 
+  // Network MIDI status with icon and status badge
+  page += F("<div class='row g-1 mb-2'><div class='col-6 d-flex align-items-center'>");
+  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-ethernet me-2' viewBox='0 0 16 16'>");
+  page += F("<path d='M14 13.5v-7a.5.5 0 0 0-.5-.5H12V4.5a.5.5 0 0 0-.5-.5h-1v-.5A.5.5 0 0 0 10 3H6a.5.5 0 0 0-.5.5V4h-1a.5.5 0 0 0-.5.5V6H2.5a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5ZM3.75 11h.5a.25.25 0 0 1 .25.25v1.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-1.5a.25.25 0 0 1 .25-.25Zm2 0h.5a.25.25 0 0 1 .25.25v1.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-1.5a.25.25 0 0 1 .25-.25Zm1.75.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v1.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-1.5ZM9.75 11h.5a.25.25 0 0 1 .25.25v1.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-1.5a.25.25 0 0 1 .25-.25Zm1.75.25a.25.25 0 0 1 .25-.25h.5a.25.25 0 0 1 .25.25v1.5a.25.25 0 0 1-.25.25h-.5a.25.25 0 0 1-.25-.25v-1.5Z'/>");
+  page += F("</svg>");
+  page += F("Network MIDI");
+  page += F("</div><div class='col-6 text-end'>");
+  if (appleMidiConnected) {
+    page += F("<span class='badge text-bg-success d-inline-flex align-items-center'>");
+    page += F("<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='currentColor' class='bi bi-play-circle-fill me-1' viewBox='0 0 16 16'>");
+    page += F("<path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z'/>");
+    page += F("</svg>Connected</span>");
+  } else {
+    page += F("<span class='badge text-bg-danger d-inline-flex align-items-center'>");
+    page += F("<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='currentColor' class='bi bi-stop-circle-fill me-1' viewBox='0 0 16 16'>");
+    page += F("<path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.5 5A1.5 1.5 0 0 0 5 6.5v3A1.5 1.5 0 0 0 6.5 11h3A1.5 1.5 0 0 0 11 9.5v-3A1.5 1.5 0 0 0 9.5 5h-3z'/>");
+    page += F("</svg>Disconnected</span>");
+  }
+  page += F("</div></div>");
+
+  #ifdef BLE
+  // BLE MIDI status with icon and status badge
+  page += F("<div class='row g-1 mb-2'><div class='col-6 d-flex align-items-center'>");
+  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-bluetooth me-2' viewBox='0 0 16 16'>");
+  page += F("<path fill-rule='evenodd' d='m8.543 3.948 1.316 1.316L8.543 6.58V3.948Zm0 8.104 1.316-1.316L8.543 9.42v2.632Zm-1.41-4.043L4.275 5.133l.827-.827L7.377 6.58V1.128l4.137 4.136L8.787 8.01l2.745 2.745-4.136 4.137V9.42l-2.294 2.274-.827-.827L7.133 8.01ZM7.903 16c3.498 0 5.904-1.655 5.904-8.01 0-6.335-2.406-7.99-5.903-7.99C4.407 0 2 1.655 2 8.01 2 14.344 4.407 16 7.904 16Z'/>");
+  page += F("</svg>");
+  page += F("BLE MIDI");
+  page += F("</div><div class='col-6 text-end'>");
+  if (bleMidiConnected) {
+    page += F("<span class='badge text-bg-success d-inline-flex align-items-center'>");
+    page += F("<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='currentColor' class='bi bi-play-circle-fill me-1' viewBox='0 0 16 16'>");
+    page += F("<path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z'/>");
+    page += F("</svg>Connected</span>");
+  } else {
+    page += F("<span class='badge text-bg-danger d-inline-flex align-items-center'>");
+    page += F("<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='currentColor' class='bi bi-stop-circle-fill me-1' viewBox='0 0 16 16'>");
+    page += F("<path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.5 5A1.5 1.5 0 0 0 5 6.5v3A1.5 1.5 0 0 0 6.5 11h3A1.5 1.5 0 0 0 11 9.5v-3A1.5 1.5 0 0 0 9.5 5h-3z'/>");
+    page += F("</svg>Disconnected</span>");
+  }
+  page += F("</div></div>");
+  #endif
+
+  closeCard();
   if (trim_page(start, len)) return;
 
+  // System Status Card
+  addCard(SYSTEM_ICON, "System");
+
+  // System Information Section
+  page += F("<h6 class='border-bottom pb-2 fw-bold'>System Information</h6>");
+  addStatusItem("SDK Version", ESP.getSdkVersion());
+  addStatusItem("Free Memory", "<span id='free-memory'></span>");
+  addStatusItem("Uptime", "<span id='uptime'></span>");
+
+  // ESP32 Platform Section
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>ESP32 Platform</h6>");
+  addStatusItem("ESP32 Platform", ESP32_PLATFORM_VERSION);
+  char idfVer[16];
+  snprintf(idfVer, sizeof(idfVer), "%d.%d.%d", 
+          ESP_IDF_VERSION_MAJOR, 
+          ESP_IDF_VERSION_MINOR, 
+          ESP_IDF_VERSION_PATCH);
+  addStatusItem("IDF Version", idfVer);
+  addStatusItem("Build Env", xstr(PLATFORMIO_ENV));
+
+  // Firmware Section
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Firmware</h6>");
+  char version[16];
+  snprintf(version, sizeof(version), "%d.%d.%d", 
+          PEDALINO_VERSION_MAJOR, 
+          PEDALINO_VERSION_MINOR, 
+          PEDALINO_VERSION_PATCH);
+  addStatusItem("Version", version);
+  addStatusItem("Size", String(sketchSize) + " bytes");
+  addStatusItem("Hash", sketchMD5);
+
+  // Frontend Section  
+  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Frontend</h6>");
+  addStatusItem("Bootstrap Version", "<span id='bootstrap-version'></span>");
+
+  // Close the row of cards
+  page += F("</div>");
+  
+  // JavaScript for uptime counter 
   page += F("<script>"
-            "var isplaying = 0;"
-            "var invert = 0;"
-            "var zoom = 1;"
-            "var con;"
-            "var source;"
+      "function u(){"
+      "const e=document.getElementById('uptime');"
+      "let t=");
+  page += millis();
+  page += F(";"
+      "try{"
+      "const n=()=>{"
+      "t+=1e3;"
+      "let n=Math.floor(t/1e3),o=Math.floor(n/60),r=Math.floor(o/60),a=Math.floor(r/24);"
+      "n%=60,o%=60,r%=24;"
+      "let l='';"
+      "a>0&&(l+=a+'d '),r>0&&(l+=r+'h '),o>0&&(l+=o+'m '),l+=n+'s';"
+      "e.innerHTML=l"
+      "};"
+      "n(),setInterval(n,1e3)"
+      "}catch(t){e.innerHTML='<span class=\"text-danger\">Error</span>'}"
+      "}"
+      "setTimeout(u,0);"
+      "</script>");
 
-            "function webSocketConnect() {"
-            "con = new WebSocket('ws://' + location.hostname + ':80/ws');"
-            "con.binaryType = 'arraybuffer';"
-            "con.onopen = function () {"
-            "console.log('WebSocket to Pedalino open');"
-            //"$('#live').find('input, button, submit, textarea, select').removeAttr('disabled');"
-            //"$('#live').find('a').removeClass('disablehyper').unbind('click');"
-            "var preview = document.querySelectorAll('input, button, submit, textarea, select');"
-            "for (var i = 0; i < preview.length;  i++) {preview[i].removeAttribute('disabled');};"
-            //"document.querySelectorAll('a').forEach(function(number, index, array){array[index].classList.remove('disablehyper').removeEventListener('click', click);});"
-            "};"
-            "con.onerror = function (error) {"
-            "console.log('WebSocket to Pedalino error ', error);"
-            "};"
-            "con.onmessage = function (e) {"
-            "var data = e.data;"
-            "var dv = new DataView(data);"
-  //          "if (dv.buffer.byteLength != 1024) return;"
-            "var canvas=document.getElementById('screen');"
-            "var context=canvas.getContext('2d');"
-            "var x=0; y=0;"
-            "for (y=0; y<64; y++)"
-            "  for (x=0; x<128; x++)"
-            "    if ((dv.getUint8(x+Math.floor(y/8)*128) & (1<<(y&7))) == 0){"
-            "      (invert == 0) ? context.clearRect(x*zoom,y*zoom,zoom,zoom) : context.fillRect(x*zoom,y*zoom,zoom,zoom);"
-            "    } else {(invert == 0) ? context.fillRect(x*zoom,y*zoom,zoom,zoom) : context.clearRect(x*zoom,y*zoom,zoom,zoom);}"
-            "};"
-            "con.onclose = function () {"
-            "console.log('WebSocket to Pedalino closed');"
-            //"$('#live').find('input, button, submit, textarea, select').attr('disabled', 'disabled');"
-            //"$('#live').find('a').addClass('disablehyper').click(function (e) { e.preventDefault(); });"
-            "var preview = document.querySelectorAll('input, button, submit, textarea, select');"
-            "for (var i = 0; i < preview.length;  i++) {preview[i].setAttribute('disabled', 'disabled');};"
-            "document.querySelectorAll('a').forEach(function(number, index, array){array[index].classList.add('disablehyper').addEventListener(click, click);});"
-            "};"
-            "setInterval(keepAliveConnection, 1000);"
-            "};");
+  // Memory update script
+  page += F("<script>"
+      "function m(){"
+      "const e=document.getElementById('free-memory');"
+      "try{"
+      "const n=()=>{"
+      "fetch('/memory').then(e=>e.json()).then(n=>{e.textContent=(n.memory/1024).toFixed(2)+' kB'})"
+      ".catch(()=>{e.innerHTML='<span class=\"text-danger\">Error</span>'})};"
+      "n(),setInterval(n,5e3)"
+      "}catch(n){e.innerHTML='<span class=\"text-danger\">Error</span>'}"
+      "}"
+      "setTimeout(m,500);"
+      "</script>");
 
-  if (trim_page(start, len)) return;
+  // Simple script for Bootstrap version
+  page += F("<script>"
+    "document.addEventListener('DOMContentLoaded', function() {"
+    "  if (typeof bootstrap !== 'undefined') {"
+    "    document.getElementById('bootstrap-version').textContent = bootstrap.Tooltip.VERSION;"
+    "  } else {"
+    "    document.getElementById('bootstrap-version').textContent = 'Not available';"
+    "  }"
+    "});"
+    "</script>");
 
-  page += F("function click(e) { e.preventDefault(); };"
-
-            "function keepAliveConnection() {"
-            "if (con.readyState == WebSocket.CLOSED) webSocketConnect();"
-            "if (source.readyState == EventSource.CLOSED) eventSourceConnect();"
-            "};"
-
-            "webSocketConnect();"
-
-            "function eventSourceConnect() {"
-            "if (!!window.EventSource) {"
-            "source = new EventSource('/events');"
-            "source.addEventListener('open', function(e) {"
-            "console.log('Events Connected');"
-            "}, false);"
-            "source.addEventListener('error', function(e) {"
-            "if (e.target.readyState != EventSource.OPEN) {"
-            "console.log('Events Disconnected');"
-            "}"
-            "}, false);"
-            "source.addEventListener('message', function(e) {"
-            "console.log('Event: ', e.data);"
-            "}, false);"
-            "source.addEventListener('play', function(e) { isplaying = e.data; }, false);"
-            "source.addEventListener('timesignature', function(e) {"
-            "document.getElementById('timesignature').innerHTML = e.data;"
-            "}, false);"
-            "source.addEventListener('bpm', function(e) {"
-            "document.getElementById('bpm').innerHTML = e.data;"
-            "}, false);"
-            "source.addEventListener('beat', function(e) {"
-            "document.getElementById('beat').innerHTML = e.data;"
-            "}, false);"
-            "source.addEventListener('mtc', function(e) {"
-            "document.getElementById('mtc').innerHTML = e.data;"
-	          "}, false);"
-            "source.addEventListener('screen', function(e) {"
-            "}, false);"
-            "}"
-            "}"
-
-            "eventSourceConnect();");
-
-  if (trim_page(start, len)) return;
-
-  page += F("function sendBinary(str) {"
-            "if (con.readyState != WebSocket.OPEN || con.bufferedAmount > 0) return;"
-            "var buffer = new ArrayBuffer(str.length+1);"
-            "var view = new DataView(buffer);"
-            "for (i=0; i<str.length; i++)"
-            "  view.setUint8(i, str.charCodeAt(i));"
-            "view.setUint8(str.length, 0);"
-            "con.send(view);"
-            "}"
-
-            "document.getElementById('showremotedisplay').onclick = function() {"
-            "const toast = new bootstrap.Toast(document.getElementById('remotedisplay'));"
-            "toast.show();"
-            "setInterval(requestRemoteDisplay, 1000);"
-            "return false; };"
-
-            "function requestRemoteDisplay() {sendBinary('.');}"
-
-            "function resizeScreen(z) {"
-            "zoom = z;"
-            "var canvas=document.getElementById('screen');"
-            "var context=canvas.getContext('2d');"
-            "context.canvas.width = 128*zoom;"
-            "context.canvas.height = 64*zoom;"
-            "};");
-
-  if (trim_page(start, len)) return;
-
-  for (unsigned int i = 1; i < BANKS; i++) {
-    page += F("document.getElementById('bank");
-    page += i;
-    page += F("').onclick = function() {"
-              "sendBinary('bank");
-    page += i;
-    page += F("');"
-              "return false; };");
-
-    if (trim_page(start, len)) return;
-  }
-
-  page += F("document.getElementById('invert').onclick = function() {"
-            "if (invert == 0 ) invert = 1; else invert = 0; return false; };"
-            "document.getElementById('zoom1').onclick = function() { resizeScreen(1); return false; };"
-            "document.getElementById('zoom2').onclick = function() { resizeScreen(2); return false; };"
-            "document.getElementById('zoom4').onclick = function() { resizeScreen(4); return false; };"
-
-            "document.getElementById('clock-master').onclick = function() {"
-            "sendBinary('clock-master');"
-            "return false; };"
-            "document.getElementById('clock-slave').onclick = function() {"
-            "sendBinary('clock-slave');"
-            "return false; };"
-            "document.getElementById('mtc-master').onclick = function() {"
-            "sendBinary('mtc-master');"
-            "return false; };"
-            "document.getElementById('mtc-slave').onclick = function() {"
-            "sendBinary('mtc-slave');"
-            "return false; };"
-
-            "document.getElementById('4_4').onclick = function() {"
-            "sendBinary('4/4');"
-            "return false; };"
-            "document.getElementById('3_4').onclick = function() {"
-            "sendBinary('3/4');"
-            "return false; };"
-            "document.getElementById('2_4').onclick = function() {"
-            "sendBinary('2/4');"
-            "return false; };"
-            "document.getElementById('3_8').onclick = function() {"
-            "sendBinary('3/8');"
-            "return false; };"
-            "document.getElementById('6_8').onclick = function() {"
-            "sendBinary('6/8');"
-            "return false; };"
-            "document.getElementById('9_8').onclick = function() {"
-            "sendBinary('9/8');"
-            "return false; };"
-            "document.getElementById('12_8').onclick = function() {"
-            "sendBinary('12/8');"
-            "return false; };"
-
-            "document.getElementById('start').onclick = function() {"
-            "sendBinary('start');"
-            "return false; };"
-            "document.getElementById('stop').onclick = function() {"
-            "sendBinary('stop');"
-            "return false; };"
-            "document.getElementById('continue').onclick = function() {"
-            "sendBinary('continue');"
-            "return false; };"
-            "document.getElementById('tap').onclick = function() {"
-            "sendBinary('tap');"
-            "return false; };"
-
-            "</script>");
-
-  get_footer_page();
-
+  closeCard();
+  
+    get_footer_page();
   if (trim_page(start, len, true)) return;
 }
 
@@ -1181,28 +802,6 @@ void get_actions_page(unsigned int start, unsigned int len) {
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
-  /*
-  page += F("<div class='col-auto'>");
-  page += F("<div class='btn-group' role='group'>");
-  page += F("<button id='btnGroupNewAction' type='button' class='btn btn-primary btn-sm dropdown-toggle' data-bs-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-plus-circle-dotted' viewBox='0 0 16 16'>");
-  page += F("<path d='M8 0c-.176 0-.35.006-.523.017l.064.998a7.117 7.117 0 0 1 .918 0l.064-.998A8.113 8.113 0 0 0 8 0zM6.44.152c-.346.069-.684.16-1.012.27l.321.948c.287-.098.582-.177.884-.237L6.44.153zm4.132.271a7.946 7.946 0 0 0-1.011-.27l-.194.98c.302.06.597.14.884.237l.321-.947zm1.873.925a8 8 0 0 0-.906-.524l-.443.896c.275.136.54.29.793.459l.556-.831zM4.46.824c-.314.155-.616.33-.905.524l.556.83a7.07 7.07 0 0 1 .793-.458L4.46.824zM2.725 1.985c-.262.23-.51.478-.74.74l.752.66c.202-.23.418-.446.648-.648l-.66-.752zm11.29.74a8.058 8.058 0 0 0-.74-.74l-.66.752c.23.202.447.418.648.648l.752-.66zm1.161 1.735a7.98 7.98 0 0 0-.524-.905l-.83.556c.169.253.322.518.458.793l.896-.443zM1.348 3.555c-.194.289-.37.591-.524.906l.896.443c.136-.275.29-.54.459-.793l-.831-.556zM.423 5.428a7.945 7.945 0 0 0-.27 1.011l.98.194c.06-.302.14-.597.237-.884l-.947-.321zM15.848 6.44a7.943 7.943 0 0 0-.27-1.012l-.948.321c.098.287.177.582.237.884l.98-.194zM.017 7.477a8.113 8.113 0 0 0 0 1.046l.998-.064a7.117 7.117 0 0 1 0-.918l-.998-.064zM16 8a8.1 8.1 0 0 0-.017-.523l-.998.064a7.11 7.11 0 0 1 0 .918l.998.064A8.1 8.1 0 0 0 16 8zM.152 9.56c.069.346.16.684.27 1.012l.948-.321a6.944 6.944 0 0 1-.237-.884l-.98.194zm15.425 1.012c.112-.328.202-.666.27-1.011l-.98-.194c-.06.302-.14.597-.237.884l.947.321zM.824 11.54a8 8 0 0 0 .524.905l.83-.556a6.999 6.999 0 0 1-.458-.793l-.896.443zm13.828.905c.194-.289.37-.591.524-.906l-.896-.443c-.136.275-.29.54-.459.793l.831.556zm-12.667.83c.23.262.478.51.74.74l.66-.752a7.047 7.047 0 0 1-.648-.648l-.752.66zm11.29.74c.262-.23.51-.478.74-.74l-.752-.66c-.201.23-.418.447-.648.648l.66.752zm-1.735 1.161c.314-.155.616-.33.905-.524l-.556-.83a7.07 7.07 0 0 1-.793.458l.443.896zm-7.985-.524c.289.194.591.37.906.524l.443-.896a6.998 6.998 0 0 1-.793-.459l-.556.831zm1.873.925c.328.112.666.202 1.011.27l.194-.98a6.953 6.953 0 0 1-.884-.237l-.321.947zm4.132.271a7.944 7.944 0 0 0 1.012-.27l-.321-.948a6.954 6.954 0 0 1-.884.237l.194.98zm-2.083.135a8.1 8.1 0 0 0 1.046 0l-.064-.998a7.11 7.11 0 0 1-.918 0l-.064.998zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z'/>");
-  page += F("</svg>");
-  page += F(" New Action</button>");
-  page += F("<div class='dropdown-menu' aria-labelledby='btnGroupNewAction'>");
-  for (i = 1; i <= PEDALS; i++) {
-    page += F("<button type='submit' class='dropdown-item' name='action' value='new");
-    page += i;
-    page += F("'>Pedal ");
-    page += i;
-    page += F("</button>");
-
-    if (trim_page(start, len)) return;
-  }
-  page += F("</div>");
-  page += F("</div>");
-  page += F("</div>");
-  */
   page += F("</div>");
 
   i = 1;
@@ -1913,7 +1512,7 @@ void get_actions_page(unsigned int start, unsigned int len) {
 
     page += F("<div class='w-25'>");
     page += F("<div class='form-floating'>");
-    page += F("<input type='color' class='form-control' id='color0Input");
+    page += F("<input type='color' class='form-control form-control-color w-100' id='color0Input");
     page += i;
     page += F("' name='color0-");
     page += i;
@@ -1921,30 +1520,30 @@ void get_actions_page(unsigned int start, unsigned int len) {
     char color[8];
     sprintf(color, "#%06X", act->color0 & 0xFFFFFF);
     page += color;
-    page += F("'>");
+    page += F("' title='Choose off color'>");
     page += F("<label for='color0Input");
     page += i;
     page += F("' id='color0Label");
     page += i;
-    page += F("'>Off</label>");
+    page += F("' class='small'>Off</label>");
     page += F("</div>");
     page += F("</div>");
-
+    
     page += F("<div class='w-25'>");
     page += F("<div class='form-floating'>");
-    page += F("<input type='color' class='form-control' id='color1Input");
+    page += F("<input type='color' class='form-control form-control-color w-100' id='color1Input");
     page += i;
     page += F("' name='color1-");
     page += i;
     page += F("' value='");
     sprintf(color, "#%06X", act->color1 & 0xFFFFFF);
     page += color;
-    page += F("'>");
+    page += F("' title='Choose on color'>");
     page += F("<label for='color1Input");
     page += i;
     page += F("' id='color1Label");
     page += i;
-    page += F("'>On</label>");
+    page += F("' class='small'>On</label>");
     page += F("</div>");
     page += F("</div>");
 
@@ -2001,24 +1600,7 @@ void get_actions_page(unsigned int start, unsigned int len) {
   }
   page += F("</div>");
   page += F("</div>");
-  /*
-  page += F("<div class='row'>");
-  page += F("<div class='col-auto'>");
-  page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'>");
-  page += F("<path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/>");
-  page += F("<path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/>");
-  page += F("</svg>");
-  page += F(" Apply</button>");
-  page += F(" ");
-  page += F("<button type='submit' name='action' value='save' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-save' viewBox='0 0 16 16'>");
-  page += F("<path d='M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z'>");
-  page += F("</svg>");
-  page += F(" Save</button>");
-  page += F("</div>");
-  page += F("</div>");
-  */
+
   page += F("</form>");
 
   if (trim_page(start, len)) return;
@@ -2399,75 +1981,29 @@ void get_pedals_page(unsigned int start, unsigned int len) {
     page += F("'");
     if (pedals[i-1].mode == PED_MOMENTARY1) page += F(" selected");
     page += F(">Momentary</option>");
-    if (PIN_D(i-1) != PIN_A(i-1)) {
-      page += F("<option value='");
-      page += PED_LATCH1;
-      page += F("'");
-      if (pedals[i-1].mode == PED_LATCH1) page += F(" selected");
-      page += F(">Latch</option>");
-      page += F("<option value='");
-      page += PED_ANALOG;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ANALOG) page += F(" selected");
-      page += F(">Analog</option>");
-      page += F("<option value='");
-      page += PED_ANALOG_PAD;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ANALOG_PAD) page += F(" selected");
-      page += F(">Analog Pad</option>");
-      page += F("<option value='");
-      page += PED_JOG_WHEEL;
-      page += F("'");
-      if (pedals[i-1].mode == PED_JOG_WHEEL) page += F(" selected");
-      page += F(">Jog Wheel</option>");
-      page += F("<option value='");
-      page += PED_MOMENTARY2;
-      page += F("'");
-      if (pedals[i-1].mode == PED_MOMENTARY2) page += F(" selected");
-      page += F(">Momentary 2</option>");
-      page += F("<option value='");
-      page += PED_MOMENTARY3;
-      page += F("'");
-      if (pedals[i-1].mode == PED_MOMENTARY3) page += F(" selected");
-      page += F(">Momentary 3</option>");
-      page += F("<option value='");
-      page += PED_LATCH2;
-      page += F("'");
-      if (pedals[i-1].mode == PED_LATCH2) page += F(" selected");
-      page += F(">Latch 2</option>");
-      page += F("<option value='");
-      page += PED_LADDER;
-      page += F("'");
-      if (pedals[i-1].mode == PED_LADDER) page += F(" selected");
-      page += F(">Ladder</option>");
-      page += F("<option value='");
-      page += PED_ULTRASONIC;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ULTRASONIC) page += F(" selected");
-      page += F(">Ultrasonic</option>");
-      page += F("<option value='");
-      page += PED_ANALOG_MOMENTARY;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ANALOG_MOMENTARY) page += F(" selected");
-      page += F(">Analog+Momentary</option>");
-      page += F("<option value='");
-      page += PED_ANALOG_LATCH;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ANALOG_LATCH) page += F(" selected");
-      page += F(">Analog+Latch</option>");
-      page += F("<option value='");
-      page += PED_ANALOG_PAD_MOMENTARY;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ANALOG_PAD_MOMENTARY) page += F(" selected");
-      page += F(">Analog Pad+Momentary</option>");
-      page += F("<option value='");
-      page += PED_ANALOG4;
-      page += F("'");
-      if (pedals[i-1].mode == PED_ANALOG4) page += F(" selected");
-      page += F(">Analog 4</option>");
-    }
+    //if (PIN_D(i-1) != PIN_A(i-1)) {
+    page += F("<option value='");
+    page += PED_LATCH1;
+    page += F("'");
+    if (pedals[i-1].mode == PED_LATCH1) page += F(" selected");
+    page += F(">Latch</option>");
+    page += F("<option value='"); 
+    page += PED_LADDER;
+    page += F("'");
+    if (pedals[i-1].mode == PED_LADDER) page += F(" selected");
+    page += F(">Ladder</option>");
+    page += F("<option value='");
+    page += PED_ANALOG;
+    page += F("'");
+    if (pedals[i-1].mode == PED_ANALOG) page += F(" selected");
+    page += F(">Analog</option>");
+    page += F("<option value='");
+    page += PED_ANALOG_PAD;
+    page += F("'");
+    if (pedals[i-1].mode == PED_ANALOG_PAD) page += F(" selected");
+    page += F(">Analog Pad</option>");
 
-    page += F("</select>");
+      page += F("</select>");
     page += F("<label for='modeSelect");
     page += i;
     page += F("'>Mode</label>");
@@ -3159,26 +2695,6 @@ void get_controls_page(unsigned int start, unsigned int len) {
 
   page += F("</div>");
   page += F("</div>");
-/*
-  page += F("<div class='container'>");
-  page += F("<div class='row mt-3'>");
-  page += F("<div class='col-auto'>");
-  page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'>");
-  page += F("<path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/>");
-  page += F("<path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/>");
-  page += F("</svg>");
-  page += F(" Apply</button>");
-  page += F(" ");
-  page += F("<button type='submit' name='action' value='save' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-save' viewBox='0 0 16 16'>");
-  page += F("<path d='M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z'>");
-  page += F("</svg>");
-  page += F(" Save</button>");
-  page += F("</div>");
-  page += F("</div>");
-  page += F("</div>");
-*/
 
   page += F("</div>");
   page += F("</div>");
@@ -3641,26 +3157,6 @@ void get_sequences_page(unsigned int start, unsigned int len) {
     page += F("' id='ledLabel");
     page += i;
     page += F("'>Led</label>");
-    /*
-    page += F("<select class='form-select' id='ledSelect");
-    page += i;
-    page += F("' name='led");
-    page += i;
-    page += F("'>");
-    for (unsigned int l = 0; l <= LEDS; l++) {
-      page += F("<option value='");
-      page += (l+1);
-      page += F("'");
-      if (sequences[s-1][i-1].led == l) page += F(" selected");
-      page += F(">");
-      if (l != LEDS) page += (l+1);
-      page += F("</option>");
-    }
-    page += F("</select>");
-    page += F("<label for='ledSelect");
-    page += i;
-    page += F("'>Led</label>");
-    */
     page += F("</div>");
     page += F("</div>");
 
@@ -3668,7 +3164,7 @@ void get_sequences_page(unsigned int start, unsigned int len) {
 
     page += F("<div class='col'>");
     page += F("<div class='form-floating'>");
-    page += F("<input type='color' class='form-control' id='colorInput");
+    page += F("<input type='color' class='form-control form-control-color w-100' id='colorInput");
     page += i;
     page += F("' name='color");
     page += i;
@@ -3676,10 +3172,10 @@ void get_sequences_page(unsigned int start, unsigned int len) {
     char color[8] = "#000000";
     sprintf(color, "#%06X", sequences[s-1][i-1].color & 0xFFFFFF);
     page += color;
-    page += F("'>");
+    page += F("' title='Choose color'>");
     page += F("<label for='colorInput");
     page += i;
-    page += F("'>Color</label>");
+    page += F("' class='small'>Color</label>");
     page += F("</div>");
     page += F("</div>");
 
@@ -3690,24 +3186,6 @@ void get_sequences_page(unsigned int start, unsigned int len) {
   }
   page += F("</div>");
   page += F("</div>");
-  /*
-  page += F("<div class='row'>");
-  page += F("<div class='col-auto'>");
-  page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'>");
-  page += F("<path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/>");
-  page += F("<path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/>");
-  page += F("</svg>");
-  page += F(" Apply</button>");
-  page += F(" ");
-  page += F("<button type='submit' name='action' value='save' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-save' viewBox='0 0 16 16'>");
-  page += F("<path d='M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z'>");
-  page += F("</svg>");
-  page += F(" Save</button>");
-  page += F("</div>");
-  page += F("</div>");
-  */
   page += F("</form>");
 
   if (trim_page(start, len)) return;
@@ -3800,43 +3278,34 @@ void get_sequences_page(unsigned int start, unsigned int len) {
   if (trim_page(start, len, true)) return;
 }
 
+#include <WiFi.h>
+
+//// +++ OPTIONS PAGE +++ ////
 void get_options_page(unsigned int start, unsigned int len) {
 
-  const String  bootswatch[] = { "bootstrap",
-                                 "cerulean",
-                                 "cosmo",
-                                 "cyborg",
-                                 "darkly",
-                                 "flatly",
-                                 "litera",
-                                 "journal",
-                                 "lumen",
-                                 "lux",
-                                 "materia",
-                                 "minty",
-                                 "pulse",
-                                 "sandstone",
-                                 "simplex",
-                                 "sketchy",
-                                 "slate",
-                                 "solar",
-                                 "spacelab",
-                                 "superhero",
-                                 "united",
-                                 "yeti"};
+  // Available Bootstrap Themes (Bootswatch Variants)
+  const String bootswatch[] = {
+    "phoenix",    "bootstrap",  "cerulean",    "cosmo",
+    "cyborg",     "darkly",     "flatly",      "journal",
+    "litera",     "lumen",      "lux",         "materia",
+    "minty",      "morph",      "pulse",       "quartz",
+    "sandstone",  "simplex",    "sketchy",     "slate",
+    "solar",      "spacelab",   "superhero",   "united",
+    "vapor",      "yeti",       "zephyr"
+  };
 
+  // Page Header
   if (get_top_page(7, start, len)) return;
 
   page += F("<form method='post'>");
 
+  // --- Row: Device Configuration & Boot Mode ---
   page += F("<div class='row'>");
+
+  // --- Column: Device Card ---
   page += F("<div class='col-md-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-cpu' viewBox='0 0 20 20'>");
-  page += F("<path d='M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z'/>");
-  page += F("</svg>");
-  page += F(" Device</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-cpu' viewBox='0 0 20 20'><path d='M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z'/></svg> Device</h5>");
   page += F("<div class='card-body'>");
 
   if (trim_page(start, len)) return;
@@ -3847,82 +3316,71 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("'>");
   page += F("<label for='devicename'>Name</label>");
   page += F("</div>");
+
   page += F("<small id='devicenameHelpBlock' class='form-text text-muted'>");
   page += F("Each device must have a different name. Enter the device name without .local. Web UI will be available at http://<i>device_name</i>.local<br>");
   page += F("Pedalino will be restarted if you change it.");
   page += F("</small>");
+
   page += F("<div class='row'>");
-  page += F("<div class='col-auto me-auto'>");
-  page += F("</div>");
+  page += F("<div class='col-auto me-auto'></div>");
   page += F("<div class='col-auto'>");
-  page += F("<a href='/update' class='btn btn-primary btn-sm' role='button' aria-pressed='true'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-cloud-arrow-down' viewBox='0 0 16 16'>");
-  page += F("<path fill-rule='evenodd' d='M7.646 10.854a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 9.293V5.5a.5.5 0 0 0-1 0v3.793L6.354 8.146a.5.5 0 1 0-.708.708l2 2z'/>");
-  page += F("<path d='M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z'/>");
-  page += F("</svg>");
-  page += F(" Check for Updates</a>");
+  page += F("<a href='/update' class='btn btn-primary btn-sm' role='button' aria-pressed='true'><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-cloud-arrow-down' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M7.646 10.854a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 9.293V5.5a.5.5 0 0 0-1 0v3.793L6.354 8.146a.5.5 0 1 0-.708.708l2 2z'/><path d='M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z'/></svg> Check for Updates</a>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
 
   if (trim_page(start, len)) return;
 
+  // --- Column: Boot Mode Card ---
   page += F("<div class='col-md-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-power' viewBox='0 0 20 20'>");
-  page += F("<path d='M7.5 1v7h1V1h-1z'/>");
-  page += F("<path d='M3 8.812a4.999 4.999 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812z'/>");
-  page += F("</svg>");
-  page += F(" Boot Mode</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-power' viewBox='0 0 20 20'><path d='M7.5 1v7h1V1h-1z'/><path d='M3 8.812a4.999 4.999 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812z'/></svg> Boot Mode</h5>");
   page += F("<div class='card-body'>");
-#ifdef WIFI
+
+  #ifdef WIFI
   page += F("<div class='form-check form-switch'>");
   page += F("<input class='form-check-input' type='checkbox' id='bootModeWifi' name='bootmodewifi'");
-  if (bootMode == PED_BOOT_NORMAL ||
-      bootMode == PED_BOOT_WIFI   ||
-      bootMode == PED_BOOT_AP     ||
-      bootMode == PED_BOOT_AP_NO_BLE) page += F(" checked");
+  if (bootMode == PED_BOOT_NORMAL || bootMode == PED_BOOT_WIFI || bootMode == PED_BOOT_AP || bootMode == PED_BOOT_AP_NO_BLE)
+    page += F(" checked");
   page += F(">");
   page += F("<label class='form-check-label' for='bootModeWifi'>WiFi</label>");
   page += F("</div>");
-  page += F("<small id='bootModeWifiHelpBlock' class='form-text text-muted'>");
-  page += F("RTP-MIDI, ipMIDI, OSC and web UI require WiFi.");
-  page += F("</small>");
+  page += F("<small id='bootModeWifiHelpBlock' class='form-text text-muted'>RTP-MIDI, ipMIDI, OSC and web UI require WiFi.</small>");
+
   page += F("<div class='form-check form-switch'>");
   page += F("<input class='form-check-input' type='checkbox' id='bootModeAP' name='bootmodeap'");
-  if (bootMode == PED_BOOT_AP ||
-      bootMode == PED_BOOT_AP_NO_BLE) page += F(" checked");
+  if (bootMode == PED_BOOT_AP || bootMode == PED_BOOT_AP_NO_BLE)
+    page += F(" checked");
   page += F(">");
   page += F("<label class='form-check-label' for='bootModeAP'>Access Point</label>");
   page += F("</div>");
-  page += F("<small id='bootModeAPHelpBlock' class='form-text text-muted'>");
-  page += F("To enable AP Mode enable WiFi too.");
-  page += F("</small>");
-#endif
-#ifdef BLE
+  page += F("<small id='bootModeAPHelpBlock' class='form-text text-muted'>To enable AP Mode enable WiFi too.</small>");
+  #endif
+
+  #ifdef BLE
   page += F("<div class='form-check form-switch'>");
   page += F("<input class='form-check-input' type='checkbox' id='bootModeBLE' name='bootmodeble'");
-  if (bootMode == PED_BOOT_NORMAL ||
-      bootMode == PED_BOOT_BLE    ||
-      bootMode == PED_BOOT_AP) page += F(" checked");
+  if (bootMode == PED_BOOT_NORMAL || bootMode == PED_BOOT_BLE || bootMode == PED_BOOT_AP)
+    page += F(" checked");
   page += F(">");
-#ifdef BLECLIENT
+
+  #ifdef BLECLIENT
   page += F("<label class='form-check-label' for='bootModeBLE'>BLE Client</label>");
-#else
+  #else
   page += F("<label class='form-check-label' for='bootModeBLE'>BLE Server</label>");
-#endif
+  #endif
+
   page += F("</div>");
-  page += F("<small id='bootModeBLEHelpBlock' class='form-text text-muted'>");
-  page += F("BLE MIDI requires BLE.");
-  page += F("</small>");
-#endif
+  page += F("<small id='bootModeBLEHelpBlock' class='form-text text-muted'>BLE MIDI requires BLE.</small>");
+  #endif
 
   if (trim_page(start, len)) return;
 
-#ifdef BLECLIENT
+  #ifdef BLECLIENT
   page += F("<br><br>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='text' maxlength='20' id='bleserver' name='bleServer' value='");
@@ -3930,12 +3388,14 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("'>");
   page += F("<label for='bleserver'>BLE Server Name/Address</label>");
   page += F("</div>");
+
   page += F("<small id='bootModeBLEServerHelpBlock' class='form-text text-muted'>");
   page += F("Enter the device name of another Pedalino to connect via BLE.<br>");
   page += F("Leave blank to connect to first available BLE MIDI server with MIDI characteristic. ");
   page += F("A BLE address (i.e. f2:c1:d9:36:e7:6b) is accepted too.");
   page += F("</small>");
-#endif
+  #endif
+
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
@@ -3943,40 +3403,42 @@ void get_options_page(unsigned int start, unsigned int len) {
 
   if (trim_page(start, len)) return;
 
+  // --- Row: WiFi Network & AP Mode ---
   page += F("<div class='row'>");
+
+  // --- Column: WiFi Network Card ---
   page += F("<div class='col-md-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-wifi' viewBox='0 0 20 20'>");
-  page += F("<path d='M15.385 6.115a.485.485 0 0 0-.048-.736A12.443 12.443 0 0 0 8 3 12.44 12.44 0 0 0 .663 5.379a.485.485 0 0 0-.048.736.518.518 0 0 0 .668.05A11.448 11.448 0 0 1 8 4c2.507 0 4.827.802 6.717 2.164.204.148.489.13.668-.049z'/>");
-  page += F("<path d='M13.229 8.271c.216-.216.194-.578-.063-.745A9.456 9.456 0 0 0 8 6c-1.905 0-3.68.56-5.166 1.526a.48.48 0 0 0-.063.745.525.525 0 0 0 .652.065A8.46 8.46 0 0 1 8 7a8.46 8.46 0 0 1 4.577 1.336c.205.132.48.108.652-.065zm-2.183 2.183c.226-.226.185-.605-.1-.75A6.472 6.472 0 0 0 8 9c-1.06 0-2.062.254-2.946.704-.285.145-.326.524-.1.75l.015.015c.16.16.408.19.611.09A5.478 5.478 0 0 1 8 10c.868 0 1.69.201 2.42.56.203.1.45.07.611-.091l.015-.015zM9.06 12.44c.196-.196.198-.52-.04-.66A1.99 1.99 0 0 0 8 11.5a1.99 1.99 0 0 0-1.02.28c-.238.14-.236.464-.04.66l.706.706a.5.5 0 0 0 .708 0l.707-.707z'/>");
-  page += F("</svg>");
-  page += F(" WiFi Network</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-wifi' viewBox='0 0 20 20'><path d='M15.385 6.115a.485.485 0 0 0-.048-.736A12.443 12.443 0 0 0 8 3 12.44 12.44 0 0 0 .663 5.379a.485.485 0 0 0-.048.736.518.518 0 0 0 .668.05A11.448 11.448 0 0 1 8 4c2.507 0 4.827.802 6.717 2.164.204.148.489.13.668-.049z'/><path d='M13.229 8.271c.216-.216.194-.578-.063-.745A9.456 9.456 0 0 0 8 6c-1.905 0-3.68.56-5.166 1.526a.48.48 0 0 0-.063.745.525.525 0 0 0 .652.065A8.46 8.46 0 0 1 8 7a8.46 8.46 0 0 1 4.577 1.336c.205.132.48.108.652-.065zm-2.183 2.183c.226-.226.185-.605-.1-.75A6.472 6.472 0 0 0 8 9c-1.06 0-2.062.254-2.946.704-.285.145-.326.524-.1.75l.015.015c.16.16.408.19.611.09A5.478 5.478 0 0 1 8 10c.868 0 1.69.201 2.42.56.203.1.45.07.611-.091l.015-.015zM9.06 12.44c.196-.196.198-.52-.04-.66A1.99 1.99 0 0 0 8 11.5a1.99 1.99 0 0 0-1.02.28c-.238.14-.236.464-.04.66l.706.706a.5.5 0 0 0 .708 0l.707-.707z'/></svg> WiFi Network</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='row g-1'>");
+
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
   page += F("<select class='form-select' id='wifissid' name='wifiSSID'>");
-  networks = WiFi.scanComplete();
+
+  int networks = WiFi.scanComplete();
   if (networks > 0) {
     for (int i = 0; i < networks; i++) {
       if (!WiFi.SSID(i).isEmpty()) {
         page += F("<option value='");
         page += WiFi.SSID(i);
         page += F("'");
-        if (wifiSSID == WiFi.SSID(i)) page += F(" selected");
+        if (wifiSSID == WiFi.SSID(i))
+          page += F(" selected");
         page += F(">");
         page += WiFi.SSID(i);
         page += F("</option>");
       }
-
       if (trim_page(start, len)) return;
     }
   }
+
   page += F("</select>");
   page += F("<label for='wifissid'>SSID</label>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='password' maxlength='32' id='wifipassword' name='wifiPassword' value='");
@@ -3985,10 +3447,12 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<label for='wifipassword'>Password</label>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("<small class='form-text text-muted'>");
   page += F("Connect to a wifi network using SSID and password. WiFi networks list is updated only on boot.<br>");
   page += F("Pedalino will be restarted if it is connected to a WiFi network and you change them.");
   page += F("</small>");
+
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
@@ -3996,15 +3460,13 @@ void get_options_page(unsigned int start, unsigned int len) {
 
   if (trim_page(start, len)) return;
 
+  // --- Column: AP Mode Card ---
   page += F("<div class='col-md-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-broadcast-pin' viewBox='0 0 20 20'>");
-  page += F("<path d='M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z'/>");
-  page += F("</svg>");
-  page += F(" AP Mode</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-broadcast-pin' viewBox='0 0 20 20'><path d='M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z'/></svg> AP Mode</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='row g-1'>");
+
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='text' maxlength='32' id='ssidsoftap' name='ssidSoftAP' value='");
@@ -4013,6 +3475,7 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<label for='wifissidap'>SSID</label>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='password' maxlength='32' id='passwordsoftap' name='passwordSoftAP' value='");
@@ -4021,10 +3484,12 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<label for='passwordsoftap'>Password</label>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("<small class='form-text text-muted'>");
   page += F("Access Point SSID and password.<br>");
   page += F("Pedalino will be restarted if it is in AP mode and you change them.");
   page += F("</small>");
+
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
@@ -4033,50 +3498,51 @@ void get_options_page(unsigned int start, unsigned int len) {
 
   if (trim_page(start, len)) return;
 
+  // --- Row: Web UI Theme & Web UI Login ---
   page += F("<div class='row'>");
+
+  // --- Column: Web UI Theme Card ---
   page += F("<div class='col-md-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-display' viewBox='0 0 20 20'>");
-  page += F("<path d='M0 4s0-2 2-2h12s2 0 2 2v6s0 2-2 2h-4c0 .667.083 1.167.25 1.5H11a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1h.75c.167-.333.25-.833.25-1.5H2s-2 0-2-2V4zm1.398-.855a.758.758 0 0 0-.254.302A1.46 1.46 0 0 0 1 4.01V10c0 .325.078.502.145.602.07.105.17.188.302.254a1.464 1.464 0 0 0 .538.143L2.01 11H14c.325 0 .502-.078.602-.145a.758.758 0 0 0 .254-.302 1.464 1.464 0 0 0 .143-.538L15 9.99V4c0-.325-.078-.502-.145-.602a.757.757 0 0 0-.302-.254A1.46 1.46 0 0 0 13.99 3H2c-.325 0-.502.078-.602.145z'/>");
-  page += F("</svg>");
-  page += F(" Web UI Theme</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-display' viewBox='0 0 20 20'><path d='M0 4s0-2 2-2h12s2 0 2 2v6s0 2-2 2h-4c0 .667.083 1.167.25 1.5H11a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1h.75c.167-.333.25-.833.25-1.5H2s-2 0-2-2V4zm1.398-.855a.758.758 0 0 0-.254.302A1.46 1.46 0 0 0 1 4.01V10c0 .325.078.502.145.602.07.105.17.188.302.254a1.464 1.464 0 0 0 .538.143L2.01 11H14c.325 0 .502-.078.602-.145a.758.758 0 0 0 .254-.302 1.464 1.464 0 0 0 .143-.538L15 9.99V4c0-.325-.078-.502-.145-.602a.757.757 0 0 0-.302-.254A1.46 1.46 0 0 0 13.99 3H2c-.325 0-.502.078-.602.145z'/></svg> Web UI Theme</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='form-floating'>");
   page += F("<select class='form-select' id='bootstraptheme' name='theme'>");
-  for (unsigned int i = 0; i < 22; i++) {
+
+  for (unsigned int i = 0; i < sizeof(bootswatch) / sizeof(bootswatch[0]); i++) {
     page += F("<option value='");
     page += bootswatch[i];
     page += F("'");
-    if (theme == bootswatch[i]) page += F(" selected");
+    if (theme == bootswatch[i])
+      page += F(" selected");
     page += F(">");
     page += bootswatch[i];
     page += F("</option>");
 
     if (trim_page(start, len)) return;
   }
+
   page += F("</select>");
   page += F("<label for='theme'>Theme</label>");
   page += F("</div>");
+
   page += F("<small id='bootstrapthemeHelpBlock' class='form-text text-muted'>");
-  page += F("Changing default theme require internet connection because themes are served via a CDN network. Only 'bootstrap' theme has been stored into Pedalino flash memory.");
+  page += F("Bootstrap (Local)' uses the theme stored in flash memory. Other themes require internet connection as they are served via CDN network.");
   page += F("</small>");
+
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
 
   if (trim_page(start, len)) return;
 
+  // --- Column: Web UI Login Card ---
   page += F("<div class='col-md-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-key' viewBox='0 0 20 20'>");
-  page += F("<path d='M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8zm4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5z'/>");
-  page += F("<path d='M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z'/>");
-  page += F("</svg>");
-  page += F(" Web UI Login</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-key' viewBox='0 0 20 20'><path d='M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8zm4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5z'/><path d='M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z'/></svg> Web UI Login</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='row g-1'>");
+
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control form-control-sm' type='text' maxlength='32' id='httpusername' name='httpUsername' value='");
@@ -4085,6 +3551,7 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<label for='httpusername'>Username</label>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control form-control-sm' type='password' maxlength='32' id='httppassword' name='httpPassword' value='");
@@ -4093,9 +3560,11 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<label for='httppassword'>Password</label>");
   page += F("</div>");
   page += F("</div>");
+
   page += F("<small class='form-text text-muted'>");
   page += F("Web UI administrator username and password. Leave username blank for no login request.");
   page += F("</small>");
+
   page += F("</div>");
   page += F("</div>");
   page += F("</div>");
@@ -4104,99 +3573,92 @@ void get_options_page(unsigned int start, unsigned int len) {
 
   if (trim_page(start, len)) return;
 
+  // --- Start main content row that will contain both columns
   page += F("<div class='row'>");
-  page += F("<div class='col-md-6 col-12 mb-3'>");
-  page += F("<div class='card h-100 mb-3'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-toggle-on' viewBox='0 0 20 20'>");
-  page += F("<path d='M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z'/>");
-  page += F("</svg>");
-  page += F(" Momentary Switches</h5>");
+
+  // --- Left Column
+  page += F("<div class='col-md-6 col-12 d-flex flex-column'>");
+
+  // --- Momentary Switches Card
+  page += F("<div class='card mb-3' style='flex-grow: 1;'>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-toggle-on' viewBox='0 0 20 20'><path d='M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z'/></svg> Momentary Switches</h5>");
   page += F("<div class='card-body'>");
 
   if (trim_page(start, len)) return;
 
-  page += F("<div class='row g-1'>");
-  page += F("<div class='w-50'>");
+  page += F("<div class='row g-3'>");
+  page += F("<div class='col-6 px-3'>");
+  page += F("<div class='mb-4'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='text' maxlength='32' id='debounceInterval' name='debounceinterval' value='");
   page += debounceInterval;
   page += F("'>");
   page += F("<label for='debounceInterval'>Debounce Interval</label>");
   page += F("</div>");
-  page += F("<small id='debounceTimeModeHelpBlock' class='form-text text-muted'>");
-  page += F("Interval in milliseconds to consider valid and stable a button push. Default value is 5 ms.<br>");
-  page += F("When a mechanical switch is pushed in an electrical circuit it makes a series of short contacts for a limited interval of time. ");
-  page += F("Increase the value if spurious pressure or release occurs.");
+  page += F("<small class='form-text text-muted mt-2'>");
+  page += F("Range: 1-100ms (Default: 5ms)<br>Eliminates false triggers from switch bounce.<br>");
   page += F("</small>");
   page += F("</div>");
-  page += F("<div class='w-50'>");
-  page += F("<div class='form-floating'>");
-  page += F("<input class='form-control' type='text' maxlength='32' id='simultaneousGapTime' name='simultaneousgaptime' value='");
-  page += simultaneousGapTime;
-  page += F("'>");
-  page += F("<label for='simultaneousGapTime'>Simultaneous Gap Time</label>");
-  page += F("</div>");
-  page += F("<small id='simultaneousTimeModeHelpBlock' class='form-text text-muted'>");
-  page += F("Two buttons are considered simultaneous pressed if the second is pressed within a certain gap from the first.<br>");
-  page += F("Default value is 50 ms.");
-  page += F("</small>");
-  page += F("</div>");
-  page += F("</div>");
 
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='row g-1'>");
-  page += F("<div class='w-50'>");
+  page += F("<div class='mb-4'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='text' maxlength='32' id='pressTime' name='presstime' value='");
   page += pressTime;
   page += F("'>");
   page += F("<label for='pressTime'>Press Time</label>");
   page += F("</div>");
-  page += F("<small id='pressTimeModeHelpBlock' class='form-text text-muted'>");
-  page += F("Switch press time in milliseconds. Default value is 200.");
+  page += F("<small class='form-text text-muted mt-2'>");
+  page += F("Range: 1-1000ms (Default: 200ms)<br>Duration required for a single press to register.");
   page += F("</small>");
   page += F("</div>");
-  page += F("<div class='w-50'>");
-  page += F("<div class='form-floating'>");
-  page += F("<input class='form-control' type='text' maxlength='32' id='doublePressTime' name='doublepresstime' value='");
-  page += doublePressTime;
-  page += F("'>");
-  page += F("<label for='doublePressTime'>Double Press Time</label>");
-  page += F("</div>");
-  page += F("<small id='doublePressTimeModeHelpBlock' class='form-text text-muted'>");
-  page += F("Set double press detection time between each press time in milliseconds. Default value is 400 ms.<br>");
-  page += F("A double press is detected if the switch is released and depressed within this time, measured from when the first press is detected.");
-  page += F("</small>");
-  page += F("</div>");
-  page += F("</div>");
 
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='row g-1'>");
-  page += F("<div class='w-50'>");
+  page += F("<div class='mb-4'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='text' maxlength='32' id='longPressTime' name='longpresstime' value='");
   page += longPressTime;
   page += F("'>");
   page += F("<label for='longPressTime'>Long Press Time</label>");
   page += F("</div>");
-  page += F("<small id='longPressTimeModeHelpBlock' class='form-text text-muted'>");
-  page += F("Set the long press time in milliseconds after which a continuous press and release is deemed a long press, measured from when the first press is detected.<br>");
-  page += F("Default value is 500 ms.");
+  page += F("<small class='form-text text-muted mt-2'>");
+    page += F("Range: 1-2000ms (Default: 500ms)<br>Duration required to trigger a long press.<br>");
   page += F("</small>");
   page += F("</div>");
-  page += F("<div class='w-50'>");
+  page += F("</div>");
+
+  page += F("<div class='col-6 px-3'>"); // Second column with padding
+  page += F("<div class='mb-4'>");
+  page += F("<div class='form-floating'>");
+  page += F("<input class='form-control' type='text' maxlength='32' id='simultaneousGapTime' name='simultaneousgaptime' value='");
+  page += simultaneousGapTime;
+  page += F("'>");
+  page += F("<label for='simultaneousGapTime'>Simultaneous Gap Time</label>");
+  page += F("</div>");
+  page += F("<small class='form-text text-muted mt-2'>");
+  page += F("Range: 1-100ms (Default: 50ms)<br>Maximum time gap between two button presses to be considered simultaneous.");
+  page += F("</small>");
+  page += F("</div>");
+
+  page += F("<div class='mb-4'>");
+  page += F("<div class='form-floating'>");
+  page += F("<input class='form-control' type='text' maxlength='32' id='doublePressTime' name='doublepresstime' value='");
+  page += doublePressTime;
+  page += F("'>");
+  page += F("<label for='doublePressTime'>Double Press Time</label>");
+  page += F("</div>");
+  page += F("<small class='form-text text-muted mt-2'>");
+  page += F("Range: 1-1000ms (Default: 400ms)<br>Maximum time between two presses to register as a double-press.");
+  page += F("</small>");
+  page += F("</div>");
+
+  page += F("<div class='mb-4'>");
   page += F("<div class='form-floating'>");
   page += F("<input class='form-control' type='text' maxlength='32' id='repeatPressTime' name='repeatpresstime' value='");
   page += repeatPressTime;
   page += F("'>");
   page += F("<label for='repeatPressTime'>Repeat Press Time</label>");
   page += F("</div>");
-  page += F("<small id='repeatPressTimeModeHelpBlock' class='form-text text-muted'>");
-  page += F("Set the repeat time in milliseconds after which a continuous press and hold is treated as a stream of repeated presses, measured from when the first press is detected.<br>");
-  page += F("Default value is 1000 ms.");
+  page += F("<small class='form-text text-muted mt-2'>");
+  page += F("Range: 1-5000ms (Default: 1000ms)<br>Duration of continuous press before auto-repeat begins.");
   page += F("</small>");
   page += F("</div>");
   page += F("</div>");
@@ -4204,19 +3666,14 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("</div>");
   page += F("</div>");
 
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='col-md-6 col-12 mb-3'>");
-  page += F("<div class='card mb-3'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-ladder' viewBox='0 0 20 20'>");
-  page += F("<path d='M4.5 1a.5.5 0 0 1 .5.5V2h6v-.5a.5.5 0 0 1 1 0v14a.5.5 0 0 1-1 0V15H5v.5a.5.5 0 0 1-1 0v-14a.5.5 0 0 1 .5-.5zM5 14h6v-2H5v2zm0-3h6V9H5v2zm0-3h6V6H5v2zm0-3h6V3H5v2z'/>");
-  page += F("</svg>");
-  page += F(" Resistor Ladder Network</h5>");
+  // --- Resistor Ladder Network Card
+  page += F("<div class='card mb-3' style='flex-grow: 1;'>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-ladder' viewBox='0 0 20 20'><path d='M4.5 1a.5.5 0 0 1 .5.5V2h6v-.5a.5.5 0 0 1 1 0v14a.5.5 0 0 1-1 0V15H5v.5a.5.5 0 0 1-1 0v-14a.5.5 0 0 1 .5-.5zM5 14h6v-2H5v2zm0-3h6V9H5v2zm0-3h6V6H5v2zm0-3h6V3H5v2z'/></svg> Resistor Ladder Network</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='d-grid gap-1'>");
   for (byte i = 1; i <= LADDER_STEPS + 1; i++) {
-    if ((i - 1) % 4 == 0) page += F("<div class='row g-1'>");
+    if ((i - 1) % 4 == 0)
+      page += F("<div class='row g-1'>");
     page += F("<div class='w-25'>");
     page += F("<div class='form-floating'>");
     page += F("<input class='form-control form-control-sm' type='number' id='threshold");
@@ -4226,7 +3683,7 @@ void get_options_page(unsigned int start, unsigned int len) {
     page += F("' min='0' max='");
     page += (ADC_RESOLUTION - 1);
     page += F("' value='");
-    page += ladderLevels[i-1];
+    page += ladderLevels[i - 1];
     page += F("'>");
     page += F("<label for='threshold");
     page += i;
@@ -4235,7 +3692,8 @@ void get_options_page(unsigned int start, unsigned int len) {
     page += F("</label>");
     page += F("</div>");
     page += F("</div>");
-    if (i % 4 == 0 || i == LADDER_STEPS + 1) page += F("</div>");
+    if (i % 4 == 0 || i == LADDER_STEPS + 1)
+      page += F("</div>");
 
     if (trim_page(start, len)) return;
   }
@@ -4243,112 +3701,14 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("</div>");
   page += F("</div>");
 
-  if (trim_page(start, len)) return;
+  page += F("</div>"); // Close left column
 
-  page += F("<div class='card mb-3'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-joystick' viewBox='0 0 20 20'>");
-  page += F("<path d='M10 2a2 2 0 0 1-1.5 1.937v5.087c.863.083 1.5.377 1.5.726 0 .414-.895.75-2 .75s-2-.336-2-.75c0-.35.637-.643 1.5-.726V3.937A2 2 0 1 1 10 2z'/>");
-  page += F("<path d='M0 9.665v1.717a1 1 0 0 0 .553.894l6.553 3.277a2 2 0 0 0 1.788 0l6.553-3.277a1 1 0 0 0 .553-.894V9.665c0-.1-.06-.19-.152-.23L9.5 6.715v.993l5.227 2.178a.125.125 0 0 1 .001.23l-5.94 2.546a2 2 0 0 1-1.576 0l-5.94-2.546a.125.125 0 0 1 .001-.23L6.5 7.708l-.013-.988L.152 9.435a.25.25 0 0 0-.152.23z'/>");
-  page += F("</svg>");
-  page += F(" Encoders</h5>");
-  page += F("<div class='card-body'>");
-  page += F("<div class='form-floating'>");
-  page += F("<select class='form-select' name='encodersensitivity'>");
-  for (unsigned int s = 1; s <= 10; s++) {
-    page += F("<option value='");
-    page += s;
-    page += F("'");
-    if (encoderSensitivity == s) page += F(" selected");
-    page += F(">");
-    page += s;
-    page += F("</option>");
+  // --- Right Column
+  page += F("<div class='col-md-6 col-12 d-flex flex-column'>");
 
-    if (trim_page(start, len)) return;
-  }
-  page += F("</select>");
-  page += F("<label for='encodersensitivity'>Encoder Sensitivity</label>");
-  page += F("</div>");
-  page += F("<small id='encoderSensitivityHelpBlock' class='form-text text-muted'>");
-  page += F("Default value is 5.");
-  page += F("</small>");
-  page += F("</div>");
-  page += F("</div>");
-
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='card'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-display' viewBox='0 0 20 20'>");
-  page += F("<path d='M0 4s0-2 2-2h12s2 0 2 2v6s0 2-2 2h-4c0 .667.083 1.167.25 1.5H11a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1h.75c.167-.333.25-.833.25-1.5H2s-2 0-2-2V4zm1.398-.855a.758.758 0 0 0-.254.302A1.46 1.46 0 0 0 1 4.01V10c0 .325.078.502.145.602.07.105.17.188.302.254a1.464 1.464 0 0 0 .538.143L2.01 11H14c.325 0 .502-.078.602-.145a.758.758 0 0 0 .254-.302 1.464 1.464 0 0 0 .143-.538L15 9.99V4c0-.325-.078-.502-.145-.602a.757.757 0 0 0-.302-.254A1.46 1.46 0 0 0 13.99 3H2c-.325 0-.502.078-.602.145z'/>");
-  page += F("</svg>");
-  page += F(" Screen Saver</h5>");
-  page += F("<div class='card-body'>");
-  page += F("<div class='form-floating'>");
-  page += F("<input class='form-control form-control-sm' type='number' id='screenSaverTimeout' name='screensavertimeout' min='0' max='1440' value='");
-  page += screenSaverTimeout / 60000;
-  page += F("'>");
-  page += F("<label for='timeout'>Timeout</label>");
-  page += F("<small id='screenSaverTimeoutHelpBlock' class='form-text text-muted'>");
-  page += F("Power off display and leds when inactive for a certain amount of time in minutes.<br>Min 0 (never) - Default 60 (1 hour) - Max 1440 (24 hours).");
-  page += F("</small>");
-  page += F("</div>");
-  page += F("</div>");
-  page += F("</div>");
-  page += F("</div>");
-  page += F("</div>");
-
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='row'>");
-  page += F("<div class='col-md-6 col-12 mb-3'>");
-  page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-sliders' viewBox='0 0 20 20'>");
-  page += F("<path fill-rule='evenodd' d='M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z'/>");
-  page += F("</svg>");
-  page += F(" Additional Features</h5>");
-  page += F("<div class='card-body'>");
-  page += F("<div class='form-check form-switch'>");
-  page += F("<input class='form-check-input' type='checkbox' id='flipScreen' name='flipscreen'");
-  if (flipScreen) page += F(" checked");
-  page += F(">");
-  page += F("<label class='form-check-label' for='flipScreen'>Flip Screen</label>");
-  page += F("</div>");
-  page += F("<small id='flidScreenHelpBlock' class='form-text text-muted'>");
-  page += F("Vertical flip of screen.");
-  page += F("</small>");
-  page += F("<div class='form-check form-switch'>");
-  page += F("<input class='form-check-input' type='checkbox' id='tapDanceMode' name='tapdancemode'");
-  if (tapDanceMode) page += F(" checked");
-  page += F(">");
-  page += F("<label class='form-check-label' for='tapDanceMode'>Tap Dance Mode</label>");
-  page += F("</div>");
-  page += F("<small id='tapDanceModeHelpBlock' class='form-text text-muted'>");
-  page += F("The first press of pedal X switch to bank X, the second press of any pedal send the MIDI event.");
-  page += F("</small>");
-  page += F("<div class='form-check form-switch'>");
-  page += F("<input class='form-check-input' type='checkbox' id='repeatOnBankSwitch' name='repeatonbankswitch'");
-  if (repeatOnBankSwitch) page += F(" checked");
-  page += F(">");
-  page += F("<label class='form-check-label' for='repeatOnBankSwitch'>Bank Switch Repeat</label>");
-  page += F("</div>");
-  page += F("<small id='repeatOnBankSwitchModeHelpBlock' class='form-text text-muted'>");
-  page += F("On bank switch repeat the last MIDI message that was sent for that bank");
-  page += F("</small>");
-  page += F("</div>");
-  page += F("</div>");
-  page += F("</div>");
-
-  if (trim_page(start, len)) return;
-
-  page += F("<div class='col-md-6 col-12 mb-3'>");
-  page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-brightness-high' viewBox='0 0 20 20'>");
-  page += F("<path d='M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z'/>");
-  page += F("</svg>");
-  page += F(" Leds</h5>");
+  // --- Leds Card
+  page += F("<div class='card mb-3' style='flex-grow: 1;'>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-brightness-high' viewBox='0 0 20 20'><path d='M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z'/></svg> Leds</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='row g-1'>");
   page += F("<div class='w-50'>");
@@ -4368,32 +3728,38 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<option value='");
   page += RGB;
   page += F("'");
-  if (rgbOrder == RGB) page += F(" selected");
+  if (rgbOrder == RGB)
+    page += F(" selected");
   page += F(">RGB</option>");
   page += F("<option value='");
   page += RBG;
   page += F("'");
-  if (rgbOrder == RBG) page += F(" selected");
+  if (rgbOrder == RBG)
+    page += F(" selected");
   page += F(">RBG</option>");
   page += F("<option value='");
   page += GRB;
   page += F("'");
-  if (rgbOrder == GRB) page += F(" selected");
+  if (rgbOrder == GRB)
+    page += F(" selected");
   page += F(">GRB</option>");
   page += F("<option value='");
   page += GBR;
   page += F("'");
-  if (rgbOrder == GBR) page += F(" selected");
+  if (rgbOrder == GBR)
+    page += F(" selected");
   page += F(">GBR</option>");
   page += F("<option value='");
   page += BRG;
   page += F("'");
-  if (rgbOrder == BRG) page += F(" selected");
+  if (rgbOrder == BRG)
+    page += F(" selected");
   page += F(">BRG</option>");
   page += F("<option value='");
   page += BGR;
   page += F("'");
-  if (rgbOrder == BGR) page += F(" selected");
+  if (rgbOrder == BGR)
+    page += F(" selected");
   page += F(">BGR</option>");
   page += F("</select>");
   page += F("<label for='rgborder'>RGB Order</label>");
@@ -4419,19 +3785,75 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("' oninput='this.previousElementSibling.textContent = `Leds Off Brightness: ` + this.value'>");
   page += F("</div>");
   page += F("</div>");
+
+  // --- Screen Saver Card
+  page += F("<div class='card mb-3' style='flex-grow: 1;'>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-display' viewBox='0 0 20 20'><path d='M0 4s0-2 2-2h12s2 0 2 2v6s0 2-2 2h-4c0 .667.083 1.167.25 1.5H11a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1h.75c.167-.333.25-.833.25-1.5H2s-2 0-2-2V4zm1.398-.855a.758.758 0 0 0-.254.302A1.46 1.46 0 0 0 1 4.01V10c0 .325.078.502.145.602.07.105.17.188.302.254a1.464 1.464 0 0 0 .538.143L2.01 11H14c.325 0 .502-.078.602-.145a.758.758 0 0 0 .254-.302 1.464 1.464 0 0 0 .143-.538L15 9.99V4c0-.325-.078-.502-.145-.602a.757.757 0 0 0-.302-.254A1.46 1.46 0 0 0 13.99 3H2c-.325 0-.502.078-.602.145z'/></svg> Screen Saver</h5>");
+  page += F("<div class='card-body'>");
+  page += F("<div class='form-floating'>");
+  page += F("<input class='form-control form-control-sm' type='number' id='screenSaverTimeout' name='screensavertimeout' min='0' max='1440' value='");
+  page += screenSaverTimeout / 60000;
+  page += F("'>");
+  page += F("<label for='timeout'>Timeout</label>");
+  page += F("<small id='screenSaverTimeoutHelpBlock' class='form-text text-muted'>");
+  page += F("Power off display and leds when inactive for a certain amount of time in minutes.<br>Min 0 (never) - Default 60 (1 hour) - Max 1440 (24 hours).");
+  page += F("</small>");
+  page += F("</div>");
   page += F("</div>");
   page += F("</div>");
 
   if (trim_page(start, len)) return;
 
+  // --- Additional Features Card
+  page += F("<div class='card mb-3' style='flex-grow: 1;'>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-sliders' viewBox='0 0 20 20'><path fill-rule='evenodd' d='M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z'/></svg> Additional Features</h5>");
+  page += F("<div class='card-body'>");
+  page += F("<div class='form-check form-switch'>");
+  page += F("<input class='form-check-input' type='checkbox' id='flipScreen' name='flipscreen'");
+  if (flipScreen)
+    page += F(" checked");
+  page += F(">");
+  page += F("<label class='form-check-label' for='flipScreen'>Flip Screen</label>");
+  page += F("</div>");
+  page += F("<small id='flidScreenHelpBlock' class='form-text text-muted'>");
+  page += F("Vertical flip of screen.");
+  page += F("</small>");
+  page += F("<div class='form-check form-switch'>");
+  page += F("<input class='form-check-input' type='checkbox' id='tapDanceMode' name='tapdancemode'");
+  if (tapDanceMode)
+    page += F(" checked");
+  page += F(">");
+  page += F("<label class='form-check-label' for='tapDanceMode'>Tap Dance Mode</label>");
+  page += F("</div>");
+  page += F("<small id='tapDanceModeHelpBlock' class='form-text text-muted'>");
+  page += F("The first press of pedal X switch to bank X, the second press of any pedal send the MIDI event.");
+  page += F("</small>");
+  page += F("<div class='form-check form-switch'>");
+  page += F("<input class='form-check-input' type='checkbox' id='repeatOnBankSwitch' name='repeatonbankswitch'");
+  if (repeatOnBankSwitch)
+    page += F(" checked");
+  page += F(">");
+  page += F("<label class='form-check-label' for='repeatOnBankSwitch'>Bank Switch Repeat</label>");
+  page += F("</div>");
+  page += F("<small id='repeatOnBankSwitchModeHelpBlock' class='form-text text-muted'>");
+  page += F("On bank switch repeat the last MIDI message that was sent for that bank");
+  page += F("</small>");
+  page += F("</div>");
+  page += F("</div>");
+  page += F("</div>");
+
+  if (trim_page(start, len)) return;
+
+  page += F("</div>");
+
+
+  // --- OSC Local and Remote row
   page += F("<div class='row'>");
-  page += F("<div class='col-md-6 col-12 mb-3'>");
+
+  // --- OSC Local Card
+  page += F("<div class='col-lg-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-ear' viewBox='0 0 20 20'>");
-  page += F("<path d='M8.5 1A4.5 4.5 0 0 0 4 5.5v7.047a2.453 2.453 0 0 0 4.75.861l.512-1.363a5.553 5.553 0 0 1 .816-1.46l2.008-2.581A4.34 4.34 0 0 0 8.66 1H8.5ZM3 5.5A5.5 5.5 0 0 1 8.5 0h.16a5.34 5.34 0 0 1 4.215 8.618l-2.008 2.581a4.555 4.555 0 0 0-.67 1.197l-.51 1.363A3.453 3.453 0 0 1 3 12.547V5.5ZM8.5 4A1.5 1.5 0 0 0 7 5.5v2.695c.112-.06.223-.123.332-.192.327-.208.577-.44.72-.727a.5.5 0 1 1 .895.448c-.256.513-.673.865-1.079 1.123A8.538 8.538 0 0 1 7 9.313V11.5a.5.5 0 0 1-1 0v-6a2.5 2.5 0 0 1 5 0V6a.5.5 0 0 1-1 0v-.5A1.5 1.5 0 0 0 8.5 4Z'/>");
-  page += F("</svg>");
-  page += F(" OSC Local</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-ear' viewBox='0 0 20 20'><path d='M8.5 1A4.5 4.5 0 0 0 4 5.5v7.047a2.453 2.453 0 0 0 4.75.861l.512-1.363a5.553 5.553 0 0 1 .816-1.46l2.008-2.581A4.34 4.34 0 0 0 8.66 1H8.5ZM3 5.5A5.5 5.5 0 0 1 8.5 0h.16a5.34 5.34 0 0 1 4.215 8.618l-2.008 2.581a4.555 4.555 0 0 0-.67 1.197l-.51 1.363A3.453 3.453 0 0 1 3 12.547V5.5ZM8.5 4A1.5 1.5 0 0 0 7 5.5v2.695c.112-.06.223-.123.332-.192.327-.208.577-.44.72-.727a.5.5 0 1 1 .895.448c-.256.513-.673.865-1.079 1.123A8.538 8.538 0 0 1 7 9.313V11.5a.5.5 0 0 1-1 0v-6a2.5 2.5 0 0 1 5 0V6a.5.5 0 0 1-1 0v-.5A1.5 1.5 0 0 0 8.5 4Z'/></svg> OSC Local</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='row g-1'>");
   page += F("<div class='w-75'>");
@@ -4463,13 +3885,10 @@ void get_options_page(unsigned int start, unsigned int len) {
 
   if (trim_page(start, len)) return;
 
-  page += F("<div class='col-md-6 col-12 mb-3'>");
+  // --- OSC Remote Card
+  page += F("<div class='col-lg-6 col-12 mb-3'>");
   page += F("<div class='card h-100'>");
-  page += F("<h5 class='card-header'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-megaphone' viewBox='0 0 20 20'>");
-  page += F("<path d='M13 2.5a1.5 1.5 0 0 1 3 0v11a1.5 1.5 0 0 1-3 0v-.214c-2.162-1.241-4.49-1.843-6.912-2.083l.405 2.712A1 1 0 0 1 5.51 15.1h-.548a1 1 0 0 1-.916-.599l-1.85-3.49a68.14 68.14 0 0 0-.202-.003A2.014 2.014 0 0 1 0 9V7a2.02 2.02 0 0 1 1.992-2.013 74.663 74.663 0 0 0 2.483-.075c3.043-.154 6.148-.849 8.525-2.199V2.5zm1 0v11a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0zm-1 1.35c-2.344 1.205-5.209 1.842-8 2.033v4.233c.18.01.359.022.537.036 2.568.189 5.093.744 7.463 1.993V3.85zm-9 6.215v-4.13a95.09 95.09 0 0 1-1.992.052A1.02 1.02 0 0 0 1 7v2c0 .55.448 1.002 1.006 1.009A60.49 60.49 0 0 1 4 10.065zm-.657.975 1.609 3.037.01.024h.548l-.002-.014-.443-2.966a68.019 68.019 0 0 0-1.722-.082z'/>");
-  page += F("</svg>");
-  page += F(" OSC Remote</h5>");
+  page += F("<h5 class='card-header'><svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-megaphone' viewBox='0 0 20 20'><path d='M13 2.5a1.5 1.5 0 0 1 3 0v11a1.5 1.5 0 0 1-3 0v-.214c-2.162-1.241-4.49-1.843-6.912-2.083l.405 2.712A1 1 0 0 1 5.51 15.1h-.548a1 1 0 0 1-.916-.599l-1.85-3.49a68.14 68.14 0 0 0-.202-.003A2.014 2.014 0 0 1 0 9V7a2.02 2.02 0 0 1 1.992-2.013 74.663 74.663 0 0 0 2.483-.075c3.043-.154 6.148-.849 8.525-2.199V2.5zm1 0v11a.5.5 0 0 0 1 0v-11a.5.5 0 0 0-1 0zm-1 1.35c-2.344 1.205-5.209 1.842-8 2.033v4.233c.18.01.359.022.537.036 2.568.189 5.093.744 7.463 1.993V3.85zm-9 6.215v-4.13a95.09 95.09 0 0 1-1.992.052A1.02 1.02 0 0 0 1 7v2c0 .55.448 1.002 1.006 1.009A60.49 60.49 0 0 1 4 10.065zm-.657.975 1.609 3.037.01.024h.548l-.002-.014-.443-2.966a68.019 68.019 0 0 0-1.722-.082z'/></svg> OSC Remote</h5>");
   page += F("<div class='card-body'>");
   page += F("<div class='row g-1'>");
   page += F("<div class='w-75'>");
@@ -4508,51 +3927,29 @@ void get_options_page(unsigned int start, unsigned int len) {
   if (trim_page(start, len)) return;
 
   page += F("<div class='row'>");
+  // --- Form Submit Buttons
+  // Contains Apply, Save, Factory Reset, Reboot, Power Off buttons
   page += F("<div class='col-auto me-auto'>");
-  page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'>");
-  page += F("<path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/>");
-  page += F("<path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/>");
-  page += F("</svg>");
-  page += F(" Apply</button> ");
-  page += F("<button type='submit' name='action' value='save' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-save' viewBox='0 0 16 16'>");
-  page += F("<path d='M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z'>");
-  page += F("</svg>");
-  page += F(" Save</button>");
+  page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm'><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'><path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/><path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/></svg> Apply</button> ");
+  page += F("<button type='submit' name='action' value='save' class='btn btn-primary btn-sm'><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-save' viewBox='0 0 16 16'><path d='M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z'/></svg> Save</button>");
   page += F("</div>");
   page += F("<div class='col-auto'>");
-  page += F("<button type='submit' name='action' value='factorydefault' class='btn btn-danger btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-wrench' viewBox='0 0 16 16'>");
-  page += F("<path d='M.102 2.223A3.004 3.004 0 0 0 3.78 5.897l6.341 6.252A3.003 3.003 0 0 0 13 16a3 3 0 1 0-.851-5.878L5.897 3.781A3.004 3.004 0 0 0 2.223.1l2.141 2.142L4 4l-1.757.364L.102 2.223zm13.37 9.019l.528.026.287.445.445.287.026.529L15 13l-.242.471-.026.529-.445.287-.287.445-.529.026L13 15l-.471-.242-.529-.026-.287-.445-.445-.287-.026-.529L11 13l.242-.471.026-.529.445-.287.287-.445.529-.026L13 11l.471.242z'/>");
-  page += F("</svg>");
-
-  if (trim_page(start, len)) return;
-
-  page += F(" Reset to Factory Default</button> ");
-  page += F("<button type='submit' name='action' value='reboot' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-bootstrap-reboot' viewBox='0 0 16 16'>");
-  page += F("<path d='M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 0 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.812 6.812 0 0 0 1.16 8z'>");
-  page += F("<path d='M6.641 11.671V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352h1.141zm0-3.75V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324h-1.6z'>");
-  page += F("</svg>");
-  page += F(" Reboot</button> ");
-  page += F("<button type='submit' name='action' value='poweroff' class='btn btn-primary btn-sm'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-power' viewBox='0 0 16 16'>");
-  page += F("<path d='M7.5 1v7h1V1h-1z'/>");
-  page += F("<path d='M3 8.812a4.999 4.999 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812z'/>");
-  page += F("</svg>");
-  page += F(" Power Off</button>");
+  page += F("<button type='submit' name='action' value='factorydefault' class='btn btn-danger btn-sm'><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-wrench' viewBox='0 0 16 16'><path d='M.102 2.223A3.004 3.004 0 0 0 3.78 5.897l6.341 6.252A3.003 3.003 0 0 0 13 16a3 3 0 1 0-.851-5.878L5.897 3.781A3.004 3.004 0 0 0 2.223.1l2.141 2.142L4 4l-1.757.364L.102 2.223zm13.37 9.019l.528.026.287.445.445.287.026.529L15 13l-.242.471-.026.529-.445.287-.287.445-.529.026L13 15l-.471-.242-.529-.026-.287-.445-.445-.287-.026-.529L11 13l.242-.471.026-.529.445-.287.287-.445.529-.026L13 11l.471.242z'/></svg> Reset to Factory Default</button> ");
+  page += F("<button type='submit' name='action' value='reboot' class='btn btn-primary btn-sm'><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-bootstrap-reboot' viewBox='0 0 16 16'><path d='M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 0 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.812 6.812 0 0 0 1.16 8z'><path d='M6.641 11.671V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352h1.141zm0-3.75V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324h-1.6z'></svg> Reboot</button> ");
+  page += F("<button type='submit' name='action' value='poweroff' class='btn btn-primary btn-sm'><svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-power' viewBox='0 0 16 16'><path d='M7.5 1v7h1V1h-1z'/><path d='M3 8.812a4.999 4.999 0 0 1 2.578-4.375l-.485-.874A6 6 0 1 0 11 3.616l-.501.865A5 5 0 1 1 3 8.812z'/></svg> Power Off</button>");
   page += F("</div>");
   page += F("</div>");
 
   page += F("</form>");
 
+  // --- Page Footer
   get_footer_page();
 
   if (trim_page(start, len, true)) return;
 }
 
 
+//// +++ CONFIGURATIONS PAGE +++ ////
 void get_configurations_page(unsigned int start, unsigned int len) {
 
   if (get_top_page(8, start, len)) return;
@@ -4724,12 +4121,11 @@ void get_configurations_page(unsigned int start, unsigned int len) {
   page += confoptions;
   page += F("</select>");
   page += F("<small id='filenameHelpBlock' class='form-text text-muted'>");
-  page += F("'Apply' to load configuration into current profile.<br>");
-  page += F("'Apply & Save' to load configuration into current profile and save the profile.<br>");
-  page += F("'Append' to load configuration into current profile. Existing Actions are not deleted.<br>");
-  page += F("'Append & Save' to load configuration into current profile and save the profile. Existing Actions are not deleted.<br>");
-  page += F("'Download' to download configuration to local computer.<br>");
-  page += F("'Delete' to remove configuration.");
+  page += F("Apply: Overwrites the current profile settings<br>");
+  page += F("Append: Adds to the current profile settings<br>"); 
+  // page += F("Save: Makes the changes permanent<br>");
+  page += F("Download: Download configuration to local computer.<br>");
+  page += F("Delete: Delete the configuration.");
   page += F("</small>");
   page += F("</div>");
 
@@ -4765,31 +4161,33 @@ void get_configurations_page(unsigned int start, unsigned int len) {
   if (trim_page(start, len)) return;
 
   page += F("<div class='col-3'>");
-  page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm' style='width: 100%;'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'>");
-  page += F("<path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/>");
-  page += F("<path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/>");
-  page += F("</svg>");
-  page += F("<br>Apply</button><p></p>");
+  // page += F("<button type='submit' name='action' value='apply' class='btn btn-primary btn-sm' style='width: 100%;'>");
+  // page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-check2-circle' viewBox='0 0 16 16'>");
+  // page += F("<path d='M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z'/>");
+  // page += F("<path d='M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z'/>");
+  // page += F("</svg>");
+  // page += F("<br>Apply</button><p></p>");
+  // // Apply & Save ⤵️
   page += F("<button type='submit' name='action' value='save' class='btn btn-primary btn-sm' style='width: 100%;'>");
   page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-save' viewBox='0 0 16 16'>");
   page += F("<path d='M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z'>");
   page += F("</svg>");
-  page += F("<br>Apply & Save</button><p></p>");
+  page += F("<br>Apply</button><p></p>");
 
   if (trim_page(start, len)) return;
 
-  page += F("<button type='submit' name='action' value='append' class='btn btn-primary btn-sm' style='width: 100%;'>");
-  page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-plus-circle-dotted' viewBox='0 0 16 16'>");
-  page += F("<path d='M8 0c-.176 0-.35.006-.523.017l.064.998a7.117 7.117 0 0 1 .918 0l.064-.998A8.113 8.113 0 0 0 8 0zM6.44.152c-.346.069-.684.16-1.012.27l.321.948c.287-.098.582-.177.884-.237L6.44.153zm4.132.271a7.946 7.946 0 0 0-1.011-.27l-.194.98c.302.06.597.14.884.237l.321-.947zm1.873.925a8 8 0 0 0-.906-.524l-.443.896c.275.136.54.29.793.459l.556-.831zM4.46.824c-.314.155-.616.33-.905.524l.556.83a7.07 7.07 0 0 1 .793-.458L4.46.824zM2.725 1.985c-.262.23-.51.478-.74.74l.752.66c.202-.23.418-.446.648-.648l-.66-.752zm11.29.74a8.058 8.058 0 0 0-.74-.74l-.66.752c.23.202.447.418.648.648l.752-.66zm1.161 1.735a7.98 7.98 0 0 0-.524-.905l-.83.556c.169.253.322.518.458.793l.896-.443zM1.348 3.555c-.194.289-.37.591-.524.906l.896.443c.136-.275.29-.54.459-.793l-.831-.556zM.423 5.428a7.945 7.945 0 0 0-.27 1.011l.98.194c.06-.302.14-.597.237-.884l-.947-.321zM15.848 6.44a7.943 7.943 0 0 0-.27-1.012l-.948.321c.098.287.177.582.237.884l.98-.194zM.017 7.477a8.113 8.113 0 0 0 0 1.046l.998-.064a7.117 7.117 0 0 1 0-.918l-.998-.064zM16 8a8.1 8.1 0 0 0-.017-.523l-.998.064a7.11 7.11 0 0 1 0 .918l.998.064A8.1 8.1 0 0 0 16 8zM.152 9.56c.069.346.16.684.27 1.012l.948-.321a6.944 6.944 0 0 1-.237-.884l-.98.194zm15.425 1.012c.112-.328.202-.666.27-1.011l-.98-.194c-.06.302-.14.597-.237.884l.947.321zM.824 11.54a8 8 0 0 0 .524.905l.83-.556a6.999 6.999 0 0 1-.458-.793l-.896.443zm13.828.905c.194-.289.37-.591.524-.906l-.896-.443c-.136.275-.29.54-.459.793l.831.556zm-12.667.83c.23.262.478.51.74.74l.66-.752a7.047 7.047 0 0 1-.648-.648l-.752.66zm11.29.74c.262-.23.51-.478.74-.74l-.752-.66c-.201.23-.418.447-.648.648l.66.752zm-1.735 1.161c.314-.155.616-.33.905-.524l-.556-.83a7.07 7.07 0 0 1-.793.458l.443.896zm-7.985-.524c.289.194.591.37.906.524l.443-.896a6.998 6.998 0 0 1-.793-.459l-.556.831zm1.873.925c.328.112.666.202 1.011.27l.194-.98a6.953 6.953 0 0 1-.884-.237l-.321.947zm4.132.271a7.944 7.944 0 0 0 1.012-.27l-.321-.948a6.954 6.954 0 0 1-.884.237l.194.98zm-2.083.135a8.1 8.1 0 0 0 1.046 0l-.064-.998a7.11 7.11 0 0 1-.918 0l-.064.998zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z'/>");
-  page += F("</svg>");
-  page += F("<br>Append</button><p></p>");
+  // page += F("<button type='submit' name='action' value='append' class='btn btn-primary btn-sm' style='width: 100%;'>");
+  // page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-plus-circle-dotted' viewBox='0 0 16 16'>");
+  // page += F("<path d='M8 0c-.176 0-.35.006-.523.017l.064.998a7.117 7.117 0 0 1 .918 0l.064-.998A8.113 8.113 0 0 0 8 0zM6.44.152c-.346.069-.684.16-1.012.27l.321.948c.287-.098.582-.177.884-.237L6.44.153zm4.132.271a7.946 7.946 0 0 0-1.011-.27l-.194.98c.302.06.597.14.884.237l.321-.947zm1.873.925a8 8 0 0 0-.906-.524l-.443.896c.275.136.54.29.793.459l.556-.831zM4.46.824c-.314.155-.616.33-.905.524l.556.83a7.07 7.07 0 0 1 .793-.458L4.46.824zM2.725 1.985c-.262.23-.51.478-.74.74l.752.66c.202-.23.418-.446.648-.648l-.66-.752zm11.29.74a8.058 8.058 0 0 0-.74-.74l-.66.752c.23.202.447.418.648.648l.752-.66zm1.161 1.735a7.98 7.98 0 0 0-.524-.905l-.83.556c.169.253.322.518.458.793l.896-.443zM1.348 3.555c-.194.289-.37.591-.524.906l.896.443c.136-.275.29-.54.459-.793l-.831-.556zM.423 5.428a7.945 7.945 0 0 0-.27 1.011l.98.194c.06-.302.14-.597.237-.884l-.947-.321zM15.848 6.44a7.943 7.943 0 0 0-.27-1.012l-.948.321c.098.287.177.582.237.884l.98-.194zM.017 7.477a8.113 8.113 0 0 0 0 1.046l.998-.064a7.117 7.117 0 0 1 0-.918l-.998-.064zM16 8a8.1 8.1 0 0 0-.017-.523l-.998.064a7.11 7.11 0 0 1 0 .918l.998.064A8.1 8.1 0 0 0 16 8zM.152 9.56c.069.346.16.684.27 1.012l.948-.321a6.944 6.944 0 0 1-.237-.884l-.98.194zm15.425 1.012c.112-.328.202-.666.27-1.011l-.98-.194c-.06.302-.14.597-.237.884l.947.321zM.824 11.54a8 8 0 0 0 .524.905l.83-.556a6.999 6.999 0 0 1-.458-.793l-.896.443zm13.828.905c.194-.289.37-.591.524-.906l-.896-.443c-.136.275-.29.54-.459.793l.831.556zm-12.667.83c.23.262.478.51.74.74l.66-.752a7.047 7.047 0 0 1-.648-.648l-.752.66zm11.29.74c.262-.23.51-.478.74-.74l-.752-.66c-.201.23-.418.447-.648.648l.66.752zm-1.735 1.161c.314-.155.616-.33.905-.524l-.556-.83a7.07 7.07 0 0 1-.793.458l.443.896zm-7.985-.524c.289.194.591.37.906.524l.443-.896a6.998 6.998 0 0 1-.793-.459l-.556.831zm1.873.925c.328.112.666.202 1.011.27l.194-.98a6.953 6.953 0 0 1-.884-.237l-.321.947zm4.132.271a7.944 7.944 0 0 0 1.012-.27l-.321-.948a6.954 6.954 0 0 1-.884.237l.194.98zm-2.083.135a8.1 8.1 0 0 0 1.046 0l-.064-.998a7.11 7.11 0 0 1-.918 0l-.064.998zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z'/>");
+  // page += F("</svg>");
+  // page += F("<br>Append</button><p></p>");
+  // //Append & Save ⤵️
   page += F("<button type='submit' name='action' value='appendsave' class='btn btn-primary btn-sm' style='width: 100%;'>");
   page += F("<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-plus-circle' viewBox='0 0 16 16'>");
   page += F("<path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/>");
   page += F("<path d='M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z'/>");
   page += F("</svg>");
-  page += F("<br>Append & Save</button><p></p>");
+  page += F("<br>Append</button><p></p>");
 
   if (trim_page(start, len)) return;
 
@@ -4908,7 +4306,7 @@ void get_update_page(unsigned int start, unsigned int len) {
   page += F("</div></b></div>");
   page += F("<div class='col-4'>");
   page += F("Latest public version: <b>");
-  page += F("<div id='latestFirmwareVersion' w3-include-html='https://raw.githubusercontent.com/alf45tar/PedalinoMini/master/firmware/");
+  page += F("<div id='latestFirmwareVersion' w3-include-html='https://raw.githubusercontent.com/fuegovic/PedalinoMini/single/firmware/");
   page += xstr(PLATFORMIO_ENV);
   page += F("/version.txt?");
   page += (rand() % (999999 - 100000 + 1) + 100000);
@@ -4933,7 +4331,7 @@ void get_update_page(unsigned int start, unsigned int len) {
   page += F("</div>");
   page += F("<div class='col-4'>");
   page += F("<small>");
-  page += F("<div id='latestFirmwareVersion' w3-include-html='https://raw.githubusercontent.com/alf45tar/PedalinoMini/master/firmware/");
+  page += F("<div id='latestFirmwareVersion' w3-include-html='https://raw.githubusercontent.com/fuegovic/PedalinoMini/single/firmware/");
   page += xstr(PLATFORMIO_ENV);
   page += F("/firmware.bin.md5?");
   page += (rand() % (999999 - 100000 + 1) + 100000);
@@ -5247,22 +4645,6 @@ size_t get_root_page_chunked(uint8_t *buffer, size_t maxLen, size_t index) {
   return byteWritten;
 }
 
-size_t get_live_page_chunked(uint8_t *buffer, size_t maxLen, size_t index) {
-
-  page = "";
-  get_live_page(index, maxLen - 1);
-  page.getBytes(buffer, maxLen, 0);
-  buffer[maxLen-1] = 0; // CWE-126
-  size_t byteWritten = strlen((const char *)buffer);
-  if (byteWritten == 0) {
-    page = "";
-    alert = "";
-    alertError = "";
-    fullPageCompleted = true;
-  }
-  return byteWritten;
-}
-
 size_t get_actions_page_chunked(uint8_t *buffer, size_t maxLen, size_t index) {
 
   page = "";
@@ -5439,14 +4821,6 @@ void http_handle_root(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
-void http_handle_live(AsyncWebServerRequest *request) {
-  if (!httpUsername.isEmpty() && !request->authenticate(httpUsername.c_str(), httpPassword.c_str())) return request->requestAuthentication();
-  http_handle_globals(request);
-  AsyncWebServerResponse *response = request->beginChunkedResponse("text/html", get_live_page_chunked);
-  response->addHeader("Connection", "close");
-  request->send(response);
-}
-
 void http_handle_actions(AsyncWebServerRequest *request) {
 
   String list;
@@ -5552,20 +4926,6 @@ void http_handle_progress(AsyncWebServerRequest *request) {
     request->send(200, "text/plain", String(HttpsOTA.status() == HTTPS_OTA_UPDATING ? 100 * otaProgress / FIRMWARE_MAX_SIZE : 0));
   else
     request->send(200, "text/plain", String(Update.isRunning() && Update.size() ? 100 * Update.progress() / Update.size() : 0));
-}
-
-void http_handle_post_live(AsyncWebServerRequest *request) {
-
-  String a;
-
-  a = request->arg("profile");
-  currentProfile = a.toInt();
-
-  alert = "Saved";
-
-  AsyncWebServerResponse *response = request->beginChunkedResponse("text/html", get_live_page_chunked);
-  response->addHeader("Connection", "close");
-  request->send(response);
 }
 
 void http_handle_post_actions(AsyncWebServerRequest *request) {
@@ -6374,10 +5734,6 @@ void http_handle_update_file_upload(AsyncWebServerRequest *request, String filen
   //Upload handler chunks in data
   if (!index) {
     // Disconnect, not to interfere with OTA process
-#ifdef WEBSOCKET
-    webSocket.enable(false);
-    webSocket.closeAll();
-#endif
     firmwareUpdate = PED_UPDATE_HTTP;
     delay(100);
     DPRINT("Update Start: %s\n", filename.c_str());
@@ -6471,180 +5827,12 @@ void http_handle_not_found(AsyncWebServerRequest *request) {
   }
 }
 
-
-#ifdef WEBSOCKET
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-
-  //static bool connected = false;
-
-  if(type == WS_EVT_CONNECT){
-    //client connected
-    DPRINT("ws[%s][%u] connect\n", server->url(), client->id());
-    //client->printf("Hello Client %u :)", client->id());
-    //client->ping();
-    //client->keepAlivePeriod(1);
-    //connected = true;
-    wsClient = client;
-  } else if(type == WS_EVT_DISCONNECT){
-    //client disconnected
-    DPRINT("ws[%s][%u] disconnect\n", server->url(), client->id());
-    //connected = false;
-    wsClient = NULL;
-  } else if(type == WS_EVT_ERROR){
-    //error was received from the other end
-    DPRINT("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*)arg), (char*)data);
-  } else if(type == WS_EVT_PONG){
-    //pong message was received (in response to a ping request maybe)
-    DPRINT("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len)?(char*)data:"");
-  } else if(type == WS_EVT_DATA){
-    //data packet
-    AwsFrameInfo * info = (AwsFrameInfo*)arg;
-    if(info->final && info->index == 0 && info->len == len){
-      //the whole message is in a single frame and we got all of it's data
-      DPRINT("ws[%s][%u] %s-message[%llu]: ", server->url(), client->id(), (info->opcode == WS_TEXT)?"text":"binary", info->len);
-      if(info->opcode == WS_TEXT){
-        data[len] = 0;
-        DPRINT("%s\n", (char*)data);
-      } else {
-        for (size_t i = 0; i < info->len; i++) {
-          DPRINT("%02x ", data[i]);
-        }
-        data[info->len-1] = 0;
-        DPRINT(" %s\n", (char*)data);
-        //DPRINT("%d\n", ESP.getFreeHeap());
-        if (strcmp((const char *)data, ".") == 0) {
-          //AsyncWebSocketMessageBuffer *buffer = webSocket.makeBuffer(128*64);
-          //memcpy(buffer->get(), display.buffer, 128*64);
-          //if (connected && buffer) {client->binary(buffer); delete buffer; buffer = NULL;}
-          //client->binary(display.buffer, 128*64);
-        }
-        else if (strcmp((const char *)data, "start") == 0)
-          mtc_start();
-        else if (strcmp((const char *)data, "stop") == 0)
-          mtc_stop();
-        else if (strcmp((const char *)data, "continue") == 0)
-          mtc_continue();
-        else if (strcmp((const char *)data, "tap") == 0)
-          mtc_tap();
-        else if (strcmp((const char *)data, "clock-master") == 0) {
-          MTC.setMode(MidiTimeCode::SynchroClockMaster);
-          bpm = (bpm == 0) ? 120 : bpm;
-          MTC.setBpm(bpm);
-          currentMidiTimeCode = PED_MIDI_CLOCK_MASTER;
-        }
-        else if (strcmp((const char *)data, "clock-slave") == 0) {
-          MTC.setMode(MidiTimeCode::SynchroClockSlave);
-          currentMidiTimeCode = PED_MIDI_CLOCK_SLAVE;
-          bpm = 0;
-        }
-        else if (strcmp((const char *)data, "mtc-master") == 0) {
-          MTC.setMode(MidiTimeCode::SynchroMTCMaster);
-          MTC.sendPosition(0, 0, 0, 0);
-          currentMidiTimeCode = PED_MTC_MASTER_24;
-        }
-        else if (strcmp((const char *)data, "mtc-slave") == 0) {
-          MTC.setMode(MidiTimeCode::SynchroMTCSlave);
-          currentMidiTimeCode = PED_MTC_SLAVE;
-        }
-        else if (strcmp((const char *)data, "4/4") == 0) {
-          timeSignature = PED_TIMESIGNATURE_4_4;
-          MTC.setBeat(4);
-        }
-        else if (strcmp((const char *)data, "3/4") == 0) {
-          timeSignature = PED_TIMESIGNATURE_3_4;
-          MTC.setBeat(3);
-        }
-        else if (strcmp((const char *)data, "2/4") == 0) {
-          timeSignature = PED_TIMESIGNATURE_2_4;
-          MTC.setBeat(2);
-        }
-        else if (strcmp((const char *)data, "3/8") == 0) {
-          timeSignature = PED_TIMESIGNATURE_3_8;
-          MTC.setBeat(3);
-        }
-        else if (strcmp((const char *)data, "6/8") == 0) {
-          timeSignature = PED_TIMESIGNATURE_6_8;
-          MTC.setBeat(3);
-        }
-        else if (strcmp((const char *)data, "9/8") == 0) {
-          timeSignature = PED_TIMESIGNATURE_9_8;
-          MTC.setBeat(3);
-        }
-        else if (strcmp((const char *)data, "12/8") == 0) {
-          timeSignature = PED_TIMESIGNATURE_12_8;
-          MTC.setBeat(3);
-        }
-        else {
-          int b;
-          if (sscanf((const char *)data, "bank%d", &b) == 1)
-            currentBank = constrain(b, 0, BANKS - 1);
-            update_current_step();
-            leds_refresh();
-        }
-      }
-      /*
-      if(info->opcode == WS_TEXT)
-        client->text("I got your text message");
-      else
-        client->binary("I got your binary message");
-      */
-    } else {
-      //message is comprised of multiple frames or the frame is split into multiple packets
-      if(info->index == 0){
-        if(info->num == 0)
-          DPRINT("ws[%s][%u] %s-message start\n", server->url(), client->id(), (info->message_opcode == WS_TEXT)?"text":"binary");
-        DPRINT("ws[%s][%u] frame[%u] start[%llu]\n", server->url(), client->id(), info->num, info->len);
-      }
-
-      DPRINT("ws[%s][%u] frame[%u] %s[%llu - %llu]: ", server->url(), client->id(), info->num, (info->message_opcode == WS_TEXT)?"text":"binary", info->index, info->index + len);
-      if(info->message_opcode == WS_TEXT){
-        data[len] = 0;
-        DPRINT("%s\n", (char*)data);
-      } else {
-        for(size_t i=0; i < len; i++){
-          DPRINT("%02x ", data[i]);
-        }
-        DPRINT("\n");
-      }
-
-      if((info->index + len) == info->len){
-        DPRINT("ws[%s][%u] frame[%u] end[%llu]\n", server->url(), client->id(), info->num, info->len);
-        if(info->final){
-          DPRINT("ws[%s][%u] %s-message end\n", server->url(), client->id(), (info->message_opcode == WS_TEXT)?"text":"binary");
-          /*
-          if(info->message_opcode == WS_TEXT)
-            client->text("I got your text message");
-          else
-            client->binary("I got your binary message");
-          */
-        }
-      }
-    }
-  }
-}
-#endif  // NO_WEBSOCKET
-
-
 void http_setup() {
 
 #ifdef WEBCONFIG
-#ifdef WEBSOCKET
-  webSocket.onEvent(onWsEvent);
-  httpServer.addHandler(&webSocket);
-  //events.setAuthentication("user", "pass");
-  httpServer.addHandler(&events);
-#endif
-/*
-  httpServer.serveStatic("/favicon.ico",                SPIFFS, "/favicon.ico").setDefaultFile("/favicon.ico").setCacheControl("max-age=600");
-  httpServer.serveStatic("/logo.png",                   SPIFFS, "/logo.png").setDefaultFile("/logo.png").setCacheControl("max-age=600");
-  httpServer.serveStatic("/css/bootstrap.min.css",      SPIFFS, "/css/bootstrap.min.css").setDefaultFile("/css/bootstrap.min.css").setCacheControl("max-age=600");
-  httpServer.serveStatic("/js/bootstrap.bundle.min.js", SPIFFS, "/js/bootstrap.bundle.min.js").setDefaultFile("/js/bootstrap.bundle.min.js").setCacheControl("max-age=600");
-  httpServer.serveStatic("/js/Sortable.min.js",         SPIFFS, "/js/Sortable.min.js").setDefaultFile("/js/Sortable.min.js").setCacheControl("max-age=600");
-  httpServer.serveStatic("/schema.json",                SPIFFS, "/schema.json").setDefaultFile("/schema.json").setCacheControl("max-age=600");
-  httpServer.serveStatic("/files",                      SPIFFS, "/").setDefaultFile("").setAuthentication(httpUsername.c_str(), httpPassword.c_str());
-*/
+
   httpServer.serveStatic("/favicon.ico",                SPIFFS, "/favicon.ico").setCacheControl("max-age=600");
-  httpServer.serveStatic("/logo.png",                   SPIFFS, "/logo.png").setCacheControl("max-age=600");
+  httpServer.serveStatic("/logo.webp",                   SPIFFS, "/logo.webp").setCacheControl("max-age=600");
   httpServer.serveStatic("/css/bootstrap.min.css",      SPIFFS, "/css/bootstrap.min.css").setCacheControl("max-age=600");
   httpServer.serveStatic("/js/bootstrap.bundle.min.js", SPIFFS, "/js/bootstrap.bundle.min.js").setCacheControl("max-age=600");
   httpServer.serveStatic("/js/Sortable.min.js",         SPIFFS, "/js/Sortable.min.js").setCacheControl("max-age=600");
@@ -6654,8 +5842,6 @@ void http_setup() {
   httpServer.on("/",                            http_handle_root);
   httpServer.on("/login",           HTTP_GET,   http_handle_login);
   httpServer.on("/login",           HTTP_POST,  http_handle_post_login);
-  httpServer.on("/live",            HTTP_GET,   http_handle_live);
-  httpServer.on("/live",            HTTP_POST,  http_handle_post_live);
   httpServer.on("/actions",         HTTP_GET,   http_handle_actions);
   httpServer.on("/actions",         HTTP_POST,  http_handle_post_actions);
   httpServer.on("/pedals",          HTTP_GET,   http_handle_pedals);
@@ -6670,7 +5856,11 @@ void http_setup() {
   httpServer.on("/options",         HTTP_POST,  http_handle_post_options);
   httpServer.on("/configurations",  HTTP_GET,   http_handle_configurations);
   httpServer.on("/configurations",  HTTP_POST,  http_handle_post_configurations, http_handle_configuration_file_upload);
-
+  httpServer.on("/memory",          HTTP_GET, [](AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    response->printf("{\"memory\": %d}", ESP.getFreeHeap());
+    request->send(response);
+  });
   httpServer.on("/update",          HTTP_GET,   http_handle_update);
   httpServer.on("/update",          HTTP_POST,  http_handle_post_update, http_handle_update_file_upload);
   httpServer.on("/progress",        HTTP_GET,   http_handle_progress);
@@ -6703,25 +5893,7 @@ inline void http_run() {
   if (interruptCounter2 > 0) {
 
     interruptCounter2 = 0;
-
-#ifdef WEBSOCKET
-    //webSocket.binaryAll(display.buffer, 128*64);
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-#else
-    if (wsClient) wsClient->binary(display.buffer, 128*64);
-#endif
-     // Limits the number of clients by closing the oldest client
-     // when the maximum number of clients has been exceeded
-    webSocket.cleanupClients();
-#endif
-
-/*
-    if (!buffer) {
-      buffer = webSocket.makeBuffer(128*64);
-      memcpy(buffer->get(), display.buffer, 128*64);
-    }
-    */
   }
 }
 
-#endif  // WIFI
+#endif
