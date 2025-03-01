@@ -36,6 +36,37 @@ This is a full-featured MIDI controller that supports up to 15 analog and digita
 - Over-the-Air (OTA) firmware updates
 - Browser-based firmware installation and WiFi provisioning
 
+## Table of Contents
+
+- [Key Features](#key-features)
+  - [Connectivity and Protocols](#connectivity-and-protocols)
+  - [Hardware Support](#hardware-support)
+  - [MIDI Implementation](#midi-implementation)
+  - [Configuration](#configuration)
+- [Bill of materials](#bill-of-materials)
+- [Schematic](#schematic)
+  - [Warnings](#warnings)
+- [USB MIDI using Arduino Pro Micro](#usb-midi-using-arduino-pro-micro)
+- [How to upload firmware, WiFi provisioning and access to web user interface](#how-to-upload-firmware-wifi-provisioning-and-access-to-web-user-interface)
+- [How to Build and Upload PedalinoMini™](#how-to-build-and-upload-pedalinomini)
+  - [Prerequisites](#prerequisites)
+  - [Getting the Code](#getting-the-code)
+  - [Building and Uploading](#building-and-uploading)
+- [How to connect PedalinoMini™ to a WiFi network](#how-to-connect-pedalinomini-to-a-wifi-network)
+- [Boot modes](#boot-modes)
+- [How to connect to the web user interface](#how-to-connect-to-the-web-user-intertface)
+- [Pedals](#pedals)
+- [Controls](#controls)
+- [Actions](#actions)
+- [Display mode](#display-mode)
+- [Interfaces](#interfaces)
+- [Sequences](#sequences)
+- [Options](#options)
+- [Configurations](#configurations)
+- [Update](#update)
+- [How to switch profiles](#how-to-switch-profiles)
+
+
 ## Bill of materials
 
 - Any ESP32 board supported by [Arduino core for ESP32](https://github.com/espressif/arduino-esp32)
