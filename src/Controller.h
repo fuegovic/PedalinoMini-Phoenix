@@ -1,13 +1,14 @@
 /*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2024 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
+  (c) 2018-2025 alf45star
+  https://github.com/alf45tar/PedalinoMini
+
+  This file is part of PedalinoMini.
+
+  You should have received a copy of the GNU General Public License
+  along with PedalinoMini. If not, see <http://www.gnu.org/licenses/>.
+
+  Modifications by Fuegovic, 2025.
+*/
 
 #include <algorithm>
 #include <list>
@@ -61,6 +62,7 @@ void leds_refresh()
     fastleds[l] = lastLedColor[currentBank][l];
   fastleds[LEDS] = CRGB::Black;
   FastLED.show();
+  update_profile_led();
 }
 
 void leds_refresh(byte l)
@@ -73,6 +75,7 @@ void leds_refresh(byte l)
   fastleds[l] = lastLedColor[currentBank][l];
   fastleds[LEDS] = CRGB::Black;
   FastLED.show();
+  update_profile_led();
 }
 
 void set_led_color(byte l, CRGB c, byte b)
@@ -512,6 +515,7 @@ void switch_profile_or_bank(byte channel, byte number, byte value) {
   if (channel == 16 && number == midi::BankSelect && value > 0 && value <= PROFILES) {
     currentProfile = value;
     reloadProfile = true;
+    update_profile_led();
     DPRINT("PROFILE.....%d\n", currentProfile);
   }
   if (channel == 16 && number == midi::BankSelect+32 && value >= 0 && value <= BANKS) {
@@ -759,6 +763,11 @@ void ladder_config()
         }
         if (analog.getValue() != ADC_RESOLUTION-1) {
           ladderLevels[i] = analog.getValue();
+        }
+        display_progress_bar_title2("Release", "Switch " + String(i+1)); // Show "Release Switch" message
+        start = millis();
+        while (millis() - start < 1000) {
+          display_progress_bar_update(millis() - start, 1000); // Progress bar goes from full to empty
         }
       }
       display_progress_bar_2_label(LADDER_STEPS, DISPLAY_WIDTH * ladderLevels[LADDER_STEPS-1] / ADC_RESOLUTION);
@@ -1360,20 +1369,46 @@ void fire_action(action* act, byte p, byte i, byte e)
               break;
 
             case PED_ACTION_PROFILE_PLUS:
-              if (reloadProfile) return;
-              eeprom_update_current_bank();
-              currentProfile = (currentProfile == (PROFILES - 1) ? 0 : currentProfile + 1);
-              reloadProfile = true;
-              DPRINT("PROFILE+.....%d\n", currentProfile);
-              break;
-
-            case PED_ACTION_PROFILE_MINUS:
-              if (reloadProfile) return;
-              eeprom_update_current_bank();
-              currentProfile = (currentProfile == 0 ? PROFILES - 1 : currentProfile - 1);
-              reloadProfile = true;
-              DPRINT("PROFILE-.....%d\n", currentProfile);
-              break;
+            if (reloadProfile) return;
+            eeprom_update_current_bank();
+            switch (currentProfile) {
+                case 0:  // Profile A
+                    currentProfile = 1;  // Go to Profile B
+                    break;
+                case 1:  // Profile B
+                    currentProfile = 2;  // Go to Profile C
+                    break;
+                case 2:  // Profile C
+                    currentProfile = 0;  // Loop back to Profile A
+                    break;
+                default:
+                    currentProfile = 0;  // Fallback to Profile A
+            }
+            reloadProfile = true;
+            update_profile_led();
+            DPRINT("PROFILE+.....%d (Profile %c)\n", currentProfile, 'A' + currentProfile);
+            break;
+        
+        case PED_ACTION_PROFILE_MINUS:
+            if (reloadProfile) return;
+            eeprom_update_current_bank();
+            switch (currentProfile) {
+                case 0:  // Profile A
+                    currentProfile = 2;  // Go to Profile C
+                    break;
+                case 1:  // Profile B
+                    currentProfile = 0;  // Go to Profile A
+                    break;
+                case 2:  // Profile C
+                    currentProfile = 1;  // Go to Profile B
+                    break;
+                default:
+                    currentProfile = 0;  // Fallback to Profile A
+            }
+            reloadProfile = true;
+            update_profile_led();
+            DPRINT("PROFILE-.....%d (Profile %c)\n", currentProfile, 'A' + currentProfile);
+            break;
 
             case PED_ACTION_LED_COLOR:
               fastleds[led_control(act->control, act->led)] = act->color0;
@@ -1392,6 +1427,7 @@ void fire_action(action* act, byte p, byte i, byte e)
             case PED_ACTION_DEVICE_INFO:
               scrollingMode = !scrollingMode;
               leds_refresh();
+              update_profile_led();
               DPRINT("DEVICE INFO\n");
               //send_configuration_sysex();
               break;
@@ -1734,6 +1770,7 @@ void controller_event_handler_analog(byte pedal, byte button, int value)
                           0, MIDI_RESOLUTION - 1,
                           currentBank, controls[act->control].pedal1);
               leds_refresh();
+              // update_profile_led();
               break;
 
             case PED_ACTION_TAP:
@@ -2572,4 +2609,5 @@ void controller_setup()
   }
 */
   set_initial_led_color();
+  update_profile_led();
 }

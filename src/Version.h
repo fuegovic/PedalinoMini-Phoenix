@@ -1,14 +1,3 @@
-/*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2024 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
-
 #pragma once
 
 #ifdef __cplusplus
@@ -20,12 +9,22 @@ extern "C" {
 /** Minor version number (x.X.x) */
 #define PEDALINO_VERSION_MINOR   5
 /** Patch version number (x.x.X) */
-#define PEDALINO_VERSION_PATCH   0
+#define PEDALINO_VERSION_PATCH   2
+/** Patch version suffix (x.x.x-X) */
+#define PEDALINO_VERSION_SUFFIX  "🐦‍🔥"
+
+#define PEDALINO_GITHUB_URL "https://github.com/fuegovic/PedalinoMini/tree/single"
 
 #define xstr(s) sstr(s)  // stringize the result of expansion of a macro argument
 #define sstr(s) #s
 
-#define VERSION xstr(PEDALINO_VERSION_MAJOR.PEDALINO_VERSION_MINOR.PEDALINO_VERSION_PATCH)
+#define VERSION xstr(PEDALINO_VERSION_MAJOR) "." xstr(PEDALINO_VERSION_MINOR) "." xstr(PEDALINO_VERSION_PATCH) " - " PEDALINO_VERSION_SUFFIX
+
+#if defined(LILYGO_T_DISPLAY) || defined(LILYGO_T_DISPLAY_S3) || defined(BPI_LEAF_S3)
+#define ESP32_PLATFORM_VERSION "6.9.0"
+#else
+#define ESP32_PLATFORM_VERSION "3.5.0"
+#endif
 
 /**
  * Macro to convert PEDALINO version number into an integer

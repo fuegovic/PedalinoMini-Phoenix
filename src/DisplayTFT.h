@@ -1,13 +1,14 @@
 /*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2024 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
+  (c) 2018-2025 alf45star
+  https://github.com/alf45tar/PedalinoMini
+
+  This file is part of PedalinoMini.
+
+  You should have received a copy of the GNU General Public License
+  along with PedalinoMini. If not, see <http://www.gnu.org/licenses/>.
+
+  Modifications by Fuegovic, 2025.
+*/
 
 #if (defined ARDUINO_LILYGO_T_DISPLAY) || (defined ARDUINO_LILYGO_T_DISPLAY_S3)
 #include <TFT_eSPI.h>

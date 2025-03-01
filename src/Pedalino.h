@@ -1,13 +1,14 @@
 /*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2024 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
+  (c) 2018-2025 alf45star
+  https://github.com/alf45tar/PedalinoMini
+
+  This file is part of PedalinoMini.
+
+  You should have received a copy of the GNU General Public License
+  along with PedalinoMini. If not, see <http://www.gnu.org/licenses/>.
+
+  Modifications by Fuegovic, 2025.
+*/
 
 #ifndef _PEDALINO_H
 #define _PEDALINO_H
@@ -17,12 +18,12 @@ __________           .___      .__  .__                 _____  .__       .__    
 #include <vector>
 #include <Arduino.h>
 
-#define MODEL           "PedalinoMini™"
+#define MODEL           "PedalinoMini™ 🐦‍🔥"
 
 #define INTERFACES        6
 #define PROFILES          3
 #define BANKS            21   // 20 banks + 1 bank for global actions
-#define PEDALS            6   // real number of pedals is board specific (see below)
+#define PEDALS           15   // real number of pedals is board specific (see below)
 #define CONTROLS        100
 #define SEQUENCES        20
 #define STEPS            10   // number of steps for each sequence
@@ -30,8 +31,8 @@ __________           .___      .__  .__                 _____  .__       .__    
 #define ADC_BOARDS        4   //
 #define ADC_INPUTS        4   // ADS1115 number of analog inputs
 #define ADC_CHANNELS      (ADC_BOARDS * ADC_INPUTS)
-#define LEDS             10   // number of WS2812B leds (254 max)
-#define LED_RGB_ORDER   RGB   // do not change it, RGB order is managed by program because FastLED library does not support changing RGB order at runtime
+#define LEDS             20   // number of WS2812B leds (254 max)
+#define LED_RGB_ORDER   GRB   // RGB order, will identify as "RGB" in the webUI
 #define SLOTS_ROWS        2
 #define SLOTS_COLS        3
 #define SLOTS             SLOTS_ROWS * SLOTS_COLS
@@ -39,6 +40,11 @@ __________           .___      .__  .__                 _____  .__       .__    
 
 #define MAXACTIONNAME    16
 #define MAXBANKNAME      16
+
+#define PROFILE_LED      20                   // Profile Indicator LED
+#define PROFILE_A_COLOR  CRGB(255, 25, 0);    // Color for profile 0
+#define PROFILE_B_COLOR  CRGB(0, 255, 255);   // Color for profile 1
+#define PROFILE_C_COLOR  CRGB(255, 0, 255);   // Color for profile 2
 
 // https://randomnerdtutorials.com/esp32-pinout-reference-gpios/
 // GPIOs 34 to 39 are GPIs – input only pins.
@@ -128,15 +134,51 @@ const byte pinA[] = {GPIO_NUM_44, GPIO_NUM_43, GPIO_NUM_10, GPIO_NUM_3,  GPIO_NU
 #define FASTLEDS_DATA_PIN     GPIO_NUM_21
 #else
 #undef  PEDALS
-#define PEDALS                7
-const byte pinD[] = {GPIO_NUM_25, GPIO_NUM_26, GPIO_NUM_27, GPIO_NUM_14, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_0};
-const byte pinA[] = {GPIO_NUM_36, GPIO_NUM_39, GPIO_NUM_34, GPIO_NUM_35, GPIO_NUM_32, GPIO_NUM_33, GPIO_NUM_0};
+#define PEDALS                 15
+
+// Digital pins for switches/pedals
+const byte pinD[] = {
+    GPIO_NUM_36,  // Pedal  1 - Expression (ADC1_CH0)
+    GPIO_NUM_39,  // Pedal  2 - Expression (ADC1_CH3)
+    GPIO_NUM_34,  // Pedal  3 - Expression (ADC1_CH6)
+    GPIO_NUM_35,  // Pedal  4 - Expression (ADC1_CH7)
+    GPIO_NUM_32,  // Pedal  5 - Expression (ADC1_CH4)
+    GPIO_NUM_33,  // Pedal  6 - Expression (ADC1_CH5)
+    GPIO_NUM_25,  // Pedal  7 - Digital Switch
+    GPIO_NUM_26,  // Pedal  8 - Digital Switch
+    GPIO_NUM_27,  // Pedal  9 - Digital Switch
+    GPIO_NUM_14,  // Pedal 10 - Digital Switch
+    GPIO_NUM_13,  // Pedal 11 - Digital Switch
+    GPIO_NUM_17,  // Pedal 12 - Digital Switch
+    GPIO_NUM_16,  // Pedal 13 - Digital Switch
+    GPIO_NUM_23,  // Pedal 14 - Digital Switch (shared with MIDI)
+    GPIO_NUM_0    // Pedal 15 - Digital Switch (shared with BOOT)
+};
+
+// Analog pins for expression pedals
+const byte pinA[] = {
+    GPIO_NUM_36,  // Pedal  1 - Expression (ADC1_CH0)
+    GPIO_NUM_39,  // Pedal  2 - Expression (ADC1_CH3)
+    GPIO_NUM_34,  // Pedal  3 - Expression (ADC1_CH6)
+    GPIO_NUM_35,  // Pedal  4 - Expression (ADC1_CH7)
+    GPIO_NUM_32,  // Pedal  5 - Expression (ADC1_CH4)
+    GPIO_NUM_33,  // Pedal  6 - Expression (ADC1_CH5)
+    GPIO_NUM_25,  // Pedal  7 - Digital Switch
+    GPIO_NUM_26,  // Pedal  8 - Digital Switch
+    GPIO_NUM_27,  // Pedal  9 - Digital Switch
+    GPIO_NUM_14,  // Pedal 10 - Digital Switch
+    GPIO_NUM_13,  // Pedal 11 - Digital Switch
+    GPIO_NUM_17,  // Pedal 12 - Digital Switch
+    GPIO_NUM_16,  // Pedal 13 - Digital Switch
+    GPIO_NUM_23,  // Pedal 14 - Digital Switch (shared with MIDI)
+    GPIO_NUM_0    // Pedal 15 - Digital Switch (shared with BOOT)
+};
 #define FACTORY_DEFAULT_PIN   GPIO_NUM_0
 #define USB_MIDI_IN_PIN       GPIO_NUM_18
 #define USB_MIDI_OUT_PIN      GPIO_NUM_19
 #define DIN_MIDI_IN_PIN       GPIO_NUM_15
 #define DIN_MIDI_OUT_PIN      GPIO_NUM_4
-#define BATTERY_PIN           GPIO_NUM_36   // GPIO_NUM_32 to GPIO_NUM_39 only
+// #define BATTERY_PIN           GPIO_NUM_36   // GPIO_NUM_32 to GPIO_NUM_39 only
 #define FASTLEDS_DATA_PIN     GPIO_NUM_5
 #endif
 
@@ -162,7 +204,7 @@ using namespace ace_button;
 #define DEBOUNCE_INTERVAL        5
 #define PED_PRESS_TIME         200
 #define PED_DOUBLE_PRESS_TIME  400
-#define PED_LONG_PRESS_TIME    500
+#define PED_LONG_PRESS_TIME   1000
 #define PED_REPEAT_PRESS_TIME 1000
 #define PED_SIMULTANEOUS_GAP    50
 
@@ -326,7 +368,7 @@ const char *pedalAnalogResponse[] = {"Linear", "Log", "Antilog"};
 #define PED_TIMESIGNATURE_LAST  7
 
 #define MIDI_RESOLUTION         128       // MIDI 7-bit CC resolution
-#define ADC_RESOLUTION_BITS       9       // hardware 9 to 12-bit ADC converter resolution
+#define ADC_RESOLUTION_BITS      10       // hardware 9 to 12-bit ADC converter resolution
                                           // software 1 to 16-bit resolution
 #define ADC_RESOLUTION (1 << ADC_RESOLUTION_BITS)
 
@@ -611,9 +653,13 @@ String getChipId() {
   return String(chipId);
 }
 
-String host           = getChipId();
-String ssidSoftAP     = String("Pedalino-") + getChipId();
-String passwordSoftAP = getChipId();
+// String host           = getChipId();
+// String ssidSoftAP     = String("Pedalino-") + getChipId();
+// String passwordSoftAP = getChipId();
+
+String host           = String("pedalino");
+String ssidSoftAP     = String("Pedalino");
+String passwordSoftAP = String("pedalino");
 
 #include <AsyncTCP.h>
 #define WEBSERVER_H           // to not redefine WebRequestMethod (HTTP_GET, HTTP_POST, ...)

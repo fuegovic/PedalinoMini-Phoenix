@@ -1,14 +1,14 @@
 /*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2022 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
+  (c) 2018-2025 alf45star
+  https://github.com/alf45tar/PedalinoMini
 
+  This file is part of PedalinoMini.
+
+  You should have received a copy of the GNU General Public License
+  along with PedalinoMini. If not, see <http://www.gnu.org/licenses/>.
+
+  Modifications by Fuegovic, 2025.
+*/
 
 byte led_control(byte c, byte l)
 {
@@ -171,6 +171,17 @@ CRGBPalette16 pacifica_palette_3 =
     { 0x000208, 0x00030E, 0x000514, 0x00061A, 0x000820, 0x000927, 0x000B2D, 0x000C33,
       0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
 
+// Fire ocean palettes - warm colors inspired by lava and fire
+CRGBPalette16 fireocean_palette_1 =
+    { 0x120000, 0x220000, 0x320000, 0x420000, 0x520000, 0x620000, 0x720000, 0x820000,
+      0x920000, 0xA20000, 0xB20000, 0xC20000, 0xD20000, 0xE20000, 0xF23300, 0xFF4400 };
+CRGBPalette16 fireocean_palette_2 =
+    { 0x120000, 0x220000, 0x320000, 0x420000, 0x520000, 0x620000, 0x720000, 0x820000,
+      0x920000, 0xA20000, 0xB20000, 0xC20000, 0xD20000, 0xE20000, 0xF25500, 0xFF7700 };
+CRGBPalette16 fireocean_palette_3 =
+    { 0x320000, 0x420000, 0x520000, 0x620000, 0x720000, 0x820000, 0x920000, 0xA20000,
+      0xB20000, 0xC20000, 0xD20000, 0xE20000, 0xF20000, 0xFF2200, 0xFF5500, 0xFF8800 };
+
 // Add one layer of waves into the led array
 void pacifica_one_layer( CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff)
 {
@@ -250,6 +261,44 @@ void pacifica_loop()
 
   // Deepen the blues and greens a bit
   pacifica_deepen_colors();
+}
+
+void fireocean_loop()
+{
+  // Similar structure to pacifica_loop but with fire palettes
+  static uint16_t sCIStart1, sCIStart2, sCIStart3, sCIStart4;
+  static uint32_t sLastms = 0;
+  uint32_t ms = GET_MILLIS();
+  uint32_t deltams = ms - sLastms;
+  sLastms = ms;
+  uint16_t speedfactor1 = beatsin16(3, 179, 269);
+  uint16_t speedfactor2 = beatsin16(4, 179, 269);
+  uint32_t deltams1 = (deltams * speedfactor1) / 256;
+  uint32_t deltams2 = (deltams * speedfactor2) / 256;
+  uint32_t deltams21 = (deltams1 + deltams2) / 2;
+  sCIStart1 += (deltams1 * beatsin88(1011,10,13));
+  sCIStart2 -= (deltams21 * beatsin88(777,8,11));
+  sCIStart3 -= (deltams1 * beatsin88(501,5,7));
+  sCIStart4 -= (deltams2 * beatsin88(257,4,6));
+
+  // Clear to a dim warm background
+  fill_solid(fastleds, LEDS, swap_rgb_order(CRGB(10, 2, 0), rgbOrder));
+
+  // Render layers with fire palettes
+  pacifica_one_layer(fireocean_palette_1, sCIStart1, beatsin16(3, 11 * 256, 14 * 256), beatsin8(10, 70, 130), 0-beat16(301));
+  pacifica_one_layer(fireocean_palette_2, sCIStart2, beatsin16(4, 6 * 256, 9 * 256), beatsin8(17, 40, 80), beat16(401));
+  pacifica_one_layer(fireocean_palette_3, sCIStart3, 6 * 256, beatsin8(9, 10, 38), 0-beat16(503));
+  pacifica_one_layer(fireocean_palette_3, sCIStart4, 5 * 256, beatsin8(8, 10, 28), beat16(601));
+
+  // Add brighter 'flames' where the waves line up
+  pacifica_add_whitecaps();
+
+  // Enhance the reds and yellows
+  for(uint16_t i = 0; i < LEDS; i++) {
+    fastleds[i].red = scale8(fastleds[i].red, 200);
+    fastleds[i].green = scale8(fastleds[i].green, 100);
+    fastleds[i] |= swap_rgb_order(CRGB(5, 1, 0), rgbOrder);
+  }
 }
 
 void plasma() {                                                 // This is the heart of this program. Sure is short. . . and fast.
@@ -350,13 +399,35 @@ void ease() {
 
     lerpVal = lerp8by8(0, LEDS-1, easeOutVal);                  // Map it to the number of LED's you have.
 
-    fastleds[lerpVal] = swap_rgb_order(CRGB::Blue, rgbOrder);
+    fastleds[lerpVal] = swap_rgb_order(CRGB::Red, rgbOrder);
     fadeToBlackBy(fastleds, LEDS, 32);                          // 8 bit, 1 = slow fade, 255 = fast fade
   }
 }
 
 void ease2() {
   //fastleds[5 + (millis() / 1000) % 4)] = CRGB::Blue;
-  fastleds[(millis() / 1000) % LEDS] = swap_rgb_order(CRGB::Blue, rgbOrder);
+  fastleds[(millis() / 1000) % LEDS] = swap_rgb_order(CRGB::Cyan, rgbOrder);
   fadeToBlackBy(fastleds, LEDS, 2);                           // 8 bit, 1 = slow fade, 255 = fast fade
+}
+
+// void update_profile_led() {
+//   CRGB color;
+//   switch (currentProfile) {
+//     case 0:  color = CRGB::Orange;    break;
+//     case 1:  color = CRGB::Cyan;      break;
+//     case 2:  color = CRGB::Magenta;   break;
+//   }
+//   fastleds[19] = swap_rgb_order(color, rgbOrder);
+//   FastLED.show();
+// }
+
+void update_profile_led() {
+  CRGB color;
+  switch (currentProfile) {
+    case 0:  color = PROFILE_A_COLOR;  break;
+    case 1:  color = PROFILE_B_COLOR;  break;
+    case 2:  color = PROFILE_C_COLOR;  break;
+  }
+  fastleds[PROFILE_LED - 1] = swap_rgb_order(color, rgbOrder);
+  FastLED.show();
 }

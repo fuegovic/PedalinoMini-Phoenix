@@ -1,14 +1,14 @@
 /*
-__________           .___      .__  .__                 _____  .__       .__     ___ ________________    ___
-\______   \ ____   __| _/____  |  | |__| ____   ____   /     \ |__| ____ |__|   /  / \__    ___/     \   \  \
- |     ___// __ \ / __ |\__  \ |  | |  |/    \ /  _ \ /  \ /  \|  |/    \|  |  /  /    |    | /  \ /  \   \  \
- |    |   \  ___// /_/ | / __ \|  |_|  |   |  (  <_> )    Y    \  |   |  \  | (  (     |    |/    Y    \   )  )
- |____|    \___  >____ |(____  /____/__|___|  /\____/\____|__  /__|___|  /__|  \  \    |____|\____|__  /  /  /
-               \/     \/     \/             \/               \/        \/       \__\                 \/  /__/
-                                                                                   (c) 2018-2024 alf45star
-                                                                       https://github.com/alf45tar/PedalinoMini
- */
+  (c) 2018-2025 alf45star
+  https://github.com/alf45tar/PedalinoMini
 
+  This file is part of PedalinoMini.
+
+  You should have received a copy of the GNU General Public License
+  along with PedalinoMini. If not, see <http://www.gnu.org/licenses/>.
+
+  Modifications by Fuegovic, 2025.
+*/
 
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -404,7 +404,7 @@ bool improv_config()
       }
     }
     if (crono % 200 < 5) display_progress_bar_update(crono / 200, IMPROV_CONNECT_TIMEOUT * 5 - 1);
-    fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::SeaGreen, rgbOrder);
+    fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Red, rgbOrder);
     fastleds[(crono / 500) % LEDS].nscale8(ledsOnBrightness);
     fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
     FastLED.show();
@@ -472,7 +472,7 @@ bool smart_config()
   display_progress_bar_title2("Use the mobile app for", "SmartConfig");
   unsigned long startCrono = millis();
   unsigned long crono = 0;
-  CRGB          color = swap_rgb_order(CRGB::Cyan, rgbOrder);
+  CRGB          color = swap_rgb_order(CRGB::Red, rgbOrder);
   color.nscale8(ledsOnBrightness);
   while (!WiFi.smartConfigDone() && crono / 1000 < SMART_CONFIG_TIMEOUT) {
     if (crono %  200 < 5) display_progress_bar_update(crono / 200, SMART_CONFIG_TIMEOUT*5-1);
@@ -536,7 +536,7 @@ bool wps_config()
   display_progress_bar_title2("Press WPS button on AP", "WPS Setup");
   unsigned long startCrono = millis();
   unsigned long crono = 0;
-  CRGB          color = swap_rgb_order(CRGB::Magenta, rgbOrder);
+  CRGB          color = swap_rgb_order(CRGB::Red, rgbOrder);
   color.nscale8(ledsOnBrightness);
   while (wpsStatus == 0 && crono / 1000 < WPS_TIMEOUT) {
     if (crono %  200 < 5) display_progress_bar_update(crono / 200, WPS_TIMEOUT*5-1);
@@ -556,7 +556,7 @@ bool wps_config()
     unsigned long crono = millis() - startCrono;
     while (!WiFi.isConnected() && crono / 1000 < WIFI_CONNECT_TIMEOUT) {
       if (crono % 200 < 5) display_progress_bar_update(crono / 200, WIFI_CONNECT_TIMEOUT * 5 - 1);
-      fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Blue, rgbOrder);
+      fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Red, rgbOrder);
       fastleds[(crono / 500) % LEDS].nscale8(ledsOnBrightness);
       fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
       FastLED.show();
@@ -602,7 +602,7 @@ bool ap_connect(const String& ssid, const String& password)
   unsigned long crono = millis() - startCrono;
   while (!WiFi.isConnected() && crono / 1000 < WIFI_CONNECT_TIMEOUT) {
     if (crono % 200 < 5) display_progress_bar_update(crono / 200, WIFI_CONNECT_TIMEOUT * 5 - 1);
-    fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Blue, rgbOrder);
+    fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Red, rgbOrder);
     fastleds[(crono / 500) % LEDS].nscale8(ledsOnBrightness);
     fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
     FastLED.show();
