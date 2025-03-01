@@ -99,7 +99,7 @@ IMPORTANT: ESP32 board and Arduino Pro Micro must share GND.
 
 ## How to upload firmware, WiFi provisioning and access to web user interface
 
-TBD
+[Web Installer](https://fuegovic.github.io/PedalinoMini/installer)
 
 ## How to Build and Upload PedalinoMini™
 
