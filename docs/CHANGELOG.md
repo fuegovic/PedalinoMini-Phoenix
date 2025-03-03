@@ -44,14 +44,15 @@
   - **Note:** Other modes requiring 2 GPIOs have been disabled
 - 🔄 Looping boot menu: does not factory reset anymore when holding past the last option
 - ⚡ Improved boot menu:
-  - 2 seconds for Normal Boot selection
-  - 3 seconds per option
+  - 2.5 seconds per option
   - Safe looping past last option
   - Factory Default triggers only on release during its time window
 - 📚 Updated FastLED library to latest version for better ESP32 compatibility
 - ⚡ Re-enabled Switch Ladder feature for advanced switch configurations
 - 🌐 Updated Web Installer
-- 📝 New Docs
+- 📝 New Docs -> mkdocs
+- LED animation during BBoot Menu
+- Changed Options menu to Settings
 
 ## 🔄 Profile System
 - Cycles through profiles A → B → C
