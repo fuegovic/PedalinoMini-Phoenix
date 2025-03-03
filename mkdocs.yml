@@ -1,0 +1,120 @@
+site_name: 🐦‍🔥 PedalinoMini
+site_url: https://fuegovic.github.io/PedalinoMini/
+theme:
+  name: material
+  # custom_dir: overrides
+  palette:
+  
+      # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+  
+    # Dark Mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Dark mode
+      primary: grey
+      accent: yellow
+
+    # Light Mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Light mode
+      primary: grey
+      accent: orange
+  font:
+    text: Merriweather Sans
+    code: Red Hat Mono
+  
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - search.highlight
+    - search.share
+
+  # Use a standard icon from the Material icon set instead of a custom image path
+  icon:
+    logo: material/midi
+    favicon: material/midi
+
+# Combine both extra_css sections into one
+extra_css:
+  - stylesheets/extra.css
+  - css/panzoom.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/fuegovic/PedalinoMini
+      name: 🐦‍🔥 PedalinoMini on GitHub
+    - icon: material/midi
+      link: https://github.com/alf45tar/PedalinoMini
+      name: PedalinoMini on GitHub   
+  generator: false    
+
+nav:
+  - Home: index.md
+  
+  - Getting Started:
+    - Introduction: getting-started/index.md
+    - Installation: getting-started/installation.md
+    - WiFi Setup: getting-started/wifi-setup.md
+    - Boot Modes: getting-started/boot-modes.md
+    - First Steps: getting-started/first-steps.md
+
+  - Online Installer: installer.md
+  
+  - Hardware:
+    - Overview: hardware/index.md
+    - Schematic: hardware/schematic.md
+    - Bill of Materials: hardware/bom.md
+  
+  - Interfaces:
+    - Overview: interfaces/index.md
+    - MIDI Interfaces: interfaces/midi-interfaces.md
+    - OSC Messages: interfaces/osc-messages.md
+    - MIDI Routing: interfaces/midi-routing.md
+  
+  - Basic Configuration:
+    - Configuration Overview: basic-configuration/index.md
+    - Web UI Access: basic-configuration/webui.md
+    - Pedals Setup: basic-configuration/pedals.md
+    - Controls Setup: basic-configuration/controls.md
+    - Actions Setup: basic-configuration/actions.md
+  
+  - Advanced Features:
+    - Sequences: advanced-features/sequences.md
+    - Profiles: advanced-features/profiles.md
+    - Display: advanced-features/display.md
+    - Options: advanced-features/options.md
+    - Updating: advanced-features/update.md
+
+extra_files:
+  - installer.html
+
+extra_javascript:
+  - js/panzoom.min.js
+
+# Enable inclusion of HTML files
+include_files:
+  - "*.html"
+
+markdown_extensions:
+  - md_in_html
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
