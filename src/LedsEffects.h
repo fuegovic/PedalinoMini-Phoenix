@@ -263,6 +263,26 @@ void pacifica_loop()
   pacifica_deepen_colors();
 }
 
+void fireocean_add_sparks()
+{
+  uint8_t basethreshold = beatsin8( 9, 55, 65);
+  uint8_t wave = beat8( 7 );
+
+  for( uint16_t i = 0; i < LEDS; i++) {
+    uint8_t threshold = scale8( sin8( wave), 20) + basethreshold;
+    wave += 7;
+    uint8_t l = fastleds[i].getAverageLight();
+    if( l > threshold) {
+      uint8_t overage = l - threshold;
+      uint8_t overage2 = qadd8( overage, overage);
+      uint8_t redComponent = qadd8( overage2, overage2); // Strongest component - red
+      uint8_t greenComponent = overage2; // Less green
+      uint8_t blueComponent = scale8( overage, 10); // Very little blue
+      fastleds[i] += swap_rgb_order(CRGB( redComponent, greenComponent, blueComponent), rgbOrder);
+    }
+  }
+}
+
 void fireocean_loop()
 {
   // Similar structure to pacifica_loop but with fire palettes
@@ -290,8 +310,8 @@ void fireocean_loop()
   pacifica_one_layer(fireocean_palette_3, sCIStart3, 6 * 256, beatsin8(9, 10, 38), 0-beat16(503));
   pacifica_one_layer(fireocean_palette_3, sCIStart4, 5 * 256, beatsin8(8, 10, 28), beat16(601));
 
-  // Add brighter 'flames' where the waves line up
-  pacifica_add_whitecaps();
+  // Add brighter 'sparks'
+  fireocean_add_sparks();
 
   // Enhance the reds and yellows
   for(uint16_t i = 0; i < LEDS; i++) {
