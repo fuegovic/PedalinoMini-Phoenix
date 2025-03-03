@@ -20,7 +20,7 @@ jobs:
     - name: Build with MkDocs
       uses: romw314/mkdocs-action@v2
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1.0.9
+      uses: actions/upload-pages-artifact@v4
   deploy:
     runs-on: ubuntu-20.04
     steps:
