@@ -8,7 +8,7 @@ A full-featured MIDI controller supporting up to 15 analog and digital pedals, w
 
 ## 📚 Documentation
 
-**Full documentation available at: [PedalinoMini Documentation](https://fuegovic.github.io/PedalinoMini/)**
+**Full documentation available at: [PedalinoMini 🐦‍🔥 Documentation](https://fuegovic.github.io/PedalinoMini-Phoenix/)**
 
 ## Key Features
 
@@ -37,7 +37,7 @@ A full-featured MIDI controller supporting up to 15 analog and digital pedals, w
 ## Quick Start
 
 ### Software Installation
-- [Web Installer](https://fuegovic.github.io/PedalinoMini/installer)
+- [Web Installer](https://fuegovic.github.io/PedalinoMini-Phoenix/installer)
 
 ## Bill of materials
 
