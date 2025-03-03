@@ -42,7 +42,7 @@ theme:
   # Use a standard icon from the Material icon set instead of a custom image path
   icon:
     logo: material/midi
-    favicon: material/midi
+    favicon: assets/favicon.ico
 
 # Combine both extra_css sections into one
 extra_css:
