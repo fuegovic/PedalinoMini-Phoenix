@@ -1,5 +1,5 @@
 site_name: 🐦‍🔥 PedalinoMini
-site_url: https://fuegovic.github.io/PedalinoMini/
+site_url: https://fuegovic.github.io/PedalinoMini-Phoenix/
 theme:
   name: material
   # custom_dir: overrides
@@ -52,7 +52,7 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/fuegovic/PedalinoMini
+      link: https://github.com/fuegovic/PedalinoMini-Phoenix
       name: 🐦‍🔥 PedalinoMini on GitHub
     - icon: material/midi
       link: https://github.com/alf45tar/PedalinoMini
