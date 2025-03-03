@@ -311,8 +311,50 @@ void setup()
     if (duration >= 20000) {
       duration = 0;
       milliStart = millis();
+      // Reset boot mode when cycling back
+      newBootMode = PED_BOOT_NORMAL;
+      display_progress_bar_title2("Release button for", "Normal Boot");
+      // Turn off all LEDs when cycling back
+      fill_solid(fastleds, LEDS, CRGB::Black);
+      FastLED.show();
       continue;
     }
+
+    // First determine which boot option we're on (8 options total)
+    int bootOption = duration / 2500;  // Each option gets 2500ms
+    
+    // Calculate progress within current option (0.0 to 1.0)
+    float optionProgress = (duration % 2500) / 2500.0;
+    
+    // Calculate how many LEDs to light based on progress within current option
+    // We want 1 LED at start, up to 4 at end of each option's time window
+    int activeLeds = 1 + int(optionProgress * 4);  // 1 to 4 LEDs
+    
+    // Ensure we have at least 1 LED lit, even at the very beginning
+    activeLeds = max(1, min(activeLeds, 4));
+    
+    // Update LED colors based on current boot option
+    // fill_solid(fastleds, LEDS, CRGB::Black);  // Turn all LEDs off first
+    
+    // Different colors for different boot modes
+    CRGB currentColor;
+    switch (bootOption) {
+      case 0:  currentColor = CRGB::Green;   break;  // Normal Boot
+      case 1:  currentColor = CRGB::Blue;    break;  // Bluetooth Only
+      case 2:  currentColor = CRGB::Cyan;    break;  // WiFi Only
+      case 3:  currentColor = CRGB::Yellow;  break;  // Access Point
+      case 4:  currentColor = CRGB::Purple;  break;  // AP without BLE
+      case 5:  currentColor = CRGB::Orange;  break;  // WiFi Reset
+      case 6:  currentColor = CRGB::Pink;    break;  // Ladder Config
+      case 7:  currentColor = CRGB::Red;     break;  // Factory Default
+      default: currentColor = CRGB::Green;   break;
+    }
+    
+    // Light up LEDs progressively (only first 4)
+    for (int i = 0; i < activeLeds && i < 4; i++) {
+      fastleds[i] = currentColor;
+    }
+    FastLED.show();
 
     if (duration > 2500 && duration < 5000 && newBootMode != PED_BOOT_BLE) {
       newBootMode = PED_BOOT_BLE;
@@ -349,7 +391,11 @@ void setup()
 
     DPRINT("#");
     display_progress_bar_update(duration, 20000);
-  }
+}
+
+// Turn off all LEDs when exiting the menu
+fill_solid(fastleds, LEDS, CRGB::Black);
+FastLED.show();
 
   //display_clear();
 
