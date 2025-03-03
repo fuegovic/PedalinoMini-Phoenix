@@ -339,15 +339,15 @@ void setup()
     // Different colors for different boot modes
     CRGB currentColor;
     switch (bootOption) {
-      case 0:  currentColor = CRGB::Green;   break;  // Normal Boot
-      case 1:  currentColor = CRGB::Blue;    break;  // Bluetooth Only
-      case 2:  currentColor = CRGB::Cyan;    break;  // WiFi Only
-      case 3:  currentColor = CRGB::Yellow;  break;  // Access Point
-      case 4:  currentColor = CRGB::Purple;  break;  // AP without BLE
-      case 5:  currentColor = CRGB::Orange;  break;  // WiFi Reset
-      case 6:  currentColor = CRGB::Pink;    break;  // Ladder Config
-      case 7:  currentColor = CRGB::Red;     break;  // Factory Default
-      default: currentColor = CRGB::Green;   break;
+      case 0:  currentColor = CRGB(128, 42, 0);   break;  // Normal Boot - Warm Orange
+      case 1:  currentColor = CRGB(128, 85, 0);   break;  // Bluetooth Only - Golden Yellow
+      case 2:  currentColor = CRGB(42, 128, 0);   break;  // WiFi Only - Lime Green
+      case 3:  currentColor = CRGB(0, 128, 85);   break;  // Access Point - Aqua Green
+      case 4:  currentColor = CRGB(0, 45, 128);   break;  // AP without BLE - Bright Blue
+      case 5:  currentColor = CRGB(42, 0, 128);   break;  // WiFi Reset - Vivid Purple
+      case 6:  currentColor = CRGB(128, 0, 85);   break;  // Ladder Config - Deep Magenta
+      case 7:  currentColor = CRGB(128, 0, 0);    break;  // Factory Default - Anchor Red
+      default: currentColor = CRGB(128, 42, 0);   break;
     }
     
     // Light up LEDs progressively (only first 4)
