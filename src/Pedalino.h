@@ -138,39 +138,39 @@ const byte pinA[] = {GPIO_NUM_44, GPIO_NUM_43, GPIO_NUM_10, GPIO_NUM_3,  GPIO_NU
 
 // Digital pins for switches/pedals
 const byte pinD[] = {
-    GPIO_NUM_36,  // Pedal  1 - Expression (ADC1_CH0)
-    GPIO_NUM_39,  // Pedal  2 - Expression (ADC1_CH3)
-    GPIO_NUM_34,  // Pedal  3 - Expression (ADC1_CH6)
-    GPIO_NUM_35,  // Pedal  4 - Expression (ADC1_CH7)
-    GPIO_NUM_32,  // Pedal  5 - Expression (ADC1_CH4)
-    GPIO_NUM_33,  // Pedal  6 - Expression (ADC1_CH5)
-    GPIO_NUM_25,  // Pedal  7 - Digital Switch
-    GPIO_NUM_26,  // Pedal  8 - Digital Switch
-    GPIO_NUM_27,  // Pedal  9 - Digital Switch
-    GPIO_NUM_14,  // Pedal 10 - Digital Switch
-    GPIO_NUM_13,  // Pedal 11 - Digital Switch
-    GPIO_NUM_17,  // Pedal 12 - Digital Switch
-    GPIO_NUM_16,  // Pedal 13 - Digital Switch
-    GPIO_NUM_23,  // Pedal 14 - Digital Switch (shared with MIDI)
-    GPIO_NUM_0    // Pedal 15 - Digital Switch (shared with BOOT)
+  GPIO_NUM_23,  // Pedal  1 - Digital Switch
+  GPIO_NUM_17,  // Pedal  2 - Digital Switch
+  GPIO_NUM_16,  // Pedal  3 - Digital Switch
+  GPIO_NUM_13,  // Pedal  4 - Digital Switch
+  GPIO_NUM_14,  // Pedal  5 - Digital Switch
+  GPIO_NUM_27,  // Pedal  6 - Digital Switch
+  GPIO_NUM_26,  // Pedal  7 - Digital Switch
+  GPIO_NUM_25,  // Pedal  8 - Digital Switch
+  GPIO_NUM_33,  // Pedal  9 - Expression (ADC1_CH0)
+  GPIO_NUM_32,  // Pedal 10 - Expression (ADC1_CH3)
+  GPIO_NUM_35,  // Pedal 11 - Expression (ADC1_CH6)
+  GPIO_NUM_34,  // Pedal 12 - Expression (ADC1_CH7)
+  GPIO_NUM_39,  // Pedal 13 - Expression (ADC1_CH4)
+  GPIO_NUM_36,  // Pedal 14 - Expression (ADC1_CH5)
+  GPIO_NUM_0    // Pedal 15 - Digital Switch (shared with BOOT)
 };
 
 // Analog pins for expression pedals
 const byte pinA[] = {
-    GPIO_NUM_36,  // Pedal  1 - Expression (ADC1_CH0)
-    GPIO_NUM_39,  // Pedal  2 - Expression (ADC1_CH3)
-    GPIO_NUM_34,  // Pedal  3 - Expression (ADC1_CH6)
-    GPIO_NUM_35,  // Pedal  4 - Expression (ADC1_CH7)
-    GPIO_NUM_32,  // Pedal  5 - Expression (ADC1_CH4)
-    GPIO_NUM_33,  // Pedal  6 - Expression (ADC1_CH5)
-    GPIO_NUM_25,  // Pedal  7 - Digital Switch
-    GPIO_NUM_26,  // Pedal  8 - Digital Switch
-    GPIO_NUM_27,  // Pedal  9 - Digital Switch
-    GPIO_NUM_14,  // Pedal 10 - Digital Switch
-    GPIO_NUM_13,  // Pedal 11 - Digital Switch
-    GPIO_NUM_17,  // Pedal 12 - Digital Switch
-    GPIO_NUM_16,  // Pedal 13 - Digital Switch
-    GPIO_NUM_23,  // Pedal 14 - Digital Switch (shared with MIDI)
+    GPIO_NUM_23,  // Pedal  1 - Digital Switch
+    GPIO_NUM_17,  // Pedal  2 - Digital Switch
+    GPIO_NUM_16,  // Pedal  3 - Digital Switch
+    GPIO_NUM_13,  // Pedal  4 - Digital Switch
+    GPIO_NUM_14,  // Pedal  5 - Digital Switch
+    GPIO_NUM_27,  // Pedal  6 - Digital Switch
+    GPIO_NUM_26,  // Pedal  7 - Digital Switch
+    GPIO_NUM_25,  // Pedal  8 - Digital Switch
+    GPIO_NUM_33,  // Pedal  9 - Expression (ADC1_CH0)
+    GPIO_NUM_32,  // Pedal 10 - Expression (ADC1_CH3)
+    GPIO_NUM_35,  // Pedal 11 - Expression (ADC1_CH6)
+    GPIO_NUM_34,  // Pedal 12 - Expression (ADC1_CH7)
+    GPIO_NUM_39,  // Pedal 13 - Expression (ADC1_CH4)
+    GPIO_NUM_36,  // Pedal 14 - Expression (ADC1_CH5)
     GPIO_NUM_0    // Pedal 15 - Digital Switch (shared with BOOT)
 };
 #define FACTORY_DEFAULT_PIN   GPIO_NUM_0

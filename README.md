@@ -104,6 +104,12 @@ PedalinoMini Phoenix is a significant evolution of the original **[PedalinoMini�
 
 See the documentation for a complete list of pin assignments and wiring details.
 
+## Build
+
+Coming Sooon
+
+![Case](./docs/assets/case.png "Case")
+
 ## ⚖️ License
 
 This project is licensed under the [GPL-3.0 License](LICENSE).
