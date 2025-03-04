@@ -102,6 +102,11 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
     #else
       page += F("<link href='https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css' rel='stylesheet' crossorigin='anonymous'>");
     #endif
+    // This CSS hides the slot selectors
+    page += F("<style>");
+    page += F("[id^='slotSelect'], [id^='slotLabel'], [for^='slotSelect'] { display: none !important; }");
+    page += F("</style>");
+    //
   } else if (theme == "bootstrap") {
     page += F("<link href='https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css' rel='stylesheet' crossorigin='anonymous'>");
   } else {
@@ -1475,7 +1480,7 @@ void get_actions_page(unsigned int start, unsigned int len) {
     if (trim_page(start, len)) return;
 
     page += F("<div class='row g-1'>");
-    page += F("<div class='w-25'>");
+    page += F("<div class='col-4'>");
     page += F("<div class='form-floating'>");
     page += F("<select class='form-select' id='ledSelect");
     page += i;
@@ -1484,13 +1489,11 @@ void get_actions_page(unsigned int start, unsigned int len) {
     page += F("'>");
     page += F("<option value='0'");
     if (act->led == leds) page += F(" selected");
-    // if (act->led == LEDS) page += F(" selected");
     page += F("></option>");
     page += F("<option value='255'");
     if (act->led == 255) page += F(" selected");
     page += F(">Default</option>");
     for (unsigned int l = 1; l <= leds; l++) {
-    // for (unsigned int l = 1; l <= LEDS; l++) {
       page += F("<option value='");
       page += l;
       page += F("'");
@@ -1512,7 +1515,7 @@ void get_actions_page(unsigned int start, unsigned int len) {
 
     if (trim_page(start, len)) return;
 
-    page += F("<div class='w-25'>");
+    page += F("<div class='col-4'>");
     page += F("<div class='form-floating'>");
     page += F("<input type='color' class='form-control form-control-color w-100' id='color0Input");
     page += i;
@@ -1531,7 +1534,7 @@ void get_actions_page(unsigned int start, unsigned int len) {
     page += F("</div>");
     page += F("</div>");
     
-    page += F("<div class='w-25'>");
+    page += F("<div class='col-4'>");
     page += F("<div class='form-floating'>");
     page += F("<input type='color' class='form-control form-control-color w-100' id='color1Input");
     page += i;
@@ -1551,7 +1554,7 @@ void get_actions_page(unsigned int start, unsigned int len) {
 
     if (trim_page(start, len)) return;
 
-    page += F("<div class='w-25'>");
+    page += F("<div class='w-25 d-none'>");
     page += F("<div class='form-floating'>");
     page += F("<select class='form-select' id='slotSelect");
     page += i;
