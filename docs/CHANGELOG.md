@@ -1,6 +1,7 @@
 # Changelog
 
 ## ✨ New Features & Updates
+- 🐦‍🔥 Renamed project "PedalioMini Phoenix"
 - 🌙 Dark Mode by default
 - 🎨 Added new Bootswatch themes
 - 🎨 New "Phoenix" theme as factory default:
@@ -52,7 +53,8 @@
 - 🌐 Updated Web Installer
 - 📝 New Docs -> mkdocs
 - LED animation during BBoot Menu
-- Changed Options menu to Settings
+- Changed Options menu to Settings menu
+
 
 ## 🔄 Profile System
 - Cycles through profiles A → B → C
