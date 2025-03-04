@@ -60,6 +60,8 @@
   - Ensure LED settings persist across reboots via NVS/SPIFFS storage
   - Fix issue where some functions referenced hardcoded constant instead of variable
   - Add proper WebUI form validation for LED quantity (1-254 range)"
+- 🚫 Removed "Slots" menu entry from the "actions" page (wasn't used afaik)
+
 
 ## 🔄 Profile System
 - Cycles through profiles A → B → C
