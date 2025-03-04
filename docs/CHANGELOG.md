@@ -62,6 +62,7 @@
   - Add proper WebUI form validation for LED quantity (1-254 range)"
 - 🚫 Removed "Slots" menu entry from the "actions" page (wasn't used afaik)
 
+
 ## 🔄 Profile System
 - Cycles through profiles A → B → C
 - Profile+ : Forward cycling (A→B→C→A)
