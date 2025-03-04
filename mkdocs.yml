@@ -40,9 +40,10 @@ theme:
     - search.share
 
   # Use a standard icon from the Material icon set instead of a custom image path
+  favicon: assets/favicon.ico
   icon:
     logo: material/midi
-    favicon: assets/favicon.ico
+    
 
 # Combine both extra_css sections into one
 extra_css:
