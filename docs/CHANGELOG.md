@@ -54,7 +54,12 @@
 - 📝 New Docs -> mkdocs
 - LED animation during BBoot Menu
 - Changed Options menu to Settings menu
-
+- ✨ Implement configurable LED quantity via WebUI 
+  - Replace hardcoded LEDS constant with dynamic leds variable throughout codebase
+  - Update LED effects and animations to respect user-configured LED count
+  - Ensure LED settings persist across reboots via NVS/SPIFFS storage
+  - Fix issue where some functions referenced hardcoded constant instead of variable
+  - Add proper WebUI form validation for LED quantity (1-254 range)"
 
 ## 🔄 Profile System
 - Cycles through profiles A → B → C

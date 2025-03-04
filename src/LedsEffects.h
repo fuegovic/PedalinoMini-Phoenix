@@ -10,10 +10,17 @@
   Modifications by Fuegovic, 2025.
 */
 
+// byte led_control(byte c, byte l)
+// {
+//   c = constrain(c, 0, CONTROLS - 1);
+//   l = (l == 255 ? 255 : constrain(l, 0, LEDS));
+//   return (l == 255 ? controls[c].led : l);
+// }
+
 byte led_control(byte c, byte l)
 {
   c = constrain(c, 0, CONTROLS - 1);
-  l = (l == 255 ? 255 : constrain(l, 0, LEDS));
+  l = (l == 255 ? 255 : constrain(l, 0, leds)); // Changed LEDS to leds
   return (l == 255 ? controls[c].led : l);
 }
 
@@ -61,15 +68,15 @@ void dot_beat() {
 
   uint8_t bpm      = 30;
   uint8_t fadeval  = 224;                               // Trail behind the LED's. Lower => faster fade.
-  uint8_t inner    = beatsin8(bpm, LEDS/4, LEDS/4*3);   // Move 1/4 to 3/4
-  uint8_t outer    = beatsin8(bpm, 0, LEDS-1);          // Move entire length
-  uint8_t middle   = beatsin8(bpm, LEDS/3, LEDS/3*2);   // Move 1/3 to 2/3
+  uint8_t inner    = beatsin8(bpm, leds/4, leds/4*3);   // Move 1/4 to 3/4
+  uint8_t outer    = beatsin8(bpm, 0, leds-1);          // Move entire length
+  uint8_t middle   = beatsin8(bpm, leds/3, leds/3*2);   // Move 1/3 to 2/3
 
   fastleds[middle] = swap_rgb_order(CRGB::Purple, rgbOrder);
   fastleds[inner]  = swap_rgb_order(CRGB::Blue, rgbOrder);
   fastleds[outer]  = swap_rgb_order(CRGB::Aqua, rgbOrder);
 
-  nscale8(fastleds, LEDS, fadeval);                   // Fade the entire array. Or for just a few LED's, use  nscale8(&leds[2], 5, fadeval);
+  nscale8(fastleds, leds, fadeval);                   // Fade the entire array. Or for just a few LED's, use  nscale8(&leds[2], 5, fadeval);
 
 }
 
@@ -85,10 +92,10 @@ void blendwave() {
   clr1 = blend(CHSV(beatsin8(3,0,255),255,255), CHSV(beatsin8(4,0,255),255,255), speed);
   clr2 = blend(CHSV(beatsin8(4,0,255),255,255), CHSV(beatsin8(3,0,255),255,255), speed);
 
-  loc1 = beatsin8(10,0, LEDS-1);
+  loc1 = beatsin8(10,0, leds-1);
 
   fill_gradient_RGB(fastleds, 0, swap_rgb_order(clr2, rgbOrder), loc1, swap_rgb_order(clr1, rgbOrder));
-  fill_gradient_RGB(fastleds, loc1, swap_rgb_order(clr2, rgbOrder), LEDS-1, swap_rgb_order(clr1, rgbOrder));
+  fill_gradient_RGB(fastleds, loc1, swap_rgb_order(clr2, rgbOrder), leds-1, swap_rgb_order(clr1, rgbOrder));
 
 }
 
@@ -115,7 +122,7 @@ void pride()
   sHue16 += deltams * beatsin88( 400, 5,9);
   uint16_t brightnesstheta16 = sPseudotime;
 
-  for( uint16_t i = 0 ; i < LEDS; i++) {
+  for( uint16_t i = 0 ; i < leds; i++) {
     hue16 += hueinc16;
     uint8_t hue8 = hue16 / 256;
 
@@ -129,7 +136,7 @@ void pride()
     CRGB newcolor = CHSV( hue8, sat8, bri8);
 
     uint16_t pixelnumber = i;
-    pixelnumber = (LEDS-1) - pixelnumber;
+    pixelnumber = (leds-1) - pixelnumber;
 
     nblend(fastleds[pixelnumber], swap_rgb_order(newcolor, rgbOrder), 64);
     //fastleds[pixelnumber].nscale8(ledsOnBrightness);
@@ -188,7 +195,7 @@ void pacifica_one_layer( CRGBPalette16& p, uint16_t cistart, uint16_t wavescale,
   uint16_t ci = cistart;
   uint16_t waveangle = ioff;
   uint16_t wavescale_half = (wavescale / 2) + 20;
-  for( uint16_t i = 0; i < LEDS; i++) {
+  for( uint16_t i = 0; i < leds; i++) {
     waveangle += 250;
     uint16_t s16 = sin16( waveangle ) + 32768;
     uint16_t cs = scale16( s16 , wavescale_half ) + wavescale_half;
@@ -206,7 +213,7 @@ void pacifica_add_whitecaps()
   uint8_t basethreshold = beatsin8( 9, 55, 65);
   uint8_t wave = beat8( 7 );
 
-  for( uint16_t i = 0; i < LEDS; i++) {
+  for( uint16_t i = 0; i < leds; i++) {
     uint8_t threshold = scale8( sin8( wave), 20) + basethreshold;
     wave += 7;
     uint8_t l = fastleds[i].getAverageLight();
@@ -221,7 +228,7 @@ void pacifica_add_whitecaps()
 // Deepen the blues and greens
 void pacifica_deepen_colors()
 {
-  for( uint16_t i = 0; i <LEDS; i++) {
+  for( uint16_t i = 0; i <leds; i++) {
     fastleds[i].blue = scale8( fastleds[i].blue,  145);
     fastleds[i].green= scale8( fastleds[i].green, 200);
     fastleds[i] |= swap_rgb_order(CRGB( 2, 5, 7), rgbOrder);
@@ -248,7 +255,7 @@ void pacifica_loop()
   sCIStart4 -= (deltams2 * beatsin88(257,4,6));
 
   // Clear out the LED array to a dim background blue-green
-  fill_solid(fastleds, LEDS, swap_rgb_order(CRGB( 2, 6, 10), rgbOrder));
+  fill_solid(fastleds, leds, swap_rgb_order(CRGB( 2, 6, 10), rgbOrder));
 
   // Render each of four layers, with different scales and speeds, that vary over time
   pacifica_one_layer( pacifica_palette_1, sCIStart1, beatsin16( 3, 11 * 256, 14 * 256), beatsin8( 10, 70, 130), 0-beat16( 301) );
@@ -268,7 +275,7 @@ void fireocean_add_sparks()
   uint8_t basethreshold = beatsin8( 9, 55, 65);
   uint8_t wave = beat8( 7 );
 
-  for( uint16_t i = 0; i < LEDS; i++) {
+  for( uint16_t i = 0; i < leds; i++) {
     uint8_t threshold = scale8( sin8( wave), 20) + basethreshold;
     wave += 7;
     uint8_t l = fastleds[i].getAverageLight();
@@ -302,7 +309,7 @@ void fireocean_loop()
   sCIStart4 -= (deltams2 * beatsin88(257,4,6));
 
   // Clear to a dim warm background
-  fill_solid(fastleds, LEDS, swap_rgb_order(CRGB(10, 2, 0), rgbOrder));
+  fill_solid(fastleds, leds, swap_rgb_order(CRGB(10, 2, 0), rgbOrder));
 
   // Render layers with fire palettes
   pacifica_one_layer(fireocean_palette_1, sCIStart1, beatsin16(3, 11 * 256, 14 * 256), beatsin8(10, 70, 130), 0-beat16(301));
@@ -314,7 +321,7 @@ void fireocean_loop()
   fireocean_add_sparks();
 
   // Enhance the reds and yellows
-  for(uint16_t i = 0; i < LEDS; i++) {
+  for(uint16_t i = 0; i < leds; i++) {
     fastleds[i].red = scale8(fastleds[i].red, 200);
     fastleds[i].green = scale8(fastleds[i].green, 100);
     fastleds[i] |= swap_rgb_order(CRGB(5, 1, 0), rgbOrder);
@@ -342,7 +349,7 @@ void plasma() {                                                 // This is the h
   int thisPhase = beatsin8(6,-64,64);                           // Setting phase change for a couple of waves.
   int thatPhase = beatsin8(7,-64,64);
 
-  for (int k=0; k < LEDS; k++) {                              // For each of the LED's in the strand, set a brightness based on a wave as follows:
+  for (int k=0; k < leds; k++) {                              // For each of the LED's in the strand, set a brightness based on a wave as follows:
 
     int colorIndex = cubicwave8((k*23)+thisPhase)/2 + cos8((k*15)+thatPhase)/2;           // Create a wave and add a phase change and add another wave with its own phase change.. Hey, you can even change the frequencies if you wish.
     int thisBright = qsub8(colorIndex, beatsin8(7,0,96));                                 // qsub gives it a bit of 'black' dead space by setting sets a minimum value. If colorIndex < current value of beatsin8(), then bright = 0. Otherwise, bright = colorIndex..
@@ -354,11 +361,11 @@ void plasma() {                                                 // This is the h
 void blur() {
 
   uint8_t blurAmount = dim8_raw(beatsin8(3,64, 192) );       // A sinewave at 3 Hz with values ranging from 64 to 192.
-  blur1d(fastleds, LEDS, blurAmount);                         // Apply some blurring to whatever's already on the strip, which will eventually go black.
+  blur1d(fastleds, leds, blurAmount);                         // Apply some blurring to whatever's already on the strip, which will eventually go black.
 
-  uint8_t  i = beatsin8(9, 0, LEDS);
-  uint8_t  j = beatsin8(7, 0, LEDS);
-  uint8_t  k = beatsin8(5, 0, LEDS);
+  uint8_t  i = beatsin8(9, 0, leds);
+  uint8_t  j = beatsin8(7, 0, leds);
+  uint8_t  k = beatsin8(5, 0, leds);
 
   // The color of each point shifts over time, each at a different speed.
   uint16_t ms = millis();
@@ -399,8 +406,8 @@ uint8_t secondHand = (millis() / 1000) % 15;                  // IMPORTANT!!! Ch
   }
 
   if (millis() % 5 == 0) {
-    fadeToBlackBy(fastleds, LEDS, thisfade);                    // Low values = slower fade.
-    int pos = random16(LEDS);                                   // Pick an LED at random.
+    fadeToBlackBy(fastleds, leds, thisfade);                    // Low values = slower fade.
+    int pos = random16(leds);                                   // Pick an LED at random.
     fastleds[pos] = swap_rgb_order(ColorFromPalette(currentPalette, thishue + random16(huediff)/4 , thisbri, currentBlending), rgbOrder);
     thishue = thishue + thisinc;                                // It increments here.
   }
@@ -417,17 +424,17 @@ void ease() {
     easeOutVal = ease8InOutQuad(easeInVal);                     // Start with easeInVal at 0 and then go to 255 for the full easing.
     easeInVal++;
 
-    lerpVal = lerp8by8(0, LEDS-1, easeOutVal);                  // Map it to the number of LED's you have.
+    lerpVal = lerp8by8(0, leds-1, easeOutVal);                  // Map it to the number of LED's you have.
 
     fastleds[lerpVal] = swap_rgb_order(CRGB::Red, rgbOrder);
-    fadeToBlackBy(fastleds, LEDS, 32);                          // 8 bit, 1 = slow fade, 255 = fast fade
+    fadeToBlackBy(fastleds, leds, 32);                          // 8 bit, 1 = slow fade, 255 = fast fade
   }
 }
 
 void ease2() {
   //fastleds[5 + (millis() / 1000) % 4)] = CRGB::Blue;
-  fastleds[(millis() / 1000) % LEDS] = swap_rgb_order(CRGB::Cyan, rgbOrder);
-  fadeToBlackBy(fastleds, LEDS, 2);                           // 8 bit, 1 = slow fade, 255 = fast fade
+  fastleds[(millis() / 1000) % leds] = swap_rgb_order(CRGB::Cyan, rgbOrder);
+  fadeToBlackBy(fastleds, leds, 2);                           // 8 bit, 1 = slow fade, 255 = fast fade
 }
 
 // void update_profile_led() {
@@ -448,6 +455,6 @@ void update_profile_led() {
     case 1:  color = PROFILE_B_COLOR;  break;
     case 2:  color = PROFILE_C_COLOR;  break;
   }
-  fastleds[PROFILE_LED - 1] = swap_rgb_order(color, rgbOrder);
+  fastleds[leds - 1] = swap_rgb_order(color, rgbOrder);
   FastLED.show();
 }

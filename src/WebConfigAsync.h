@@ -390,7 +390,7 @@ void get_root_page(unsigned int start, unsigned int len) {
   addStatusItem("Pedals", String(PEDALS));
   addStatusItem("Controls", String(CONTROLS));
   addStatusItem("Sequences", String(SEQUENCES));
-  addStatusItem("LEDs", String(LEDS));
+  addStatusItem("LEDs", String(leds));
   closeCard();
 
   if (trim_page(start, len)) return;
@@ -1483,12 +1483,14 @@ void get_actions_page(unsigned int start, unsigned int len) {
     page += i;
     page += F("'>");
     page += F("<option value='0'");
-    if (act->led == LEDS) page += F(" selected");
+    if (act->led == leds) page += F(" selected");
+    // if (act->led == LEDS) page += F(" selected");
     page += F("></option>");
     page += F("<option value='255'");
     if (act->led == 255) page += F(" selected");
     page += F(">Default</option>");
-    for (unsigned int l = 1; l <= LEDS; l++) {
+    for (unsigned int l = 1; l <= leds; l++) {
+    // for (unsigned int l = 1; l <= LEDS; l++) {
       page += F("<option value='");
       page += l;
       page += F("'");
@@ -2665,11 +2667,13 @@ void get_controls_page(unsigned int start, unsigned int len) {
     page += F("' name='led");
     page += (i);
     page += F("'>");
-    for (unsigned int l = 0; l <= LEDS; l++) {
+    for (unsigned int l = 0; l <= leds; l++) {
+    // for (unsigned int l = 0; l <= LEDS; l++) {
       page += F("<option value='");
       page += l;
       page += F("'");
-      if ((l == 0 && controls[i-1].led == LEDS) || controls[i-1].led == l-1) page += F(" selected");
+      if ((l == 0 && controls[i-1].led == leds) || controls[i-1].led == l-1) page += F(" selected");
+      // if ((l == 0 && controls[i-1].led == LEDS) || controls[i-1].led == l-1) page += F(" selected");
       page += F(">");
       if (l > 0) page += l;
       page += F("</option>");
@@ -3135,12 +3139,14 @@ void get_sequences_page(unsigned int start, unsigned int len) {
     page += i;
     page += F("'>");
     page += F("<option value='0'");
-    if (sequences[s-1][i-1].led == LEDS) page += F(" selected");
+    if (sequences[s-1][i-1].led == leds) page += F(" selected");
+    // if (sequences[s-1][i-1].led == LEDS) page += F(" selected");
     page += F("></option>");
     page += F("<option value='255'");
     if (sequences[s-1][i-1].led == 255) page += F(" selected");
     page += F(">Default</option>");
-    for (unsigned int l = 1; l <= LEDS; l++) {
+    for (unsigned int l = 1; l <= leds; l++) {
+    // for (unsigned int l = 1; l <= LEDS; l++) {
       page += F("<option value='");
       page += l;
       page += F("'");
@@ -3527,7 +3533,7 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("</div>");
 
   page += F("<small id='bootstrapthemeHelpBlock' class='form-text text-muted'>");
-  page += F("Bootstrap (Local)' uses the theme stored in flash memory. Other themes require internet connection as they are served via CDN network.");
+  page += F("Phoenix is stored in memory. Other themes require internet connection.");
   page += F("</small>");
 
   page += F("</div>");
@@ -3713,10 +3719,11 @@ void get_options_page(unsigned int start, unsigned int len) {
   page += F("<div class='row g-1'>");
   page += F("<div class='w-50'>");
   page += F("<div class='form-floating'>");
-  page += F("<input class='form-control form-control-sm' type='number' id='leds' name='leds' min='0' max='254' value='");
-  page += LEDS;
-  page += F("'>");
-  page += F("<label for='leds'>Leds</label>");
+  page += F("<input class='form-control form-control-sm' type='number' id='leds' name='leds' min='1' max='254' value='");
+  page += String(leds); // Ensure the value is correctly converted to a string
+  page += F("' oninput='this.value = Math.min(Math.max(parseInt(this.value) || 1, 1), 254)'>");
+  page += F("<label for='leds'>LED Count</label>");
+  page += F("<small class='text-muted'>Range: 1-254<br>&nbsp;</small>");
   page += F("</div>");
   page += F("</div>");
 
@@ -5094,7 +5101,8 @@ void http_handle_post_actions(AsyncWebServerRequest *request) {
           default: {
             unsigned int red, green, blue;
             act->led      = constrain(request->arg(String("led")        + String(i)).toInt(), 0, 255);
-            if (act->led != 255) act->led = (act->led == 0 ? LEDS : constrain(request->arg(String("led") + String(i)).toInt() - 1, 0, LEDS - 1));
+            if (act->led != 255) act->led = (act->led == 0 ? leds : constrain(request->arg(String("led") + String(i)).toInt() - 1, 0, leds - 1));
+//            if (act->led != 255) act->led = (act->led == 0 ? LEDS : constrain(request->arg(String("led") + String(i)).toInt() - 1, 0, LEDS - 1));
             act->color0   = CRGB::Black;
             red = green = blue = 0;
             sscanf(request->arg(String("color0-") + String(i)).c_str(), "#%02x%02x%02x", &red, &green, &blue);
@@ -5234,7 +5242,8 @@ void http_handle_post_controls(AsyncWebServerRequest *request) {
     controls[i].button2 = (a.toInt() == 0 ? LADDER_STEPS : constrain(a.toInt() - 1, 0, LADDER_STEPS - 1));
 
     a = request->arg(String("led") + String(i+1));
-    controls[i].led = (a.toInt() == 0 ? LEDS : constrain(a.toInt() - 1, 0, LEDS - 1));
+    controls[i].led = (a.toInt() == 0 ? leds : constrain(a.toInt() - 1, 0, leds - 1));
+    // controls[i].led = (a.toInt() == 0 ? LEDS : constrain(a.toInt() - 1, 0, LEDS - 1));
   }
 
   if (request->arg("action").equals("apply")) {
@@ -5320,7 +5329,8 @@ void http_handle_post_sequences(AsyncWebServerRequest *request) {
 
     a = request->arg(String("led") + String(i+1));
     sequences[s][i].led = constrain(a.toInt(), 0, 255);
-    if (sequences[s][i].led != 255) sequences[s][i].led = (sequences[s][i].led == 0 ? LEDS : constrain(a.toInt() - 1, 0, LEDS - 1));
+    if (sequences[s][i].led != 255) sequences[s][i].led = (sequences[s][i].led == 0 ? leds : constrain(a.toInt() - 1, 0, leds - 1));
+    // if (sequences[s][i].led != 255) sequences[s][i].led = (sequences[s][i].led == 0 ? LEDS : constrain(a.toInt() - 1, 0, LEDS - 1));
 
     a = request->arg(String("color") + String(i+1));
     red = green = blue = 0;
@@ -5464,7 +5474,14 @@ void http_handle_post_options(AsyncWebServerRequest *request) {
   if (request->arg("screensavertimeout").toInt() != screenSaverTimeout / 60000) {
     screenSaverTimeout = request->arg("screensavertimeout").toInt() * 60000;
   }
-
+  if (request->hasArg("leds")) {
+    byte newLeds = request->arg("leds").toInt();
+    if (newLeds != leds) {
+      leds = newLeds;
+      eeprom_update_leds(leds);
+      restartRequired = true;
+    }
+  }
   if (request->arg("rgborder").toInt() != rgbOrder) {
     rgbOrder = (EOrder)request->arg("rgborder").toInt();
   }

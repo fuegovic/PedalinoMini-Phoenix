@@ -404,9 +404,9 @@ bool improv_config()
       }
     }
     if (crono % 200 < 5) display_progress_bar_update(crono / 200, IMPROV_CONNECT_TIMEOUT * 5 - 1);
-    fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Red, rgbOrder);
-    fastleds[(crono / 500) % LEDS].nscale8(ledsOnBrightness);
-    fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
+    fastleds[(crono / 500) % leds] = swap_rgb_order(CRGB::Red, rgbOrder);
+    fastleds[(crono / 500) % leds].nscale8(ledsOnBrightness);
+    fadeToBlackBy(fastleds, leds, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
     FastLED.show();
     if (digitalRead(FACTORY_DEFAULT_PIN) == LOW) { delay(200); break; }
     crono = millis() - startCrono;
@@ -476,8 +476,8 @@ bool smart_config()
   color.nscale8(ledsOnBrightness);
   while (!WiFi.smartConfigDone() && crono / 1000 < SMART_CONFIG_TIMEOUT) {
     if (crono %  200 < 5) display_progress_bar_update(crono / 200, SMART_CONFIG_TIMEOUT*5-1);
-    if (crono % 1500 < 5) fill_solid(fastleds, LEDS, color);
-    fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
+    if (crono % 1500 < 5) fill_solid(fastleds, leds, color);
+    fadeToBlackBy(fastleds, leds, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
     FastLED.show();
     if (digitalRead(FACTORY_DEFAULT_PIN) == LOW) { delay(200); break; }
     crono = millis() - startCrono;
@@ -540,8 +540,8 @@ bool wps_config()
   color.nscale8(ledsOnBrightness);
   while (wpsStatus == 0 && crono / 1000 < WPS_TIMEOUT) {
     if (crono %  200 < 5) display_progress_bar_update(crono / 200, WPS_TIMEOUT*5-1);
-    if (crono % 1500 < 5) fill_solid(fastleds, LEDS, color);
-    fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
+    if (crono % 1500 < 5) fill_solid(fastleds, leds, color);
+    fadeToBlackBy(fastleds, leds, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
     FastLED.show();
     if (digitalRead(FACTORY_DEFAULT_PIN) == LOW) { delay(200); break; }
     crono = millis() - startCrono;
@@ -556,9 +556,9 @@ bool wps_config()
     unsigned long crono = millis() - startCrono;
     while (!WiFi.isConnected() && crono / 1000 < WIFI_CONNECT_TIMEOUT) {
       if (crono % 200 < 5) display_progress_bar_update(crono / 200, WIFI_CONNECT_TIMEOUT * 5 - 1);
-      fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Red, rgbOrder);
-      fastleds[(crono / 500) % LEDS].nscale8(ledsOnBrightness);
-      fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
+      fastleds[(crono / 500) % leds] = swap_rgb_order(CRGB::Red, rgbOrder);
+      fastleds[(crono / 500) % leds].nscale8(ledsOnBrightness);
+      fadeToBlackBy(fastleds, leds, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
       FastLED.show();
       crono = millis() - startCrono;
     }
@@ -602,9 +602,9 @@ bool ap_connect(const String& ssid, const String& password)
   unsigned long crono = millis() - startCrono;
   while (!WiFi.isConnected() && crono / 1000 < WIFI_CONNECT_TIMEOUT) {
     if (crono % 200 < 5) display_progress_bar_update(crono / 200, WIFI_CONNECT_TIMEOUT * 5 - 1);
-    fastleds[(crono / 500) % LEDS] = swap_rgb_order(CRGB::Red, rgbOrder);
-    fastleds[(crono / 500) % LEDS].nscale8(ledsOnBrightness);
-    fadeToBlackBy(fastleds, LEDS, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
+    fastleds[(crono / 500) % leds] = swap_rgb_order(CRGB::Red, rgbOrder);
+    fastleds[(crono / 500) % leds].nscale8(ledsOnBrightness);
+    fadeToBlackBy(fastleds, leds, 1);                           // 8 bit, 1 = slow fade, 255 = fast fade
     FastLED.show();
     if (digitalRead(FACTORY_DEFAULT_PIN) == LOW) { delay(200); break; }
     crono = millis() - startCrono;
