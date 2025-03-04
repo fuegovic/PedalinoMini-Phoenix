@@ -1,66 +1,109 @@
-[![](./data/logo.webp)](https://github.com/fuegovic/PedalinoMini)
+<p align="center">
+  <a href="https://github.com/fuegovic/PedalinoMini">
+    <img src="./data/logo.webp" alt="PedalinoMini Phoenix Logo">
+  </a>
+</p>
 
-# PedalinoMini 🐦‍🔥
+# PedalinoMini Phoenix 🐦‍🔥: A Modern Reborn MIDI Controller
 
-> This project is a customized fork of [alf45tar's PedalinoMini™](https://github.com/alf45tar/PedalinoMini/) with significant enhancements and modifications. See the [Changelog](./docs/CHANGELOG.md) for details about changes.
+PedalinoMini Phoenix is a significant evolution of the original **[PedalinoMini™](https://github.com/alf45tar/PedalinoMini)**, bringing modern features, improved usability, and enhanced performance to this wireless MIDI foot controller for musicians.
 
-A full-featured MIDI controller supporting up to 15 analog and digital pedals, with 3 user profiles and 20 banks each.
+## ✨ Key Improvements
 
-## 📚 Documentation
+- **Expanded Connectivity**: Supports up to 15 inputs, allowing a flexible combination of footswitches and expression pedals.
+- **Enhanced UI**: Dark mode enabled by default with a Phoenix-themed color scheme featuring orange highlights.
+- **Improved Profile System**: Easily switch between profiles with color-coded LED indicators.
+- **Better User Experience**: Redesigned homepage with a card-based layout displaying system status at a glance.
+- **Simplified Setup**: Preconfigured credentials and default settings make initial setup quick and easy.
+- **Visual Enhancements**: New LED effects and animations provide clear system status feedback.
+- **Comprehensive Documentation**: Organized and accessible docs using mkdocs.
 
-**Full documentation available at: [PedalinoMini 🐦‍🔥 Documentation](https://fuegovic.github.io/PedalinoMini-Phoenix/)**
+> This refresh retains the core functionality that made the original PedalinoMini popular while adding modern touches and quality-of-life improvements for performers.
 
-## Key Features
+### ⚠️ Important Changes & Limitations
 
-### Connectivity
-- Bluetooth LE MIDI 4.0 (server or client)
-- WiFi with Network MIDI (AppleMIDI/RTP-MIDI) and ipMIDI
-- USB MIDI interface
-- Legacy DIN MIDI IN/OUT connectors
+- **Board Support**: Optimized for **ESP32 DevKit V1**. Other ESP32 boards may work but are not officially tested.
+- **USB MIDI**: Officially tested with **Arduino ProMicro**. Other implementations may work but aren't guaranteed.
+- **Removed Features**: Pedal types requiring 2 GPIO pins (e.g., rotary encoders, ultrasonic sensors) have been removed to enable the new 15-pedal mode, where each pedal uses a single GPIO.
+- **Simplified Input Types**: Focused on the most common types: momentary switches, latches, analog pedals, and analog pads.
 
-### Hardware Support
-- 15 controller ports supporting digital switches, analog expression pedals
-- Up to 45 foot switches when using resistor ladders
-- RGB NeoPixel/WS2812B status LEDs with effects
+---
 
-### MIDI Implementation
-- Comprehensive routing between all interfaces
-- Clock and MIDI Time Code (MTC) master/slave capabilities
-- Support for Program Change, Control Code, Note On/Off, Pitch Bend, and more
+## 🚀 Getting Started  
 
-### Configuration
-- 3 profiles with 20 banks each
-- Mobile-friendly web interface (http://pedalino.local)
-- OTA firmware updates
-- Browser-based firmware installation
+<div>
+    <tr>
+      <td align="center" style="padding-right: 20px; width: 200px;">
+        <a href="https://fuegovic.github.io/PedalinoMini-Phoenix/installer" target="_blank">
+          <img src="https://img.shields.io/badge/⚙️_Install_Firmware-red?style=for-the-badge" alt="Install Firmware" width="200" />
+        </a>
+      </td>
+      <td>
+        <p><em>Quickly upload the firmware and configure your device.</em></p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding-right: 20px; width: 200px;">
+        <a href="https://fuegovic.github.io/PedalinoMini-Phoenix/" target="_blank">
+          <img src="https://img.shields.io/badge/👀_Read_Documentation-yellow?style=for-the-badge" alt="Read Documentation" width="200" />
+        </a>
+      </td>
+      <td>
+        <p><em>Learn everything about setup, features, and more.</em></p>
+      </td>
+    </tr>
+</div>
 
-## Quick Start
 
-### Software Installation
-- [Web Installer](https://fuegovic.github.io/PedalinoMini-Phoenix/installer)
+---
 
-## Bill of materials
+## 💸 Bill of Materials
 
-- Any ESP32 board supported by Arduino core for ESP32
-- OLED I2C 0.96"/1.3" display 128x64 pixels SSD1306/SH1106 based
-- USB MIDI and DIN MIDI connection requires additional hardware
+- **ESP32 board:** Any ESP32 board supported by [Arduino core for ESP32](https://github.com/espressif/arduino-esp32)
+  - Tested on [DOIT ESP32 DevKit V1](https://github.com/SmartArduino/SZDOITWiKi/wiki/ESP8266---ESP32) 4M dual-mode Wi-Fi and Bluetooth module
+- **OLED I2C display:** 0.96" or 1.3", 128x64, SSD1306/SH1106
+- **USB MIDI hardware:**
+  - Arduino ProMicro
+- **DIN MIDI hardware:**
+  - **MIDI OUT**: DIN5 connector, 2x 220 Ohm resistors
+  - **MIDI IN**: DIN5 connector, 2x 220 Ohm resistors, 1N4001 diode, 6N137 optocoupler
 
-## Schematic
+## ⚡ Schematic
 
 ![Schematic](./docs/assets/Schematic_PedalinoMini.webp "Schematic")
+[View Full Schematic](./docs/assets/Schematic_PedalinoMini.webp)
 
-## Pin Configuration Guide
+## 🔌 Pin Configuration Guide
 
 ### Pedal Assignments
-| Pedal | GPIO | Digital | Analog | Type |
-|-------|------|---------|---------|------|
-| 1-6   | 36,39,34,35,32,33 | ✅ | ✅ | Expression (ADC) |
-| 7-15  | Various | ✅ | ❌ | Digital Switch |
+| Pedal  | GPIO  | Digital |  Analog  | Type                     |
+|--------|-------|---------|----------|--------------------------|
+| 1      | 23    | ✅      | ❌      | Digital Switch           |
+| 2      | 17    | ✅      | ❌      | Digital Switch           |
+| 3      | 16    | ✅      | ❌      | Digital Switch           |
+| 4      | 13    | ✅      | ❌      | Digital Switch           |
+| 5      | 14    | ✅      | ❌      | Digital Switch           |
+| 6      | 27    | ✅      | ❌      | Digital Switch           |
+| 7      | 26    | ✅      | ❌      | Digital Switch           |
+| 8      | 25    | ✅      | ❌      | Digital Switch           |
+| 9      | 33    | ✅      | ✅      | Expression (ADC)         |
+| 10     | 32    | ✅      | ✅      | Expression (ADC)         |
+| 11     | 35    | ✅      | ✅      | Expression (ADC)         |
+| 12     | 34    | ✅      | ✅      | Expression (ADC)         |
+| 13     | 39    | ✅      | ✅      | Expression (ADC)         |
+| 14     | 36    | ✅      | ✅      | Expression (ADC)         |
+| 15     | 0     | ✅      | ❌      | Digital Switch (Onboard) |
 
 ### System Pins
-- MIDI IN: GPIO 15
-- MIDI OUT: GPIO 4
-- USB MIDI: GPIO 18,19
-- LED Strip: GPIO 5
+- **MIDI IN**: GPIO 2
+- **MIDI OUT**: GPIO 4
+- **USB MIDI**: GPIO 18, 19
+- **LED Strip**: GPIO 5
+- **OLED SDA**: GPIO 22
+- **OLED SCL**: GPIO 21
 
-See documentation for complete pin assignments and wiring details.
+See the documentation for a complete list of pin assignments and wiring details.
+
+## ⚖️ License
+
+This project is licensed under the [GPL-3.0 License](LICENSE).
