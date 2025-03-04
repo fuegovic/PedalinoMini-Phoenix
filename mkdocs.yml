@@ -43,7 +43,6 @@ theme:
   favicon: assets/favicon.ico
   icon:
     logo: material/midi
-    
 
 # Combine both extra_css sections into one
 extra_css:
