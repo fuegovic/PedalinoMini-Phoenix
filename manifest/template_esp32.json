@@ -1,13 +1,13 @@
 {
-  "name": "PedalinoMini™",
+  "name": "PedalinoMini - Phoenix",
   "version": "x.y.z",
-  "funding_url": "https://github.com/sponsors/alf45tar",
+  "funding_url": "https://github.com/sponsors/fuegovic",
   "new_install_prompt_erase": true,
   "builds": [
     {
       "chipFamily": "ESP32",
       "parts": [
-        { "path": "https://raw.githubusercontent.com/alf45tar/PedalinoMini/x.y.z/firmware/xxx/xxx-x.y.z-firmware.bin", "offset": 0 }
+        { "path": "https://raw.githubusercontent.com/fuegovic/PedalinoMini-Phoenix/x.y.z/firmware/xxx/xxx-x.y.z-firmware.bin", "offset": 0 }
       ]
     }
   ]
