@@ -713,11 +713,11 @@ void loop0(void * pvParameters)
 
       case PED_UPDATE_CLOUD:
         //set_clock();
-        url = F("https://raw.githubusercontent.com/alf45tar/PedalinoMini/master/data/css/bootstrap.min.css.gz");
+        url = F("https://raw.githubusercontent.com/fuegovic/PedalinoMini-Phoenix/master/data/css/bootstrap.min.css.gz");
         get_file_from_cloud(url, "/css/bootstrap.min.css.gz");
-        url = F("https://raw.githubusercontent.com/alf45tar/PedalinoMini/master/data/js/bootstrap.bundle.min.js.gz");
+        url = F("https://raw.githubusercontent.com/fuegovic/PedalinoMini-Phoenix/master/data/js/bootstrap.bundle.min.js.gz");
         get_file_from_cloud(url, "/js/bootstrap.bundle.min.js.gz");
-        url = F("https://raw.githubusercontent.com/alf45tar/PedalinoMini/master/data/schema.json");
+        url = F("https://raw.githubusercontent.com/fuegovic/PedalinoMini-Phoenix/master/data/schema.json");
         get_file_from_cloud(url, "/schema.json");
 
         latestFirmwareVersion = get_latest_firmware_version();
