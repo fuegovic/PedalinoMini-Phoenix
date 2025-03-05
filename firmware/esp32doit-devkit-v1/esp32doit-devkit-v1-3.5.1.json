@@ -1,0 +1,14 @@
+{
+  "name": "PedalinoMini - Phoenix",
+  "version": "3.5.1",
+  "funding_url": "https://github.com/sponsors/fuegovic",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "https://raw.githubusercontent.com/fuegovic/PedalinoMini-Phoenix/3.5.1/firmware/esp32doit-devkit-v1/esp32doit-devkit-v1-3.5.1-firmware.bin", "offset": 0 }
+      ]
+    }
+  ]
+}
