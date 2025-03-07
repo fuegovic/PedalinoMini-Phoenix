@@ -460,7 +460,7 @@ void spiffs_save_config(const String& filename, bool saveActions = true, bool sa
 
 #ifndef BOARD_HAS_PSRAM
   jdoc.shrinkToFit();
-  DPRINT("Memory used by JSON document: %d bytes\n", jdoc.memoryUsage());
+  DPRINT("Memory used by JSON document: %d bytes\n", measureJson(jdoc));
 #endif
 
   if (SPIFFS.exists(filename) && !SPIFFS.remove(filename)) {

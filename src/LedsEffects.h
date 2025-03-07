@@ -385,7 +385,7 @@ void confetti_pal() {                                         // random colored 
   static int       thishue = 50;                                       // Starting hue.
   static uint8_t   thisinc = 1;                                        // Incremental value for rotating hues
   static uint8_t   thissat = 100;                                      // The saturation, where 255 = brilliant colours.
-  static uint8_t   thisbri = 255;                                      // Brightness of a sequence. Remember, max_bright is the overall limiter.
+  // static uint8_t   thisbri = 255;                                   // Removed unused variable thisbri // Brightness of a sequence. Remember, max_bright is the overall limiter.
   static int       huediff = 256;                                      // Range of random #'s to use for hue
 
 uint8_t secondHand = (millis() / 1000) % 15;                  // IMPORTANT!!! Change '15' to a different value to change duration of the loop.
@@ -408,7 +408,7 @@ uint8_t secondHand = (millis() / 1000) % 15;                  // IMPORTANT!!! Ch
   if (millis() % 5 == 0) {
     fadeToBlackBy(fastleds, leds, thisfade);                    // Low values = slower fade.
     int pos = random16(leds);                                   // Pick an LED at random.
-    fastleds[pos] = swap_rgb_order(ColorFromPalette(currentPalette, thishue + random16(huediff)/4 , thisbri, currentBlending), rgbOrder);
+    fastleds[pos] = swap_rgb_order(ColorFromPalette(currentPalette, thishue + random16(huediff)/4 , thissat, currentBlending), rgbOrder);
     thishue = thishue + thisinc;                                // It increments here.
   }
 }
