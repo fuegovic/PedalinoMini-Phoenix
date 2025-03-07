@@ -191,24 +191,24 @@ void leds_update(byte type, byte channel, byte data1, byte data2)
   for (byte b = 0; b < BANKS; b++) {
     action *a = actions[b];
     while (a != nullptr) {
-      if (a->midiChannel == channel && (a->midiMessage == type || a->midiMessage == PED_CONTROL_CHANGE_SNAP && type == midi::ControlChange)) {
+      if (a->midiChannel == channel && (a->midiMessage == type || (a->midiMessage == PED_CONTROL_CHANGE_SNAP && type == midi::ControlChange))) {
         switch (a->event) {
 
           case PED_EVENT_PRESS_RELEASE:
-            if (a->midiMessage == PED_PROGRAM_CHANGE &&                         a->midiValue1 == data1 ||
-                a->midiMessage != PED_PROGRAM_CHANGE && a->midiCode == data1 && a->midiValue1 == data2) {
+            if ((a->midiMessage == PED_PROGRAM_CHANGE &&                         a->midiValue1 == data1) ||
+                (a->midiMessage != PED_PROGRAM_CHANGE && a->midiCode == data1 && a->midiValue1 == data2)) {
               set_last_led_color(b, led_control(a->control, a->led), a->color0, ledsOffBrightness);
               leds_refresh(led_control(a->control, a->led));
-            } else if (a->midiMessage == PED_PROGRAM_CHANGE &&                         a->midiValue2 == data1 ||
-                       a->midiMessage != PED_PROGRAM_CHANGE && a->midiCode == data1 && a->midiValue2 == data2) {
+            } else if ((a->midiMessage == PED_PROGRAM_CHANGE &&                         a->midiValue2 == data1) ||
+                       (a->midiMessage != PED_PROGRAM_CHANGE && a->midiCode == data1 && a->midiValue2 == data2)) {
               set_last_led_color(b, led_control(a->control, a->led), a->color1, ledsOnBrightness);
               leds_refresh(led_control(a->control, a->led));
             }
             break;
 
           case PED_EVENT_RELEASE:
-            if (a->midiMessage == PED_PROGRAM_CHANGE && a->midiCode == data1 ||
-                a->midiMessage != PED_PROGRAM_CHANGE && a->midiCode == data1 && a->midiValue1 == data2) {
+            if ((a->midiMessage == PED_PROGRAM_CHANGE && a->midiCode == data1) ||
+                (a->midiMessage != PED_PROGRAM_CHANGE && a->midiCode == data1 && a->midiValue1 == data2)) {
               set_last_led_color(b, led_control(a->control, a->led), a->color0, ledsOffBrightness);
               leds_refresh(led_control(a->control, a->led));
             }
@@ -1511,7 +1511,7 @@ void process_backlog()
               (controls[act->control].pedal2 == e->pedal) && (controls[act->control].button2 == e->button))
             ) &&
             ((act->event == e->event) ||                                                                                                // Events match or
-             (act->event == PED_EVENT_PRESS_RELEASE) && ((e->event == PED_EVENT_PRESS) || (e->event == PED_EVENT_RELEASE))              // PRESS_RELEASE matches with PRESS or RELEASE
+             ((act->event == PED_EVENT_PRESS_RELEASE) && ((e->event == PED_EVENT_PRESS) || (e->event == PED_EVENT_RELEASE)))            // PRESS_RELEASE matches with PRESS or RELEASE
             )) {
           fire_action(act, e->pedal, e->button, e->event);
         }
@@ -1538,10 +1538,10 @@ void process_backlog()
                  )
                 ) &&
                 (((act->event == e->event) ||                                                                                                // Events match or
-                  (act->event == PED_EVENT_PRESS_RELEASE) && ((e->event == PED_EVENT_PRESS) || (e->event == PED_EVENT_RELEASE))              // PRESS_RELEASE matches with PRESS or RELEASE
+                  ((act->event == PED_EVENT_PRESS_RELEASE) && ((e->event == PED_EVENT_PRESS) || (e->event == PED_EVENT_RELEASE)))            // PRESS_RELEASE matches with PRESS or RELEASE
                  ) &&
                  ((act->event == f->event) ||                                                                                                // Events match or
-                  (act->event == PED_EVENT_PRESS_RELEASE) && ((f->event == PED_EVENT_PRESS) || (f->event == PED_EVENT_RELEASE))              // PRESS_RELEASE matches with PRESS or RELEASE
+                  ((act->event == PED_EVENT_PRESS_RELEASE) && ((f->event == PED_EVENT_PRESS) || (f->event == PED_EVENT_RELEASE)))            // PRESS_RELEASE matches with PRESS or RELEASE
                  ) &&
                  (e->event == f->event)
                 )
@@ -1648,23 +1648,23 @@ void controller_event_handler_button(AceButton* button, uint8_t eventType, uint8
   bool simultaneous = false;
   action *act = actions[0];     // Global bank actions
   while (!simultaneous && act != nullptr) {
-    simultaneous = ((controls[act->control].pedal1 == e.pedal) && (controls[act->control].button1 == e.button) &&
-                    (controls[act->control].pedal2 != PEDALS)  && (controls[act->control].button2 != LADDER_STEPS) ||
-                    (controls[act->control].pedal2 == e.pedal) && (controls[act->control].button2 == e.button) &&
-                    (controls[act->control].pedal1 != PEDALS)  && (controls[act->control].button1 != LADDER_STEPS)) &&
+    simultaneous = ((((controls[act->control].pedal1 == e.pedal) && (controls[act->control].button1 == e.button) &&
+                    (controls[act->control].pedal2 != PEDALS)  && (controls[act->control].button2 != LADDER_STEPS)) ||
+                    ((controls[act->control].pedal2 == e.pedal) && (controls[act->control].button2 == e.button) &&
+                    (controls[act->control].pedal1 != PEDALS)  && (controls[act->control].button1 != LADDER_STEPS)))) &&
                    ((act->event == eventType) ||                                                                                            // Events match or
-                    (act->event == PED_EVENT_PRESS_RELEASE) && ((e.event == PED_EVENT_PRESS) || (e.event == PED_EVENT_RELEASE))             // PRESS_RELEASE matches with PRESS or RELEASE
+                    ((act->event == PED_EVENT_PRESS_RELEASE) && ((e.event == PED_EVENT_PRESS) || (e.event == PED_EVENT_RELEASE)))           // PRESS_RELEASE matches with PRESS or RELEASE
                    );
     act = act->next;
   }
   act = actions[currentBank];   // Current bank actions
   while (!simultaneous && act != nullptr) {
-    simultaneous = ((controls[act->control].pedal1 == e.pedal) && (controls[act->control].button1 == e.button) &&
-                    (controls[act->control].pedal2 != PEDALS)  && (controls[act->control].button2 != LADDER_STEPS) ||
-                    (controls[act->control].pedal2 == e.pedal) && (controls[act->control].button2 == e.button) &&
-                    (controls[act->control].pedal1 != PEDALS)  && (controls[act->control].button1 != LADDER_STEPS)) &&
+    simultaneous = ((((controls[act->control].pedal1 == e.pedal) && (controls[act->control].button1 == e.button) &&
+                    (controls[act->control].pedal2 != PEDALS)  && (controls[act->control].button2 != LADDER_STEPS)) ||
+                    ((controls[act->control].pedal2 == e.pedal) && (controls[act->control].button2 == e.button) &&
+                    (controls[act->control].pedal1 != PEDALS)  && (controls[act->control].button1 != LADDER_STEPS)))) &&
                    ((act->event == eventType) ||                                                                                            // Events match or
-                    (act->event == PED_EVENT_PRESS_RELEASE) && ((e.event == PED_EVENT_PRESS) || (e.event == PED_EVENT_RELEASE))             // PRESS_RELEASE matches with PRESS or RELEASE
+                    ((act->event == PED_EVENT_PRESS_RELEASE) && (((e.event == PED_EVENT_PRESS) || (e.event == PED_EVENT_RELEASE))))           // PRESS_RELEASE matches with PRESS or RELEASE
                    );
     act = act->next;
   }

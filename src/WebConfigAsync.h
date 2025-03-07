@@ -5504,8 +5504,8 @@ void http_handle_post_options(AsyncWebServerRequest *request) {
   }
 
   bool oscReconnect = false;
-  if (request->arg("oscremotehost") != oscRemoteHost ||
-      !oscRemoteHost.equals(oscRemoteIp.toString()) && oscRemoteIp.toString().equals("255.255.255.255")) {
+  if ((request->arg("oscremotehost") != oscRemoteHost) ||
+      (((!oscRemoteHost.equals(oscRemoteIp.toString())) && (oscRemoteIp.toString().equals("255.255.255.255"))))) {
     oscRemoteHost = request->arg("oscremotehost");
     if (!oscRemoteIp.fromString(oscRemoteHost)) {
       oscRemoteIp = MDNS.queryHost(oscRemoteHost);

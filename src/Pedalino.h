@@ -624,8 +624,19 @@ uint32_t vref = 1100;
 #define LOG_TAG           "PedalinoESP"
 //#define DPRINT(...)       ESP_LOGI(LOG_TAG, __VA_ARGS__)
 //#define DPRINTLN(...)     ESP_LOGI(LOG_TAG, __VA_ARGS__)
-#define DPRINT(...)       SERIALDEBUG.printf(__VA_ARGS__)
-#define DPRINTLN(...)     { SERIALDEBUG.printf( __VA_ARGS__ ); SERIALDEBUG.println(); }
+// Define safer debug print macros that handle format specifiers better
+// Note: When using these macros, make sure to use the correct format specifier for your data type:
+// - %d for int
+// - %u for unsigned int
+// - %ld for long
+// - %lu for unsigned long
+// - %f for float/double
+#define DPRINT_SAFE(...)  SERIALDEBUG.printf(__VA_ARGS__)
+#define DPRINT_LU(value)  SERIALDEBUG.printf("%lu", (unsigned long)(value))
+#define DPRINT_LD(value)  SERIALDEBUG.printf("%ld", (long)(value))
+// Use the safe version for the main debug macros
+#define DPRINT(...)       DPRINT_SAFE(__VA_ARGS__)
+#define DPRINTLN(...)     { DPRINT_SAFE(__VA_ARGS__); SERIALDEBUG.println(); }
 #endif
 
 #ifndef DPRINT
