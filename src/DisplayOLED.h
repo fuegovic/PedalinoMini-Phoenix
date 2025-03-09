@@ -75,6 +75,114 @@ int progressBarTotal = 100;    // Maximum progress value
 // Flag to indicate when a frame is ready
 bool bufferReady = false;
 
+//------------------------------------------------------------------------------
+// Dirty Rectangle Tracking for Efficient Updates
+//------------------------------------------------------------------------------
+#define MAX_DIRTY_REGIONS 5
+
+struct DirtyRect {
+  int16_t x;
+  int16_t y;
+  int16_t width;
+  int16_t height;
+  bool dirty;
+};
+
+DirtyRect dirtyRegions[MAX_DIRTY_REGIONS] = {
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false}
+};
+
+// Reset all dirty regions after display update
+void reset_dirty_regions() {
+  for (int i = 0; i < MAX_DIRTY_REGIONS; i++) {
+    dirtyRegions[i].dirty = false;
+  }
+}
+
+// Mark a display region as needing update
+void mark_region_dirty(int16_t x, int16_t y, int16_t width, int16_t height) {
+  // Try to find an empty slot or merge with existing dirty region
+  for (int i = 0; i < MAX_DIRTY_REGIONS; i++) {
+    // If this slot is not marked dirty, use it
+    if (!dirtyRegions[i].dirty) {
+      dirtyRegions[i].x = x;
+      dirtyRegions[i].y = y;
+      dirtyRegions[i].width = width;
+      dirtyRegions[i].height = height;
+      dirtyRegions[i].dirty = true;
+      return;
+    }
+    
+    // Check if we can merge with an existing region
+    // Simple check - if regions overlap or are adjacent, combine them
+    int16_t x1 = dirtyRegions[i].x;
+    int16_t y1 = dirtyRegions[i].y;
+    int16_t w1 = dirtyRegions[i].width;
+    int16_t h1 = dirtyRegions[i].height;
+    
+    // Check if the regions overlap or are adjacent
+    if ((x <= x1 + w1 && x + width >= x1) && 
+        (y <= y1 + h1 && y + height >= y1)) {
+      // Combine the regions
+      int16_t new_x = min(x, x1);
+      int16_t new_y = min(y, y1);
+      int16_t new_right = max(x + width, x1 + w1);
+      int16_t new_bottom = max(y + height, y1 + h1);
+      
+      dirtyRegions[i].x = new_x;
+      dirtyRegions[i].y = new_y;
+      dirtyRegions[i].width = new_right - new_x;
+      dirtyRegions[i].height = new_bottom - new_y;
+      return;
+    }
+  }
+  
+  // If we reach here, all slots are used and no merge was possible
+  // Force a full screen refresh by marking the first region as full screen
+  dirtyRegions[0].x = 0;
+  dirtyRegions[0].y = 0;
+  dirtyRegions[0].width = DISPLAY_WIDTH;
+  dirtyRegions[0].height = DISPLAY_HEIGHT;
+  dirtyRegions[0].dirty = true;
+  
+  // Clear other regions
+  for (int i = 1; i < MAX_DIRTY_REGIONS; i++) {
+    dirtyRegions[i].dirty = false;
+  }
+}
+
+// Check if there are any dirty regions needing update
+bool has_dirty_regions() {
+  for (int i = 0; i < MAX_DIRTY_REGIONS; i++) {
+    if (dirtyRegions[i].dirty) {
+      return true;
+    }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
+// Consistent Frame Timing
+//------------------------------------------------------------------------------
+unsigned long lastFrameTime = 0;
+const unsigned long FRAME_INTERVAL = 33; // ~30fps (1000ms / 30fps = 33ms)
+
+// Wait until next frame time if needed
+void synchronize_frame_timing() {
+  unsigned long currentTime = millis();
+  unsigned long elapsed = currentTime - lastFrameTime;
+  
+  if (elapsed < FRAME_INTERVAL && lastFrameTime > 0) {
+    delay(FRAME_INTERVAL - elapsed);
+  }
+  
+  lastFrameTime = millis();
+}
+
 // Begin a new frame drawing cycle
 void begin_frame() {
   // Clear the internal buffer
@@ -90,10 +198,15 @@ void end_frame() {
 // Update the physical display if buffer is ready
 void update_display() {
   if (bufferReady) {
+    // Synchronize frame timing for consistent refresh rate
+    synchronize_frame_timing();
+    
     // Send buffer to display hardware
     display.display();
-    // Reset flag
+    
+    // Reset buffer status
     bufferReady = false;
+    reset_dirty_regions();
   }
 }
 
@@ -121,6 +234,10 @@ void display_progress_bar_title(const String& title) {
   display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
   display.drawString(display.getWidth() / 2, display.getHeight() / 2 - 10, title.c_str());
   display.drawProgressBar(0, 32, 127, 8, 0);
+  
+  // Mark regions as dirty
+  mark_region_dirty(0, display.getHeight() / 2 - 20, DISPLAY_WIDTH, 40);
+  
   end_frame();
   update_display();
 }
@@ -1031,6 +1148,16 @@ void display_update() {
     // Update display state for current context
     update_display_state();
     
+    // Force redraw of static elements on every frame
+    for (int i = 0; i < overlaysCount; i++) {
+      // Mark entire overlay regions as dirty
+      mark_region_dirty(0, 0, DISPLAY_WIDTH, 10);  // Top overlay
+      mark_region_dirty(0, DISPLAY_HEIGHT-13, DISPLAY_WIDTH, 13);  // Bottom overlay
+      
+      // Draw overlays
+      overlays[i](&display, ui.getUiState());
+    }
+    
     // Determine which frame to show before updating UI
     bool showPedalInfo = millis() < endMillis2 && lastPedalName[0] != ':';
     bool inMIDIModeOrClock = MTC.isPlaying() || MTC.getMode() != PED_MTC_NONE;
@@ -1045,6 +1172,9 @@ void display_update() {
       
       // Re-enable animations after frame switch
       ui.setFrameAnimation(SLIDE_LEFT);
+      
+      // Mark entire screen as dirty when switching frames
+      mark_region_dirty(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     }
     
     // Update transition mode based on current state
