@@ -5762,11 +5762,6 @@ void http_handle_update_file_upload(AsyncWebServerRequest *request, String filen
     // Start with max available size
     if (Update.begin(UPDATE_SIZE_UNKNOWN, cmd)) {
       DPRINT("Update start\n");
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_clear();
-    display_progress_bar_title("OTA Update");
-#else
-#endif
     }
     else {
       StreamString str;
@@ -5781,21 +5776,12 @@ void http_handle_update_file_upload(AsyncWebServerRequest *request, String filen
     if (Update.write(data, len) == len) {
       if (Update.size()) {
         DPRINT("Progress: %5.1f%%\n", 100.0 * Update.progress() / Update.size());
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-        display_progress_bar_update(Update.progress(), Update.size());
-#else
-#endif
       }
     }
     else {
       StreamString str;
       Update.printError(str);
       DPRINT("Update fail: %s", str.c_str());
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-      display_clear();
-      display_progress_bar_title2("Fail!", str.c_str());
-#else
-#endif
     }
   }
 
@@ -5803,20 +5789,10 @@ void http_handle_update_file_upload(AsyncWebServerRequest *request, String filen
   if (final) {
     if (Update.end(true)) {   //true to set the size to the current progress
       DPRINT("Update Success: %uB\n", index+len);
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-      display_clear();
-      display_progress_bar_title("Success!");
-#else
-#endif
     } else {
       StreamString str;
       Update.printError(str);
       DPRINT("Update fail: %s", str.c_str());
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-      display_clear();
-      display_progress_bar_title2("Fail!", str.c_str());
-#else
-#endif
     }
   }
 }

@@ -453,9 +453,6 @@ FastLED.show();
 #ifdef WIFI
   if (wifiEnabled) {
     WiFi.persistent(false);
-#if defined(ARDUINO_BPI_LEAF_S3) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    WiFi.useStaticBuffers(true);
-#endif
     WiFi.onEvent(WiFiEvent);
     if (bootMode == PED_BOOT_AP || bootMode == PED_BOOT_AP_NO_BLE) {
       DPRINT("Skipped connection to last AP and/or SmartConfig/WPS setup\n");

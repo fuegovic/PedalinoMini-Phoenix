@@ -20,10 +20,8 @@ extern "C" {
 
 #define VERSION xstr(PEDALINO_VERSION_MAJOR) "." xstr(PEDALINO_VERSION_MINOR) "." xstr(PEDALINO_VERSION_PATCH) " - " PEDALINO_VERSION_SUFFIX
 
-#if defined(LILYGO_T_DISPLAY) || defined(LILYGO_T_DISPLAY_S3) || defined(BPI_LEAF_S3)
-#define ESP32_PLATFORM_VERSION "6.9.0"
-#else
-#define ESP32_PLATFORM_VERSION "3.5.0"
+#ifndef ESP32_PLATFORM_VERSION
+#define ESP32_PLATFORM_VERSION "Unknown" // Fallback if not provided by build system
 #endif
 
 /**

@@ -16,14 +16,8 @@
 #include <HttpsOTAUpdate.h>
 
 #include "Version.h"
-
-#if defined(ARDUINO_BPI_LEAF_S3) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-#define OTA_PARTITION_SIZE    0x360000            // 3538944 bytes
-#define FIRMWARE_MAX_SIZE     (8 * 1024 * 1024)   // 8M
-#else
 #define OTA_PARTITION_SIZE    0x1D0000            // 1900544 bytes
 #define FIRMWARE_MAX_SIZE     (4 * 1024 * 1024)   // 4M
-#endif
 
 String            latestFirmwareVersion = VERSION;
 String            url;
@@ -210,16 +204,13 @@ void ota_https_update_event_handler(HttpEvent_t *event) {
         case HTTP_EVENT_ON_CONNECTED:
             DPRINT("HTTP_EVENT_ON_CONNECTED\n");
             otaProgress = 0;
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_clear();
-    display_progress_bar_title("OTA Update");
-#else
+
     display.clear();
     display.setFont(ArialMT_Plain_10);
     display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
     display.drawString(display.getWidth() / 2, display.getHeight() / 2 - 10, "OTA Update");
     display.display();
-#endif
+
             break;
         case HTTP_EVENT_HEADER_SENT:
             DPRINT("HTTP_EVENT_HEADER_SENT\n");
@@ -230,28 +221,19 @@ void ota_https_update_event_handler(HttpEvent_t *event) {
         case HTTP_EVENT_ON_DATA:
             DPRINT("#");
             otaProgress += event->data_len;
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_progress_bar_update(otaProgress, FIRMWARE_MAX_SIZE);
-#else
     display.drawProgressBar(4, 32, 120, 8, otaProgress / (FIRMWARE_MAX_SIZE / 100) );
     display.display();
-#endif
             break;
         case HTTP_EVENT_ON_FINISH:
             DPRINT("HTTP_EVENT_ON_FINISH\n");
             break;
         case HTTP_EVENT_DISCONNECTED:
             DPRINT("HTTP_EVENT_DISCONNECTED\n");
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_clear();
-    display_progress_bar_title("Restart");
-#else
     display.clear();
     display.setFont(ArialMT_Plain_10);
     display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
     display.drawString(display.getWidth() / 2, display.getHeight() / 2, "Restart");
     display.display();
-#endif
             break;
     }
 }
