@@ -1219,3 +1219,12 @@ void display_update() {
     off = false; 
   }
 }
+
+void display_prepare() {
+  // Draw to buffer only
+  ui.update();
+}
+
+void display_update_from_buffer() {
+  display.display(); // Just transfer buffer to screen
+}
