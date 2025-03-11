@@ -41,7 +41,6 @@
 #define MAXACTIONNAME    16
 #define MAXBANKNAME      16
 
-// #define PROFILE_LED      20                // Set to be the last led of the strip instead
 #define PROFILE_A_COLOR  CRGB(255, 25, 0);    // Color for profile 0
 #define PROFILE_B_COLOR  CRGB(0, 255, 255);   // Color for profile 1
 #define PROFILE_C_COLOR  CRGB(255, 0, 255);   // Color for profile 2

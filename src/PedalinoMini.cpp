@@ -87,8 +87,13 @@
 
 TaskHandle_t loopCore0;   // loop0() on core 0
 TaskHandle_t loopCore1;   // loop1() on core 1
+TaskHandle_t displayTaskHandle;
 void loop0(void * pvParameters);
 void loop1(void * pvParameters);
+void displayTask(void * parameter);
+
+SemaphoreHandle_t displaySemaphore = NULL;
+volatile bool displayBufferReady = false;
 
 void verbose_print_reset_reason(int reason)
 {
@@ -563,6 +568,16 @@ FastLED.show();
   set_initial_led_color();
   update_profile_led();
 
+  // Create display task on Core 1 instead of Core 0
+  xTaskCreatePinnedToCore(
+                    displayTask,      // Task function
+                    "DisplayTask",    // Name
+                    4096,             // Stack size
+                    NULL,             // Parameters
+                    2,                // Priority (2 is higher than loop1 but still allows MIDI interrupts)
+                    &displayTaskHandle,// Task handle
+                    1);               // Pin to Core 1 (changed from 0)
+
   xTaskCreatePinnedToCore(
                     loop1,       /* Task function. */
                     "loopTask1", /* name of task. */
@@ -703,9 +718,6 @@ void loop0(void * pvParameters)
 
     wifi_and_battery_level();
 
-    // Update display
-    display_update();
-
     switch (firmwareUpdate) {
       case PED_UPDATE_ARDUINO_OTA:
       case PED_UPDATE_HTTP:
@@ -748,6 +760,52 @@ void loop0(void * pvParameters)
           delay(1);
         }
         return;
+    }
+  }
+}
+
+// Advanced display task optimization with ESP32's tick system
+void displayTask(void * parameter) {
+  TickType_t xLastWakeTime;
+  const TickType_t xFrequency = pdMS_TO_TICKS(33); // ~30Hz
+  
+  // Initialize the last wake time
+  xLastWakeTime = xTaskGetTickCount();
+  
+  // Allow brief yield after initialization
+  vTaskDelay(pdMS_TO_TICKS(10));
+  
+  while(true) {
+    // Critical MIDI operations might be happening - yield briefly
+    taskYIELD();
+    
+    // Wait for the next cycle with exact timing
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    
+    if (displayInit) display_init();
+    
+    if (uiUpdate && !reloadProfile) {
+      // Use shorter critical sections
+      #if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
+        topOverlay();
+        // Allow MIDI interrupts between drawing operations
+        taskYIELD();
+        drawFrame1(0, 0);
+        taskYIELD();
+        bottomOverlay();
+      #else
+        display_update();
+      #endif
+    }
+    
+    // Handle display on/off
+    bool currentDisplayOff = screenSaverTimeout == 0 ? false : 
+                          ((millis() - displayOffCountdownStart) > screenSaverTimeout);
+                          
+    if (displayOff != currentDisplayOff) {
+      displayOff = currentDisplayOff;
+      if (displayOff) display_off(); else display_on();
+      if (displayOff) leds_off(); else leds_refresh();
     }
   }
 }

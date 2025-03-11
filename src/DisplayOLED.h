@@ -54,53 +54,275 @@ SSD1306Wire               display(OLED_I2C_ADDRESS, OLED_I2C_SDA, OLED_I2C_SCL);
 OLEDDisplayUi ui(&display);
 bool          uiUpdate = true;
 
-void display_clear()
-{
-  display.clear();
-  display.display();
+//------------------------------------------------------------------------------
+// Display state variables and frame tracking
+//------------------------------------------------------------------------------
+int currentFrame = 0;          // Tracks currently displayed frame
+bool manualTransition = true;  // Controls if transitions happen automatically or manually
+
+//------------------------------------------------------------------------------
+// Progress bar and display state variables
+//------------------------------------------------------------------------------
+String progressTitle1 = "";    // First title line for progress bar
+String progressTitle2 = "";    // Second title line for progress bar
+int progressBarValue = 0;      // Current progress value
+int progressBarTotal = 100;    // Maximum progress value
+
+//------------------------------------------------------------------------------
+// Buffer Management for Double Buffering
+//------------------------------------------------------------------------------
+
+// Flag to indicate when a frame is ready
+bool bufferReady = false;
+
+//------------------------------------------------------------------------------
+// Dirty Rectangle Tracking for Efficient Updates
+//------------------------------------------------------------------------------
+#define MAX_DIRTY_REGIONS 5
+
+struct DirtyRect {
+  int16_t x;
+  int16_t y;
+  int16_t width;
+  int16_t height;
+  bool dirty;
+};
+
+DirtyRect dirtyRegions[MAX_DIRTY_REGIONS] = {
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false},
+  {0, 0, 0, 0, false}
+};
+
+// Reset all dirty regions after display update
+void reset_dirty_regions() {
+  for (int i = 0; i < MAX_DIRTY_REGIONS; i++) {
+    dirtyRegions[i].dirty = false;
+  }
 }
 
-void display_progress_bar_title(const String& title)
-{
+// Mark a display region as needing update
+void mark_region_dirty(int16_t x, int16_t y, int16_t width, int16_t height) {
+  // Try to find an empty slot or merge with existing dirty region
+  for (int i = 0; i < MAX_DIRTY_REGIONS; i++) {
+    // If this slot is not marked dirty, use it
+    if (!dirtyRegions[i].dirty) {
+      dirtyRegions[i].x = x;
+      dirtyRegions[i].y = y;
+      dirtyRegions[i].width = width;
+      dirtyRegions[i].height = height;
+      dirtyRegions[i].dirty = true;
+      return;
+    }
+    
+    // Check if we can merge with an existing region
+    // Simple check - if regions overlap or are adjacent, combine them
+    int16_t x1 = dirtyRegions[i].x;
+    int16_t y1 = dirtyRegions[i].y;
+    int16_t w1 = dirtyRegions[i].width;
+    int16_t h1 = dirtyRegions[i].height;
+    
+    // Check if the regions overlap or are adjacent
+    if ((x <= x1 + w1 && x + width >= x1) && 
+        (y <= y1 + h1 && y + height >= y1)) {
+      // Combine the regions
+      int16_t new_x = min(x, x1);
+      int16_t new_y = min(y, y1);
+      int16_t new_right = max(x + width, x1 + w1);
+      int16_t new_bottom = max(y + height, y1 + h1);
+      
+      dirtyRegions[i].x = new_x;
+      dirtyRegions[i].y = new_y;
+      dirtyRegions[i].width = new_right - new_x;
+      dirtyRegions[i].height = new_bottom - new_y;
+      return;
+    }
+  }
+  
+  // If we reach here, all slots are used and no merge was possible
+  // Force a full screen refresh by marking the first region as full screen
+  dirtyRegions[0].x = 0;
+  dirtyRegions[0].y = 0;
+  dirtyRegions[0].width = DISPLAY_WIDTH;
+  dirtyRegions[0].height = DISPLAY_HEIGHT;
+  dirtyRegions[0].dirty = true;
+  
+  // Clear other regions
+  for (int i = 1; i < MAX_DIRTY_REGIONS; i++) {
+    dirtyRegions[i].dirty = false;
+  }
+}
+
+// Check if there are any dirty regions needing update
+bool has_dirty_regions() {
+  for (int i = 0; i < MAX_DIRTY_REGIONS; i++) {
+    if (dirtyRegions[i].dirty) {
+      return true;
+    }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
+// Consistent Frame Timing
+//------------------------------------------------------------------------------
+unsigned long lastFrameTime = 0;
+const unsigned long FRAME_INTERVAL = 33; // ~30fps (1000ms / 30fps = 33ms)
+
+// Wait until next frame time if needed
+void synchronize_frame_timing() {
+  unsigned long currentTime = millis();
+  unsigned long elapsed = currentTime - lastFrameTime;
+  
+  if (elapsed < FRAME_INTERVAL && lastFrameTime > 0) {
+    delay(FRAME_INTERVAL - elapsed);
+  }
+  
+  lastFrameTime = millis();
+}
+
+// Begin a new frame drawing cycle
+void begin_frame() {
+  // Clear the internal buffer
   display.clear();
+}
+
+// Complete frame drawing and mark buffer as ready
+void end_frame() {
+  // Mark buffer as ready for display
+  bufferReady = true;
+}
+
+// Update the physical display if buffer is ready
+void update_display() {
+  if (bufferReady) {
+    // Synchronize frame timing for consistent refresh rate
+    synchronize_frame_timing();
+    
+    // Send buffer to display hardware
+    display.display();
+    
+    // Reset buffer status
+    bufferReady = false;
+    reset_dirty_regions();
+  }
+}
+
+//------------------------------------------------------------------------------
+// Modified Display Drawing Functions (Double Buffered)
+//------------------------------------------------------------------------------
+
+// Clear display with double buffering
+void display_clear() {
+  begin_frame();
+  // Nothing to draw - buffer already cleared
+  end_frame();
+  update_display();
+}
+
+// Display progress bar with double buffering
+void display_progress_bar_title(const String& title) {
+  progressTitle1 = title;
+  progressTitle2 = "";
+  progressBarValue = 0;
+  progressBarTotal = 100;
+  
+  begin_frame();
   display.setFont(ArialMT_Plain_10);
   display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
   display.drawString(display.getWidth() / 2, display.getHeight() / 2 - 10, title.c_str());
-  display.display();
+  display.drawProgressBar(0, 32, 127, 8, 0);
+  
+  // Mark regions as dirty
+  mark_region_dirty(0, display.getHeight() / 2 - 20, DISPLAY_WIDTH, 40);
+  
+  end_frame();
+  update_display();
 }
 
-void display_progress_bar_title2(const String& title1, const String& title2)
-{
-  display.clear();
+void display_progress_bar_title2(const String& title1, const String& title2) {
+  progressTitle1 = title1;
+  progressTitle2 = title2;
+  progressBarValue = 0;
+  progressBarTotal = 100;
+  
+  begin_frame();
   display.setTextAlignment(TEXT_ALIGN_CENTER);
   display.setFont(ArialMT_Plain_10);
   display.drawString(display.getWidth() / 2, 0, title1.c_str());
   if (display.getStringWidth(title2) <= display.width()) display.setFont(ArialMT_Plain_16);
   display.drawString(display.getWidth() / 2, 10, title2.c_str());
-  display.display();
+  end_frame();
+  update_display();
 }
 
-void display_progress_bar_update(unsigned int progress, unsigned int total)
-{
-  display.setColor(BLACK);
-  display.fillRect(0, 32, 127, 8);
+void display_progress_bar_update(unsigned int progress, unsigned int total) {
+  progressBarValue = progress;
+  progressBarTotal = total;
+  
+  begin_frame();
+  // Redraw titles to keep them visible
+  display.setTextAlignment(TEXT_ALIGN_CENTER);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(display.getWidth() / 2, 0, progressTitle1.c_str());
+  
+  if (progressTitle2.length() > 0) {
+    if (display.getStringWidth(progressTitle2) <= display.width()) {
+      display.setFont(ArialMT_Plain_16);
+    }
+    display.drawString(display.getWidth() / 2, 10, progressTitle2.c_str());
+  }
+  
+  // Draw progress bar
   display.drawProgressBar(0, 32, 127, 8, 100*progress/total);
-  display.display();
+  end_frame();
+  update_display();
 }
 
-void display_progress_bar_2_update(unsigned int progress, unsigned int total)
-{
-  display.setColor(BLACK);
-  display.fillRect(0, 54, 127, 8);
+void display_progress_bar_2_update(unsigned int progress, unsigned int total) {
+  begin_frame();
+  // Redraw titles
+  display.setTextAlignment(TEXT_ALIGN_CENTER);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(display.getWidth() / 2, 0, progressTitle1.c_str());
+  
+  if (progressTitle2.length() > 0) {
+    if (display.getStringWidth(progressTitle2) <= display.width()) {
+      display.setFont(ArialMT_Plain_16);
+    }
+    display.drawString(display.getWidth() / 2, 10, progressTitle2.c_str());
+  }
+  
+  // Draw both progress bars
+  display.drawProgressBar(0, 32, 127, 8, 100*progress/total);
   display.drawProgressBar(0, 54, 127, 8, 100*progress/total);
-  display.display();
+  end_frame();
+  update_display();
 }
 
-void display_progress_bar_2_label(unsigned int label, unsigned int x)
-{
+void display_progress_bar_2_label(unsigned int label, unsigned int x) {
   const String l(label);
 
-  display.setColor(WHITE);
+  begin_frame();
+  // Redraw titles
+  display.setTextAlignment(TEXT_ALIGN_CENTER);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(display.getWidth() / 2, 0, progressTitle1.c_str());
+  
+  if (progressTitle2.length() > 0) {
+    if (display.getStringWidth(progressTitle2) <= display.width()) {
+      display.setFont(ArialMT_Plain_16);
+    }
+    display.drawString(display.getWidth() / 2, 10, progressTitle2.c_str());
+  }
+  
+  // Draw progress bars
+  display.drawProgressBar(0, 32, 127, 8, 100*progressBarValue/progressBarTotal);
+  display.drawProgressBar(0, 54, 127, 8, 100*progressBarValue/progressBarTotal);
+  
+  // Draw label
   display.setFont(ArialMT_Plain_10);
   if (x <= display.getStringWidth(l) / 2) {
     display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -114,8 +336,10 @@ void display_progress_bar_2_label(unsigned int label, unsigned int x)
     display.setTextAlignment(TEXT_ALIGN_CENTER);
     display.drawString(x, 42, l);
   }
+  
   display.drawLine(x, 53, x, 63);
-  display.display();
+  end_frame();
+  update_display();
 }
 
 void topOverlay(OLEDDisplay *display, OLEDDisplayUiState* state)
@@ -813,23 +1037,24 @@ void display_boot()
 
 #ifdef WIFI
   if (wifiEnabled) {
-    display.clear();
+    begin_frame();
     display.drawXbm((display.getWidth() - WIFI_LOGO_WIDTH) / 2, (display.getHeight() - WIFI_LOGO_HEIGHT) / 2, WIFI_LOGO_WIDTH, WIFI_LOGO_HEIGHT, WiFiLogo);
-    display.display();
+    end_frame();
+    update_display();
     delay(1000);
   }
 #endif
 
 #ifdef BLE
   if (bleEnabled) {
-    display.clear();
+    begin_frame();
     display.drawXbm((display.getWidth() - BLUETOOTH_LOGO_WIDTH) / 2, (display.getHeight() - BLUETOOTH_LOGO_HEIGHT) / 2, BLUETOOTH_LOGO_WIDTH, BLUETOOTH_LOGO_HEIGHT, BluetoothLogo);
-    display.display();
+    end_frame();
+    update_display();
     delay(1000);
   }
 #endif
-  display.clear();
-  display.display();
+  display_clear();
 }
 
 void display_init()
@@ -891,15 +1116,115 @@ void display_on()
   display.displayOn();
 }
 
-void display_update()
-{
+//------------------------------------------------------------------------------
+// Frame transition control functions
+//------------------------------------------------------------------------------
+
+// Enable automatic frame transitions
+void enable_auto_transition() {
+  manualTransition = false;
+  ui.enableAutoTransition();
+}
+
+// Disable automatic frame transitions
+void disable_auto_transition() {
+  manualTransition = true;
+  ui.disableAutoTransition();
+}
+
+// Update display state based on current context
+void update_display_state() {
+  // Get current frame from UI state
+  currentFrame = ui.getUiState()->currentFrame;
+}
+
+// Update main display UI with double buffering
+void display_update() {
   static bool off = false;
 
-  if (displayInit)                display_init();
-  if (uiUpdate && !reloadProfile) ui.update();
+  if (displayInit) display_init();
+  
+  if (uiUpdate && !reloadProfile) {
+    // Update display state for current context
+    update_display_state();
+    
+    // Force redraw of static elements on every frame
+    for (int i = 0; i < overlaysCount; i++) {
+      // Mark entire overlay regions as dirty
+      mark_region_dirty(0, 0, DISPLAY_WIDTH, 10);  // Top overlay
+      mark_region_dirty(0, DISPLAY_HEIGHT-13, DISPLAY_WIDTH, 13);  // Bottom overlay
+      
+      // Draw overlays
+      overlays[i](&display, ui.getUiState());
+    }
+    
+    // Determine which frame to show before updating UI
+    bool showPedalInfo = millis() < endMillis2 && lastPedalName[0] != ':';
+    bool inMIDIModeOrClock = MTC.isPlaying() || MTC.getMode() != PED_MTC_NONE;
+    
+    // Frame switching logic - determine the appropriate frame
+    if (currentFrame > 0 && (showPedalInfo || inMIDIModeOrClock || !scrollingMode)) {
+      // Use a valid AnimationDirection value for no/minimal animation
+      ui.setFrameAnimation(SLIDE_UP);
+      
+      // Return to main frame (frame 0) when we need to show important information
+      ui.switchToFrame(0);
+      
+      // Re-enable animations after frame switch
+      ui.setFrameAnimation(SLIDE_LEFT);
+      
+      // Mark entire screen as dirty when switching frames
+      mark_region_dirty(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    }
+    
+    // Update transition mode based on current state
+    if (scrollingMode && manualTransition && 
+        !inMIDIModeOrClock && !showPedalInfo) {
+      // Use a valid AnimationDirection value for no/minimal animation
+      ui.setFrameAnimation(SLIDE_UP);
+      
+      enable_auto_transition();
+      
+      // Re-enable animations after transition mode change
+      ui.setFrameAnimation(SLIDE_LEFT);
+    }
+    else if ((!scrollingMode && !manualTransition) || 
+             (manualTransition && (showPedalInfo || inMIDIModeOrClock))) {
+      // Use a valid AnimationDirection value for no/minimal animation
+      ui.setFrameAnimation(SLIDE_UP);
+      
+      disable_auto_transition();
+      
+      // Re-enable animations after transition mode change
+      ui.setFrameAnimation(SLIDE_LEFT);
+    }
+    
+    // Update UI and draw to buffer
+    ui.update();
+    
+    // Update display in one operation
+    update_display();
+  }
 
   displayOff = screenSaverTimeout == 0 ? false : ((millis() - displayOffCountdownStart) > screenSaverTimeout);
 
-  if (!off && displayOff) { display_off(); leds_off();     off = true;  }
-  if (off && !displayOff) { display_on();  leds_refresh(); off = false; }
+  if (!off && displayOff) { 
+    display_off(); 
+    leds_off();     
+    off = true;  
+  }
+  if (off && !displayOff) { 
+    display_on();  
+    leds_refresh(); 
+    off = false; 
+  }
+}
+
+void display_prepare() {
+  // Draw to buffer only
+  ui.update();
+}
+
+void display_update_from_buffer() {
+  display.display(); // Just transfer buffer to screen
 }

@@ -16,6 +16,7 @@ PedalinoMini Phoenix is a significant evolution of the original **[PedalinoMiniâ
 - **Better User Experience**: Redesigned homepage with a card-based layout displaying system status at a glance.
 - **Simplified Setup**: Preconfigured credentials and default settings make initial setup quick and easy.
 - **Visual Enhancements**: New LED effects and animations provide clear system status feedback.
+- **Optimized Display Performance**: Fixed SSD1306 OLED display glitches on ESP32 through advanced multi-core task scheduling and cooperative yielding between display and MIDI operations.
 - **Comprehensive Documentation**: Organized and accessible docs using mkdocs.
 
 > This refresh retains the core functionality that made the original PedalinoMini popular while adding modern touches and quality-of-life improvements for performers.

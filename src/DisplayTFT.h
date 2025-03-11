@@ -1499,3 +1499,21 @@ void display_update()
     if (off && !displayOff) { display_on();  leds_refresh(); off = false; }
   }
 }
+
+void prepareTopOverlay() {
+  tft.startWrite();  // Start SPI transaction but don't commit
+  topOverlay();
+  // Don't call tft.endWrite() yet
+}
+
+void prepareFrame1(int16_t x, int16_t y) {
+  drawFrame1(x, y);
+}
+
+void prepareBottomOverlay() {
+  bottomOverlay();
+}
+
+void updateDisplay() {
+  tft.endWrite();  // Just finish the SPI transaction to update screen
+}
