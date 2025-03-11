@@ -32,10 +32,6 @@
 #endif
 
 #include <Arduino.h>
-#ifdef TTGO_T_EIGHT
-#include "esp32-hal-psram.h"
-#endif
-
 #include <esp32-hal-log.h>
 #include <esp_adc_cal.h>
 #include <esp_partition.h>
@@ -55,11 +51,7 @@
 #include "UdpMidiIn.h"
 #include "BLEMidiIn.h"
 #include "Config.h"
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-#include "DisplayTFT.h"
-#else
 #include "DisplayOLED.h"
-#endif
 #include "Controller.h"
 #include "OTAHTTPS.h"
 #include "ImprovSerial.h"
@@ -67,23 +59,7 @@
 #include "OTAUpdateArduino.h"
 #include "WifiConnect.h"
 #include "WebConfigAsync.h"
-
-
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0)
-#if CONFIG_IDF_TARGET_ESP32
-#include <esp32/rom/rtc.h>
-#elif CONFIG_IDF_TARGET_ESP32S2
-#include <esp32s2/rom/rtc.h>
-#elif CONFIG_IDF_TARGET_ESP32C3
-#include <esp32c3/rom/rtc.h>
-#elif CONFIG_IDF_TARGET_ESP32S3
-#include <esp32s3/rom/rtc.h>
-#else
-#error Target CONFIG_IDF_TARGET is not supported
-#endif
-#else // ESP32 Before IDF 4.0
 #include <rom/rtc.h>
-#endif
 
 TaskHandle_t loopCore0;   // loop0() on core 0
 TaskHandle_t loopCore1;   // loop1() on core 1
@@ -131,32 +107,6 @@ void wifi_and_battery_level() {
     if (wifiEnabled) wifiLevel = (3 * wifiLevel + WiFi.RSSI()) / 4;
 #endif // WIFI
 
-#ifdef BATTERY
-#ifdef BATTERY_ADC_EN
-    /*
-      BATTERY_ADC_EN is the ADC detection enable port
-      If the USB port is used for power supply, it is turned on by default.
-      If it is powered by battery, it needs to be set to high level
-    */
-    pinMode(BATTERY_ADC_EN, OUTPUT);
-    digitalWrite(BATTERY_ADC_EN, HIGH);
-    delay(10);
-#endif // BATTERY_ADC_EN
-    //analogReadResolution(12);
-    uint16_t voltage = analogReadMilliVolts(BATTERY_PIN) * 2; // Read the ADC voltage using the built in factory calibration, no conversion needed.
-                                                              // Battery voltage is measured using a voltage divider
-    //analogReadResolution(ADC_RESOLUTION_BITS);
-#ifdef BATTERY_ADC_EN
-    digitalWrite(BATTERY_ADC_EN, LOW);
-#endif // BATTERY_ADC_EN
-    uint16_t difference = abs(voltage - batteryVoltage);
-    //DPRINT("%d %d %d %d\n", voltage, batteryVoltage, difference, map2(constrain(batteryVoltage, 3000, 5000), 3000, 5000, 0, 100));
-    if (difference > 100)
-      batteryVoltage = (uint16_t)voltage;
-    else
-      batteryVoltage = (7 * batteryVoltage + voltage) / 8;
-#endif // BATTERY
-
 #ifdef DIAGNOSTIC
     static byte sec = 0;
 
@@ -178,10 +128,6 @@ void wifi_and_battery_level() {
 void setup()
 {
 #ifdef DEBUG_ESP_PORT
-  //esp_log_level_set("*",      ESP_LOG_ERROR);
-  //esp_log_level_set("wifi",   ESP_LOG_WARN);
-  //esp_log_level_set("BLE*",   ESP_LOG_ERROR);
-  //esp_log_level_set(LOG_TAG,  ESP_LOG_INFO);
 #endif
 
 #ifdef SERIALDEBUG
@@ -217,32 +163,6 @@ void setup()
   for (byte p = 0; p < PEDALS; p++) {
     if (rtc_gpio_is_valid_gpio((gpio_num_t)PIN_D(p))) rtc_gpio_deinit((gpio_num_t)PIN_D(p));
   }
-
-#ifdef BATTERY_PIN
-  //Check type of calibration value used to characterize ADC for BATTERY_PIN
-  esp_adc_cal_characteristics_t adc_chars = {};
-#if defined ARDUINO_LILYGO_T_DISPLAY
-  // GPIO34
-  esp_adc_cal_value_t           val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-#elif defined ARDUINO_BPI_LEAF_S3
-  // GPIO14
-  esp_adc_cal_value_t           val_type = esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-#elif defined ARDUINO_LILYGO_T_DISPLAY_S3
-  // GPIO04
-  esp_adc_cal_value_t           val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-#else
-  // GPIO__
-  esp_adc_cal_value_t           val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-#endif
-  if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
-    vref = adc_chars.vref;
-    DPRINT("eFuse Vref:%u mV\n", adc_chars.vref);
-  } else if (val_type == ESP_ADC_CAL_VAL_EFUSE_TP) {
-    DPRINT("Two Point --> coeff_a:%umV coeff_b:%umV\n", adc_chars.coeff_a, adc_chars.coeff_b);
-  } else {
-    DPRINT("Default Vref: 1100mV\n");
-  }
-#endif // BATTERY_PIN
 
   // Setup a 1Hz timer for wifi and battery level monitoring and logging
   Timer1Attach(1000);
@@ -738,10 +658,10 @@ void loop0(void * pvParameters)
           otaStatus = HttpsOTA.status();
           switch (otaStatus) {
             case HTTPS_OTA_IDLE:
-              //DPRINT("OTA upgrade have not started yet.\n");
+              DPRINT("OTA upgrade have not started yet.\n");
               break;
             case HTTPS_OTA_UPDATING:
-              //DPRINT("OTA upgrade is in progress.\n");
+              DPRINT("OTA upgrade is in progress.\n");
               break;
             case HTTPS_OTA_SUCCESS:
               DPRINT("OTA upgrade is successful.\n");
@@ -785,17 +705,7 @@ void displayTask(void * parameter) {
     if (displayInit) display_init();
     
     if (uiUpdate && !reloadProfile) {
-      // Use shorter critical sections
-      #if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-        topOverlay();
-        // Allow MIDI interrupts between drawing operations
-        taskYIELD();
-        drawFrame1(0, 0);
-        taskYIELD();
-        bottomOverlay();
-      #else
         display_update();
-      #endif
     }
     
     // Handle display on/off

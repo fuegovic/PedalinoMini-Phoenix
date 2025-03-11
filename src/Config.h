@@ -873,201 +873,6 @@ void load_factory_default()
   }
   strlcpy(banknames[0], "Global", MAXBANKNAME+1);
 
-#ifdef TTGO_T_EIGHT
-  for (byte p = 0; p < PEDALS; p++) {
-    pedals[p] = {PED_DISABLE,    // autosensing
-                 (p < 3 || p > 5) ? PED_MOMENTARY1 : PED_JOG_WHEEL, // mode
-                 PED_PRESS_1,    // press mode
-                 PED_DISABLE,    // invert polarity
-                 PED_DISABLE,    // latch emulation
-                 0,              // map function
-                 ADC_RESOLUTION * 10 / 100,  // expression pedal zero
-                 ADC_RESOLUTION * 90 / 100,  // expression pedal max
-                 0.01,           // snap multiplier
-                 8.0,            // activity threshold
-                 1.0,
-                 0.8,
-                 20,
-                 10,
-                 12,
-                 3.2,
-                 0,              // last state of switch 1
-                 0,              // last state of switch 2
-                 millis(),       // last time switch 1 status changed
-                 millis(),       // last time switch 2 status changed
-                 0, 0, 0, 0, 0, 0,   // latch emulation status
-                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                 nullptr, nullptr, nullptr, nullptr,
-                 nullptr
-                };
-  }
-  pedals[PEDALS-2].pressMode = PED_PRESS_1_2_L;
-  action *act;
-  act = actions[0] = (action*)malloc(sizeof(action));
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 36;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_PRESS;
-  act->midiMessage  = PED_ACTION_BANK_PLUS;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 1;
-  act->midiValue2   = BANKS - 1;
-  act->slot         = SLOTS;
-  act->oscAddress[0] = 0;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 38;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_PRESS;
-  act->midiMessage  = PED_ACTION_BANK_MINUS;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 1;
-  act->midiValue2   = BANKS - 1;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 37;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_DOUBLE_CLICK;
-  act->midiMessage  = PED_ACTION_POWER_ON_OFF;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 0;
-  act->midiValue2   = 127;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 37;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_LONG_PRESS;
-  act->midiMessage  = PED_ACTION_DEVICE_INFO;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 0;
-  act->midiValue2   = 127;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = nullptr;
-  create_banks();
-#else
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-  for (byte p = 0; p < PEDALS; p++)
-    pedals[p] = {PED_DISABLE,    // autosensing
-                 PED_MOMENTARY1, // mode
-                 PED_PRESS_1,    // press mode
-                 PED_DISABLE,    // invert polarity
-                 PED_DISABLE,    // latch emulation
-                 0,              // map function
-                 ADC_RESOLUTION * 10 / 100,  // expression pedal zero
-                 ADC_RESOLUTION * 90 / 100,  // expression pedal max
-                 0.01,           // snap multiplier
-                 8.0,            // activity threshold
-                 1.0,
-                 0.8,
-                 20,
-                 10,
-                 12,
-                 3.2,
-                 0,              // last state of switch 1
-                 0,              // last state of switch 2
-                 millis(),       // last time switch 1 status changed
-                 millis(),       // last time switch 2 status changed
-                 0, 0, 0, 0, 0, 0,   // latch emulation status
-                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                 nullptr,
-                 nullptr,
-                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                 nullptr, nullptr, nullptr, nullptr,
-                 nullptr
-                };
-  pedals[PEDALS-1].pressMode = PED_PRESS_1_2_L;
-  action *act;
-  act = actions[0] = (action*)malloc(sizeof(action));
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 36;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_PRESS;
-  act->midiMessage  = PED_ACTION_BANK_PLUS;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 1;
-  act->midiValue2   = BANKS - 1;
-  act->slot         = SLOTS;
-  act->oscAddress[0] = 0;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 37;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_CLICK;
-  act->midiMessage  = PED_ACTION_PROFILE_PLUS;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 1;
-  act->midiValue2   = PROFILES;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 37;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_DOUBLE_CLICK;
-  act->midiMessage  = PED_ACTION_POWER_ON_OFF;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 0;
-  act->midiValue2   = 127;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = (action*)malloc(sizeof(action));
-  act = act->next;
-  act->tag0[0]      = 0;
-  act->tag1[0]      = 0;
-  act->control      = 37;
-  act->led          = LEDS;
-  act->color0       = CRGB::Black;
-  act->color1       = CRGB::Black;
-  act->event        = PED_EVENT_LONG_PRESS;
-  act->midiMessage  = PED_ACTION_DEVICE_INFO;
-  act->midiChannel  = 1;
-  act->midiCode     = 0;
-  act->midiValue1   = 0;
-  act->midiValue2   = 127;
-  act->oscAddress[0] = 0;
-  act->slot         = SLOTS;
-  act->next         = nullptr;
-  create_banks();
-#else
   for (byte p = 0; p < PEDALS; p++)
     pedals[p] = {PED_DISABLE,    // autosensing
                  PED_MOMENTARY1, // mode
@@ -1114,22 +919,6 @@ void load_factory_default()
   act->oscAddress[0] = 0;
   act->slot         = SLOTS;
   act->next         = (action*)malloc(sizeof(action));
-  // act = act->next;
-  // act->tag0[0]      = 0;
-  // act->tag1[0]      = 0;
-  // act->control      = 37;
-  // act->led          = LEDS;
-  // act->color0       = CRGB::Black;
-  // act->color1       = CRGB::Black;
-  // act->event        = PED_EVENT_DOUBLE_CLICK;
-  // act->midiMessage  = PED_ACTION_PROFILE_MINUS;
-  // act->midiChannel  = 1;
-  // act->midiCode     = 0;
-  // act->midiValue1   = 0;
-  // act->midiValue2   = 127;
-  // act->oscAddress[0] = 0;
-  // act->slot         = SLOTS;
-  // act->next         = (action*)malloc(sizeof(action));
   act = act->next;
   act->tag0[0]      = 0;
   act->tag1[0]      = 0;
@@ -1147,8 +936,6 @@ void load_factory_default()
   act->slot         = SLOTS;
   act->next         = nullptr;
   create_banks();
-#endif
-#endif
 
   for (byte i = 0; i < CONTROLS; i++) {
     controls[i].pedal1  = PEDALS;
@@ -1281,24 +1068,6 @@ void eeprom_update_sta_wifi_credentials(const String& ssid = wifiSSID, const Str
   spiffs_save_globals();
 #endif
 }
-
-// void eeprom_update_ap_wifi_credentials(const String& ssid = String("Pedalino-") + getChipId(), const String& pass = getChipId())
-// {
-// #ifdef NVS
-//   DPRINT("Updating NVS ... ");
-//   preferences.begin("Global", false);
-//   preferences.putString("AP SSID", ssid);
-//   preferences.putString("AP Password", pass);
-//   preferences.end();
-//   DPRINT("done\n");
-//   DPRINT("[NVS][Global][AP SSID]:     %s\n", ssid.c_str());
-//   DPRINT("[NVS][Global][AP Password]: %s\n", pass.c_str());
-// #else
-//   ssidSoftAP     = ssid;
-//   passwordSoftAP = pass;
-//   spiffs_save_globals();
-// #endif
-// }
 
 void eeprom_update_ap_wifi_credentials(const String& ssid = "Pedalino", const String& pass = "pedalino")
 {

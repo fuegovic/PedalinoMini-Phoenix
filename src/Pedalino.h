@@ -50,91 +50,6 @@
 // These pins don’t have internal pull-ups or pull-down resistors.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/gpio.html
 
-#ifdef HELTEC_WIFI_KIT_32
-#undef  PEDALS
-#define PEDALS                6
-const byte pinD[] = {GPIO_NUM_0, GPIO_NUM_2, GPIO_NUM_26, GPIO_NUM_27, GPIO_NUM_14, GPIO_NUM_12};
-const byte pinA[] = {GPIO_NUM_36, GPIO_NUM_37, GPIO_NUM_38, GPIO_NUM_39, GPIO_NUM_34, GPIO_NUM_35};
-#define FACTORY_DEFAULT_PIN   GPIO_NUM_0    // PRG button
-#define USB_MIDI_IN_PIN       GPIO_NUM_18
-#define USB_MIDI_OUT_PIN      GPIO_NUM_19
-#define DIN_MIDI_IN_PIN       GPIO_NUM_23
-#define DIN_MIDI_OUT_PIN      GPIO_NUM_22
-#define BATTERY_PIN           GPIO_NUM_13   // Pin connected to VBAT
-#define BATTERY_ADC_EN        GPIO_NUM_21   // ADC_EN is the ADC detection enable port
-#define FASTLEDS_DATA_PIN     GPIO_NUM_5
-#elif defined ARDUINO_LILYGO_T_DISPLAY
-#undef  PEDALS
-#define PEDALS                8
-const byte pinD[] = {GPIO_NUM_25, GPIO_NUM_26, GPIO_NUM_27, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_17, GPIO_NUM_35, GPIO_NUM_0};
-const byte pinA[] = {GPIO_NUM_36, GPIO_NUM_37, GPIO_NUM_38, GPIO_NUM_39, GPIO_NUM_32, GPIO_NUM_33, GPIO_NUM_35, GPIO_NUM_0};
-#define FACTORY_DEFAULT_PIN   GPIO_NUM_0    // Button 2
-#define USB_MIDI_IN_PIN       GPIO_NUM_21   // SDA
-#define USB_MIDI_OUT_PIN      GPIO_NUM_22   // SCL
-#define DIN_MIDI_IN_PIN       GPIO_NUM_15
-#define DIN_MIDI_OUT_PIN      GPIO_NUM_2
-#define BATTERY_PIN           GPIO_NUM_34   // Pin connected to BAT (BAT is not VBAT)
-#define BATTERY_ADC_EN        GPIO_NUM_14   // ADC_EN is the ADC detection enable port
-#define FASTLEDS_DATA_PIN     GPIO_NUM_15
-#elif defined TTGO_T_EIGHT
-#undef  PEDALS
-#define PEDALS                9
-const byte pinD[] = {GPIO_NUM_25, GPIO_NUM_26, GPIO_NUM_27, GPIO_NUM_14, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_37, GPIO_NUM_38, GPIO_NUM_39};
-const byte pinA[] = {GPIO_NUM_36, GPIO_NUM_39, GPIO_NUM_34, GPIO_NUM_35, GPIO_NUM_32, GPIO_NUM_33, GPIO_NUM_37, GPIO_NUM_38, GPIO_NUM_39};
-#define FACTORY_DEFAULT_PIN   GPIO_NUM_38   // Right 37   Center 38   Left 39
-#define LATCH_PIN             GPIO_NUM_2
-#define USB_MIDI_IN_PIN       GPIO_NUM_18   // Used by SD
-#define USB_MIDI_OUT_PIN      GPIO_NUM_19   // Used by SD
-#define DIN_MIDI_IN_PIN       GPIO_NUM_15
-#define DIN_MIDI_OUT_PIN      GPIO_NUM_4
-#define BATTERY_PIN           GPIO_NUM_36   // GPIO_NUM_32 to GPIO_NUM_39 only
-#define FASTLEDS_DATA_PIN     GPIO_NUM_5
-#elif defined ARDUINO_BPI_LEAF_S3           // https://wiki.banana-pi.org/BPI-Leaf-S3
-#undef  PEDALS
-#define PEDALS                9
-// https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/gpio.html
-// Strapping pins: 0, 3, 45, 46
-// ADC1:    1-10
-// ADC2:   11-20 (19=D- 20=D+) (ADC2 module is also used by the Wi-Fi)
-// SPI0/1: 26-32 (usually used for SPI flash and PSRAM)
-// SPI0/1: 33-37 (on boards embedded with ESP32-S3R8 / ESP32-S3R8V chip, GPIO33~37 are also not recommended for other uses)
-const byte pinD[] = {GPIO_NUM_38, GPIO_NUM_39, GPIO_NUM_40, GPIO_NUM_41, GPIO_NUM_42, GPIO_NUM_43, GPIO_NUM_44, GPIO_NUM_2, GPIO_NUM_0};
-const byte pinA[] = {GPIO_NUM_4,  GPIO_NUM_5,  GPIO_NUM_6,  GPIO_NUM_7,  GPIO_NUM_8,  GPIO_NUM_9,  GPIO_NUM_10, GPIO_NUM_2, GPIO_NUM_0};
-#define FACTORY_DEFAULT_PIN   GPIO_NUM_0    // Button BOOT
-#define DIN_MIDI_IN_PIN       GPIO_NUM_21
-#define DIN_MIDI_OUT_PIN      GPIO_NUM_47
-#define BATTERY_PIN           GPIO_NUM_14   // Pin connected to +BATT
-#define FASTLEDS_DATA_PIN     GPIO_NUM_48
-#undef  SDA
-#undef  SCL
-#define SDA                   GPIO_NUM_15
-#define SCL                   GPIO_NUM_16
-#elif defined ARDUINO_LILYGO_T_DISPLAY_S3   // https://github.com/Xinyuan-LilyGO/T-Display-S3
-#undef  PEDALS
-#define PEDALS                8
-// https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/gpio.html
-// Strapping pins: 0, 3, 45, 46
-// ADC1:    1-10
-// ADC2:   11-20 (19=D- 20=D+) (ADC2 module is also used by the Wi-Fi)
-// SPI0/1: 26-32 (usually used for SPI flash and PSRAM)
-// SPI0/1: 33-37 (board with ESP32-S3R8 chip not recommended for other uses)
-//const byte pinD[] = {GPIO_NUM_10, GPIO_NUM_2,  GPIO_NUM_43, GPIO_NUM_44, GPIO_NUM_21, GPIO_NUM_1,  GPIO_NUM_14, GPIO_NUM_0};
-//const byte pinA[] = {GPIO_NUM_11, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_18, GPIO_NUM_14, GPIO_NUM_0};
-// Analog pedals are supported only on pedal 4, 5 and 6 because there are not enough available GPIO on ADC1
-//const byte pinD[] = {GPIO_NUM_11, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_18, GPIO_NUM_14, GPIO_NUM_0};
-//const byte pinA[] = {GPIO_NUM_44, GPIO_NUM_43, GPIO_NUM_21, GPIO_NUM_10, GPIO_NUM_2,  GPIO_NUM_1,  GPIO_NUM_14, GPIO_NUM_0};
-// Analog pedals are not supported on pedal 1 and 2 because there are only 4 available GPIOs on ADC1
-const byte pinD[] = {GPIO_NUM_11, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_18, GPIO_NUM_14, GPIO_NUM_0};
-const byte pinA[] = {GPIO_NUM_44, GPIO_NUM_43, GPIO_NUM_10, GPIO_NUM_3,  GPIO_NUM_2,  GPIO_NUM_1,  GPIO_NUM_14, GPIO_NUM_0};
-#define FACTORY_DEFAULT_PIN   GPIO_NUM_0    // Button BOOT
-#define DIN_MIDI_IN_PIN       GPIO_NUM_1
-#define DIN_MIDI_OUT_PIN      GPIO_NUM_1
-#define BATTERY_PIN           GPIO_NUM_4    // Pin connected to BAT (BAT is not VBAT)
-#define FASTLEDS_DATA_PIN     GPIO_NUM_21
-#else
-#undef  PEDALS
-#define PEDALS                 15
-
 // Digital pins for switches/pedals
 const byte pinD[] = {
   GPIO_NUM_23,  // Pedal  1 - Digital Switch
@@ -177,7 +92,6 @@ const byte pinA[] = {
 #define USB_MIDI_OUT_PIN      GPIO_NUM_19
 #define DIN_MIDI_IN_PIN       GPIO_NUM_15
 #define DIN_MIDI_OUT_PIN      GPIO_NUM_4
-// #define BATTERY_PIN           GPIO_NUM_36   // GPIO_NUM_32 to GPIO_NUM_39 only
 #define FASTLEDS_DATA_PIN     GPIO_NUM_5
 #endif
 
@@ -197,7 +111,6 @@ typedef uint8_t   byte;
 #include <AceButton.h>                  // https://github.com/bxparks/AceButton
 #include <hellodrum.h>                  // https://github.com/RyoKosaka/HelloDrum-arduino-Library
 #include <Adafruit_ADS1X15.h>           // https://github.com/adafruit/Adafruit_ADS1X15
-//#include "AnalogPad.h"
 using namespace ace_button;
 
 #define DEBOUNCE_INTERVAL        5
@@ -300,8 +213,6 @@ const char *pedalModeName[] = {"", "None", "Momentary 1", "Latch", "Analog", "Jo
 
 const char *pedalPressModeName[] = {"None", "1", "2", "12", "L", "1L","2L", "12L"};
 
-//#define PED_MIDI                1
-//#define PED_ACTIONS             PED_MIDI
 #define PED_BANK_PLUS           2
 #define PED_BANK_MINUS          3
 #define PED_START               4
@@ -449,7 +360,6 @@ struct pedal {
   MD_REncoder           *jogwheel;
   ResponsiveAnalogRead  *analogPedal[ADC_CHANNELS];
   Adafruit_ADS1115      *ads[ADC_BOARDS];
-  //AnalogPad             *analogPad;
   HelloDrum             *analogPad;
 };
 
@@ -586,11 +496,7 @@ int    wifiLevel    = 0;
 uint16_t  batteryVoltage = 4200;  // mV
 
 #ifdef DIAGNOSTIC
-#ifdef ARDUINO_LILYGO_T_DISPLAY_S3
-#define POINTS                        320             // Logged data points
-#else
 #define POINTS                        240             // Logged data points
-#endif // ARDUINO_LILYGO_T_DISPLAY_S3
 #define SECONDS_BETWEEN_SAMPLES       1
 #define GRAPH_DURATION                POINTS * SECONDS_BETWEEN_SAMPLES
 #define GRAPH_DURATION_QUARTER_SEC    GRAPH_DURATION / 4
@@ -621,8 +527,6 @@ uint32_t vref = 1100;
 #include <esp_log.h>
 #define SERIALDEBUG       Serial
 #define LOG_TAG           "PedalinoESP"
-//#define DPRINT(...)       ESP_LOGI(LOG_TAG, __VA_ARGS__)
-//#define DPRINTLN(...)     ESP_LOGI(LOG_TAG, __VA_ARGS__)
 // Define safer debug print macros that handle format specifiers better
 // Note: When using these macros, make sure to use the correct format specifier for your data type:
 // - %d for int
@@ -630,12 +534,15 @@ uint32_t vref = 1100;
 // - %ld for long
 // - %lu for unsigned long
 // - %f for float/double
-#define DPRINT_SAFE(...)  SERIALDEBUG.printf(__VA_ARGS__)
-#define DPRINT_LU(value)  SERIALDEBUG.printf("%lu", (unsigned long)(value))
-#define DPRINT_LD(value)  SERIALDEBUG.printf("%ld", (long)(value))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#define DPRINT_SAFE(fmt, ...) SERIALDEBUG.printf((fmt), ##__VA_ARGS__)
+#define DPRINT_LU(value) SERIALDEBUG.printf("%lu", (unsigned long)(value))
+#define DPRINT_LD(value) SERIALDEBUG.printf("%ld", (long)(value))
 // Use the safe version for the main debug macros
 #define DPRINT(...)       DPRINT_SAFE(__VA_ARGS__)
 #define DPRINTLN(...)     { DPRINT_SAFE(__VA_ARGS__); SERIALDEBUG.println(); }
+#pragma GCC diagnostic pop
 #endif
 
 #ifndef DPRINT
@@ -663,10 +570,6 @@ String getChipId() {
   snprintf(chipId, 9, "%08X", (uint32_t)ESP.getEfuseMac()); // Low 4 bytes of MAC address (6 bytes)
   return String(chipId);
 }
-
-// String host           = getChipId();
-// String ssidSoftAP     = String("Pedalino-") + getChipId();
-// String passwordSoftAP = getChipId();
 
 String host           = String("pedalino");
 String ssidSoftAP     = String("Pedalino");
@@ -730,5 +633,3 @@ void mtc_start();
 void mtc_stop();
 void mtc_continue();
 void mtc_tap();
-
-#endif // _PEDALINO_H

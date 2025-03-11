@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/fuegovic/PedalinoMini">
+  <a href="https://github.com/fuegovic/PedalinoMini-Phoenix">
     <img src="./data/logo.webp" alt="PedalinoMini Phoenix Logo">
   </a>
 </p>

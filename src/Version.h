@@ -13,7 +13,7 @@ extern "C" {
 /** Patch version suffix (x.x.x-X) */
 #define PEDALINO_VERSION_SUFFIX  "🐦‍🔥"
 
-#define PEDALINO_GITHUB_URL "https://github.com/fuegovic/PedalinoMini/tree/single"
+#define PEDALINO_GITHUB_URL "https://github.com/fuegovic/PedalinoMini-Phoenix"
 
 #define xstr(s) sstr(s)  // stringize the result of expansion of a macro argument
 #define sstr(s) #s

@@ -1,4 +1,4 @@
-[![](./data/logo.webp)](https://github.com/fuegovic/PedalinoMini)
+[![](./data/logo.webp)](https://github.com/fuegovic/PedalinoMini-Phoenix)
 
 # PedalinoMini™ 🐦‍🔥
 
