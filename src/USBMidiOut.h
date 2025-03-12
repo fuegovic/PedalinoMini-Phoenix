@@ -12,19 +12,6 @@
 
 #include <MIDI.h>
 
-#if defined(ARDUINO_BPI_LEAF_S3) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-
-#include <Adafruit_TinyUSB.h>
-
-// USB MIDI object
-Adafruit_USBD_MIDI usb_midi;
-
-// Create a new instance of the Arduino MIDI Library,
-// and attach usb_midi as the transport.
-MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, USB_MIDI);
-
-#else
-
 struct Serial1MIDISettings : public midi::DefaultSettings
 {
   static const long BaudRate = MIDI_BAUD_RATE;
@@ -35,9 +22,6 @@ struct Serial1MIDISettings : public midi::DefaultSettings
 #define SERIAL_MIDI_USB   Serial1
 
 MIDI_CREATE_CUSTOM_INSTANCE_ESP(HardwareSerial, SERIAL_MIDI_USB, USB_MIDI, Serial1MIDISettings);
-
-#endif
-
 
 void USB_MIDI_SendRealTimeMessage(byte type)
 {

@@ -374,17 +374,17 @@ void topOverlay(OLEDDisplay *display, OLEDDisplayUiState* state)
   if ((millis() >= endMillis2) ||
       (millis() < endMillis2 && MTC.getMode() == MidiTimeCode::SynchroNone)) {
 
-#ifdef BATTERY
-    display->setTextAlignment(TEXT_ALIGN_RIGHT);
-    display->setFont(batteryIndicator);
-    if      (batteryVoltage > 4300) display->drawString(128, 0, String((millis() >> 10) % 4));
-    else if (batteryVoltage > 3800) display->drawString(128, 0, String(4));
-    else if (batteryVoltage > 3600) display->drawString(128, 0, String(3));
-    else if (batteryVoltage > 3400) display->drawString(128, 0, String(2));
-    else if (batteryVoltage > 3200) display->drawString(128, 0, String(1));
-    else if ((millis() >> 10) % 2) display->drawString(128, 0, String(0));
-    else display->drawString(128, 0, String(4));
-#endif
+// #ifdef BATTERY
+//     display->setTextAlignment(TEXT_ALIGN_RIGHT);
+//     display->setFont(batteryIndicator);
+//     if      (batteryVoltage > 4300) display->drawString(128, 0, String((millis() >> 10) % 4));
+//     else if (batteryVoltage > 3800) display->drawString(128, 0, String(4));
+//     else if (batteryVoltage > 3600) display->drawString(128, 0, String(3));
+//     else if (batteryVoltage > 3400) display->drawString(128, 0, String(2));
+//     else if (batteryVoltage > 3200) display->drawString(128, 0, String(1));
+//     else if ((millis() >> 10) % 2) display->drawString(128, 0, String(0));
+//     else display->drawString(128, 0, String(4));
+// #endif
   }
 
   if (millis() < endMillis2) {
@@ -999,12 +999,12 @@ void drawFrame3(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int1
   display->setTextAlignment(TEXT_ALIGN_RIGHT);
   display->drawString(128 + x, 16 + y, ESP.getFreeHeap()/1024 + String(" Kb"));
 
-#ifdef BATTERY
-  display->setTextAlignment(TEXT_ALIGN_LEFT);
-  display->drawString(0 + x, 26 + y, "Battery:");
-  display->setTextAlignment(TEXT_ALIGN_RIGHT);
-  display->drawString(128 + x, 26 + y, batteryVoltage / 1000.0F + String(" V"));
-#endif
+// #ifdef BATTERY
+//   display->setTextAlignment(TEXT_ALIGN_LEFT);
+//   display->drawString(0 + x, 26 + y, "Battery:");
+//   display->setTextAlignment(TEXT_ALIGN_RIGHT);
+//   display->drawString(128 + x, 26 + y, batteryVoltage / 1000.0F + String(" V"));
+// #endif
 
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->drawString(0 + x, 36 + y, "Uptime:");

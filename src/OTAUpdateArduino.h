@@ -31,27 +31,19 @@ void ota_begin(const char *hostname) {
     webSocket.enable(false);
     webSocket.closeAll();
 #endif
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_clear();
-    display_progress_bar_title("OTA Update");
-#else
     display.clear();
     display.setFont(ArialMT_Plain_10);
     display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
     display.drawString(display.getWidth() / 2, display.getHeight() / 2 - 10, "OTA Update");
     display.display();
-#endif
+
     fill_solid(fastleds, LEDS, CRGB::Black);
     FastLED.show();
   });
 
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_progress_bar_update(progress, total);
-#else
     display.drawProgressBar(4, 32, 120, 8, progress / (total / 100) );
     display.display();
-#endif
     byte ledProgress = (progress / (total / (LEDS * 100))) / 100;
     fill_solid(fastleds, ledProgress + 1, swap_rgb_order(CRGB::Red, rgbOrder));
     byte ledDim = (progress / (total / (LEDS * 100))) % 100;
@@ -60,16 +52,11 @@ void ota_begin(const char *hostname) {
   });
 
   ArduinoOTA.onEnd([]() {
-#if defined(ARDUINO_LILYGO_T_DISPLAY) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-    display_clear();
-    display_progress_bar_title("Restart");
-#else
     display.clear();
     display.setFont(ArialMT_Plain_10);
     display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
     display.drawString(display.getWidth() / 2, display.getHeight() / 2, "Restart");
     display.display();
-#endif
     fill_solid(fastleds, LEDS, swap_rgb_order(CRGB::Green, rgbOrder));
     FastLED.show();
   });

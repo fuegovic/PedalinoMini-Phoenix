@@ -13,17 +13,15 @@ extern "C" {
 /** Patch version suffix (x.x.x-X) */
 #define PEDALINO_VERSION_SUFFIX  "🐦‍🔥"
 
-#define PEDALINO_GITHUB_URL "https://github.com/fuegovic/PedalinoMini/tree/single"
+#define PEDALINO_GITHUB_URL "https://github.com/fuegovic/PedalinoMini-Phoenix"
 
 #define xstr(s) sstr(s)  // stringize the result of expansion of a macro argument
 #define sstr(s) #s
 
 #define VERSION xstr(PEDALINO_VERSION_MAJOR) "." xstr(PEDALINO_VERSION_MINOR) "." xstr(PEDALINO_VERSION_PATCH) " - " PEDALINO_VERSION_SUFFIX
 
-#if defined(LILYGO_T_DISPLAY) || defined(LILYGO_T_DISPLAY_S3) || defined(BPI_LEAF_S3)
-#define ESP32_PLATFORM_VERSION "6.9.0"
-#else
-#define ESP32_PLATFORM_VERSION "3.5.0"
+#ifndef ESP32_PLATFORM_VERSION
+#define ESP32_PLATFORM_VERSION "Unknown" // Fallback if not provided by build system
 #endif
 
 /**

@@ -521,11 +521,7 @@ bool wps_config()
 #endif
   wpsConfig.wps_type = WPS_TYPE_PBC;
   strcpy(wpsConfig.factory_info.manufacturer, "ESPRESSIF");
-#if defined(ARDUINO_BPI_LEAF_S3) || defined(ARDUINO_LILYGO_T_DISPLAY_S3)
-  strcpy(wpsConfig.factory_info.model_number, "ESP32-S3");
-#else
   strcpy(wpsConfig.factory_info.model_number, "ESP32");
-#endif
   strcpy(wpsConfig.factory_info.model_name,   "Pedalino(TM)");
   strcpy(wpsConfig.factory_info.device_name,  "PedalinoMini");
 
