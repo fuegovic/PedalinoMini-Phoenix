@@ -359,15 +359,23 @@ const char SYSTEM_ICON[] PROGMEM = "<svg xmlns='http://www.w3.org/2000/svg' widt
 "<path d='M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z'/>"
 "</svg>";
 
-// Reusable card component
+// Reusable card component with SVG color override and improved alignment
 void addCard(const char* icon, const char* title) {
-  page += F("<div class='col'><div class='card h-100'><h5 class='card-header'>");
-  page += FPSTR(icon);
-  page += F(" ");
+  page += F("<div class='col'><div class='card h-100'>");
+  // Modified card header with flexbox for alignment
+  page += F("<h5 class='card-header fw-bold d-flex align-items-center'>");
+  // Create a temporary string to hold the icon
+  String iconStr = FPSTR(icon);
+  // Replace all occurrences of "currentColor" with the desired color
+  // iconStr.replace("currentColor", "#f8312f");
+  // Add the icon with margin-right for spacing
+  page += F("<span style='margin-right: 8px; display: flex; align-items: center;'>");
+  page += iconStr;
+  page += F("</span>");
+  // Add the title
   page += title;
   page += F("</h5><div class='card-body'>");
 }
-
 void closeCard() {
   page += F("</div>"); // Close card-body
   page += F("</div>"); // Close card
@@ -378,7 +386,7 @@ void get_root_page(unsigned int start, unsigned int len) {
   if (get_top_page(0, start, len)) return;
 
   // Minimal CSS using utility classes instead
-  page += F("<h4 class='display-4 text-center mb-4'>PedalinoMini™ 🐦‍🔥<br class='mb-0'>");
+  page += F("<h4 class='display-4 text-center mb-4'>PedalinoMini 🐦‍🔥<br class='mb-0'>");
   page += F("<small class='text-muted fs-5'>Wireless MIDI foot controller</small></h4>");
   page += F("<div class='row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-2 g-md-3 mx-3'>");
 
@@ -388,7 +396,10 @@ void get_root_page(unsigned int start, unsigned int len) {
   page += F("<div class='row g-1 mb-2'><div class='col-6'>Source Code</div>");
   page += F("<div class='col-6 text-end'><a href='");
   page += PEDALINO_GITHUB_URL;
-  page += F("' target='_blank'>GitHub</a></div></div><hr class='my-2'>");
+  page += F("' target='_blank'>GitHub</a></div></div>");
+  
+  // Add Overview section title
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Overview</h6>");
   
   addStatusItem("Profiles", String(PROFILES));
   addStatusItem("Banks", String(BANKS));
@@ -404,25 +415,25 @@ void get_root_page(unsigned int start, unsigned int len) {
   addCard(HARDWARE_ICON, "Hardware");
 
   // Board Information
-  page += F("<h6 class='border-bottom pb-2 fw-bold'>Board Information</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Board Information</h6>");
   addStatusItem("Board", ARDUINO_BOARD);
   addStatusItem("Chip", ESP.getChipModel());
   addStatusItem("Chip ID", getChipId());
 
   // CPU Information Section  
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>CPU Information</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>CPU Information</h6>");
   addStatusItem("CPU Core", String(xPortGetCoreID()));
   addStatusItem("CPU Frequency", String(ESP.getCpuFreqMHz()) + " MHz");
 
   // Memory Information Section
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Memory Information</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Memory Information</h6>");
   addStatusItem("Flash Size", String(ESP.getFlashChipSize() / (1024 * 1024)) + " MB");
   addStatusItem("Flash Frequency", String(ESP.getFlashChipSpeed() / 1000000) + " MHz");
   addStatusItem("Memory Used", String((ESP.getHeapSize() - ESP.getFreeHeap()) / 1024) + "/" + String(ESP.getHeapSize() / 1024) + " kB");
   addStatusItem("Max Memory Allocation", String(maxAllocation / 1024) + " kB");
 
   // Storage Information
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Storage Information</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Storage Information</h6>");
   addStatusItem("SPIFFS Used", String(SPIFFS.usedBytes() / 1024) + "/" + String(SPIFFS.totalBytes() / 1024) + " kB");
   addStatusItem("SPIFFS Type", F("LittleFS"));
   nvs_stats_t nvs_stats;
@@ -437,7 +448,7 @@ void get_root_page(unsigned int start, unsigned int len) {
   addCard(NETWORK_ICON, "Network");
   // First show Station info if connected
   if (WiFi.getMode() == WIFI_STA || WiFi.getMode() == WIFI_AP_STA) {
-    page += F("<h6 class='border-bottom pb-2 fw-bold'>WiFi Client</h6>");
+    page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>WiFi Client</h6>");
     addStatusItem("SSID", wifiSSID);
     addStatusItem("IP", WiFi.localIP().toString());
     addStatusItem("Signal", String(WiFi.RSSI()) + " dBm");
@@ -454,7 +465,7 @@ void get_root_page(unsigned int start, unsigned int len) {
   if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
     // Add section header if we showed Station info
     if (WiFi.getMode() == WIFI_AP_STA) {
-      page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Access Point</h6>");
+      page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Access Point</h6>");
     }
     addStatusItem("AP SSID", ssidSoftAP);
     addStatusItem("AP IP", WiFi.softAPIP().toString());
@@ -463,7 +474,7 @@ void get_root_page(unsigned int start, unsigned int len) {
   }
 
   // MIDI Status section
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>MIDI Connections</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>MIDI Connections</h6>");
 
   // Network MIDI status with icon and status badge
   page += F("<div class='row g-1 mb-2'><div class='col-6 d-flex align-items-center'>");
@@ -507,6 +518,11 @@ void get_root_page(unsigned int start, unsigned int len) {
   page += F("</div></div>");
   #endif
 
+  // OSC section
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>OSC</h6>");
+  addStatusItem("Local Port", String(oscLocalPort));
+  addStatusItem("Remote Port", String(oscRemotePort));
+
   closeCard();
   if (trim_page(start, len)) return;
 
@@ -514,13 +530,13 @@ void get_root_page(unsigned int start, unsigned int len) {
   addCard(SYSTEM_ICON, "System");
 
   // System Information Section
-  page += F("<h6 class='border-bottom pb-2 fw-bold'>System Information</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>System Information</h6>");
   addStatusItem("SDK Version", ESP.getSdkVersion());
   addStatusItem("Free Memory", "<span id='free-memory'></span>");
   addStatusItem("Uptime", "<span id='uptime'></span>");
 
   // ESP32 Platform Section
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>ESP32 Platform</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>ESP32 Platform</h6>");
   addStatusItem("ESP32 Platform", ESP32_PLATFORM_VERSION);
   char idfVer[16];
   snprintf(idfVer, sizeof(idfVer), "%d.%d.%d", 
@@ -531,18 +547,27 @@ void get_root_page(unsigned int start, unsigned int len) {
   addStatusItem("Build Env", xstr(PLATFORMIO_ENV));
 
   // Firmware Section
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Firmware</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Firmware</h6>");
   char version[16];
   snprintf(version, sizeof(version), "%d.%d.%d", 
           PEDALINO_VERSION_MAJOR, 
           PEDALINO_VERSION_MINOR, 
           PEDALINO_VERSION_PATCH);
   addStatusItem("Version", version);
-  addStatusItem("Size", String(sketchSize) + " bytes");
+  
+  // Convert firmware size to kB or MB
+  String formattedSize;
+  if (sketchSize < 1024 * 1024) {
+    formattedSize = String(sketchSize / 1024.0, 1) + " kB";
+  } else {
+    formattedSize = String(sketchSize / (1024.0 * 1024.0), 2) + " MB";
+  }
+  addStatusItem("Size", formattedSize);
+  
   addStatusItem("Hash", sketchMD5);
 
   // Frontend Section  
-  page += F("<h6 class='border-bottom pb-2 mt-3 fw-bold'>Frontend</h6>");
+  page += F("<h6 class='border-bottom border-2 py-2 mb-3 text-primary fw-bold'>Frontend</h6>");
   addStatusItem("Bootstrap Version", "<span id='bootstrap-version'></span>");
 
   // Close the row of cards
