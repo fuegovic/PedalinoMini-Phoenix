@@ -2,6 +2,14 @@
 
 <div id="myImageContainer">
     <img id="myImage" src="../../assets/Schematic_PedalinoMini.webp" alt="Schematic PedalinoMini">
+    <button id="openModal" class="modal-button" title="View full size">⤢</button>
+</div>
+
+<div id="imageModal" class="modal">
+  <span class="close-modal">&times;</span>
+  <div id="modalImageContainer">
+    <img id="modalImage" src="" alt="Schematic PedalinoMini (Full Size)">
+  </div>
 </div>
 
 <script>
@@ -9,6 +17,11 @@
 function initPanZoom() {
     const element = document.getElementById('myImage');
     const container = document.getElementById('myImageContainer');
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalContainer = document.getElementById('modalImageContainer');
+    const closeBtn = document.querySelector('.close-modal');
+    const openModalBtn = document.getElementById('openModal');
     
     // Check if elements exist
     if (!element || !container) {
@@ -54,6 +67,67 @@ function initPanZoom() {
         container.addEventListener('wheel', container._wheelHandler);
         container.addEventListener('dblclick', container._dblclickHandler);
         
+        // Modal functionality
+        if (openModalBtn) {
+            openModalBtn.addEventListener('click', function() {
+                // Set modal image source
+                modalImage.src = element.src;
+                
+                // Show modal
+                modal.style.display = 'flex';
+                
+                // Initialize PanZoom on modal image
+                const modalPanzoom = Panzoom(modalImage, {
+                    maxScale: 20,
+                    minScale: 0.5,
+                    contain: 'outside'
+                });
+                
+                // Add event handlers for modal
+                modalContainer._wheelHandler = function(event) {
+                    modalPanzoom.zoomWithWheel(event);
+                    event.preventDefault();
+                };
+                
+                modalContainer._dblclickHandler = function() {
+                    modalPanzoom.reset();
+                };
+                
+                modalContainer.addEventListener('wheel', modalContainer._wheelHandler);
+                modalContainer.addEventListener('dblclick', modalContainer._dblclickHandler);
+            });
+        }
+        
+        // Close modal when clicking the X
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                
+                // Clean up modal event listeners
+                if (modalContainer._wheelHandler) {
+                    modalContainer.removeEventListener('wheel', modalContainer._wheelHandler);
+                }
+                if (modalContainer._dblclickHandler) {
+                    modalContainer.removeEventListener('dblclick', modalContainer._dblclickHandler);
+                }
+            });
+        }
+        
+        // Close modal when clicking outside the image
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                
+                // Clean up modal event listeners
+                if (modalContainer._wheelHandler) {
+                    modalContainer.removeEventListener('wheel', modalContainer._wheelHandler);
+                }
+                if (modalContainer._dblclickHandler) {
+                    modalContainer.removeEventListener('dblclick', modalContainer._dblclickHandler);
+                }
+            }
+        });
+        
         console.log('PanZoom initialized successfully');
     };
 
@@ -82,8 +156,77 @@ window.addEventListener('popstate', function() {
 });
 </script>
 
+<style>
+#myImageContainer {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.modal-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+}
+
+#modalImageContainer {
+    position: relative;
+    width: 90%;
+    height: 90%;
+    max-width: 1500px;
+}
+
+#modalImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.close-modal:hover {
+    color: #bbb;
+}
+
+.panzoom-instructions {
+    margin-top: 10px;
+    text-align: center;
+}
+</style>
+
 <div class="panzoom-instructions">
-    <p><em>Tip: Use mouse wheel to zoom in/out. Double-click to reset view.</em></p>
+    <p><em>Tip: Use mouse wheel to zoom in/out. Double-click to reset view. Click the expand button to open in full screen.</em></p>
 </div>
 
 !!! warning "Floating Pins"

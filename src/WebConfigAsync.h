@@ -93,7 +93,7 @@ bool get_top_page(int p, unsigned int start, unsigned int len) {
   page += F("<!doctype html>");
   page += F("<html lang='en' data-bs-theme='dark'>");
   page += F("<head>");
-  page += F("<title>PedalinoMini&trade;</title>");
+  page += F("<title>PedalinoMini</title>");
   page += F("<meta charset='utf-8'>");
   page += F(" <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>");
   if (theme == "phoenix") {
@@ -308,8 +308,8 @@ void get_login_page() {
   page += F("<form class='form-signin'>");
   page += F("<div class='text-center mb-4'>");
   page += F("<img class='mb-4' src='/logo.webp' alt='' width='64' height='64'>");
-  page += F("<h1 class='h3 mb-3 font-weight-normal'>PedalinoMini&trade;</h1>");
-  page += F("<p>Wireless MIDI foot controller <a href='https://github.com/alf45tar/PedalinoMini'>More info</a></p>");
+  page += F("<h1 class='h3 mb-3 font-weight-normal'>PedalinoMini;</h1>");
+  page += F("<p>Wireless MIDI foot controller <a href='https://github.com/fuegovic/PedalinoMini-Phoenix'>More info</a></p>");
   page += F("</div>");
 
   page += F("<div class='form-label-group'>");
@@ -4428,7 +4428,7 @@ void get_update_page(unsigned int start, unsigned int len) {
   page += F("<div class='row'>");
   page += F("<div class='col-8'>");
   page += F("<small id='installHelpBlock' class='form-text text-muted'>");
-  page += F("<a target='_blank' href='https://alf45tar.github.io/PedalinoMini/installer'>PedalinoMini™ Installer</a>");
+  page += F("<a target='_blank' href='https://fuegovic.github.io/PedalinoMini-Phoenix/installer/'>PedalinoMini 🐦‍🔥 Installer</a>");
   page += F("</small>");
   page += F("</div>");
   page += F("<div class='col-1'>");
@@ -4655,7 +4655,7 @@ void get_update_page(unsigned int start, unsigned int len) {
   page += F("<!doctype html>");
   page += F("<html lang='en'>");
   page += F("<head>");
-  page += F("<title>PedalinoMini&trade;</title>");
+  page += F("<title>PedalinoMini</title>");
   page += F("</head>");
   page += F("<body>");
   page += F("<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>");

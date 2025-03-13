@@ -1,6 +1,6 @@
 [![](./data/logo.webp)](https://github.com/fuegovic/PedalinoMini-Phoenix)
 
-# PedalinoMini™ 🐦‍🔥
+# PedalinoMini 🐦‍🔥
 
 This is a full-featured MIDI controller that supports up to 15 analog and digital pedals (with capacity for up to 45 foot switches total), featuring 3 user profiles with 20 banks each for extensive control configurations.
 
