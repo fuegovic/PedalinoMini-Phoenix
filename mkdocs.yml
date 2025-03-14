@@ -78,9 +78,9 @@ nav:
   
   - Interfaces:
     - Overview: interfaces/index.md
+    - MIDI Features: interfaces/midi-features.md
     - MIDI Interfaces: interfaces/midi-interfaces.md
     - OSC Messages: interfaces/osc-messages.md
-    - MIDI Routing: interfaces/midi-routing.md
   
   - Basic Configuration:
     - Configuration Overview: basic-configuration/index.md
@@ -92,6 +92,7 @@ nav:
   - Advanced Features:
     - Sequences: advanced-features/sequences.md
     - Profiles: advanced-features/profiles.md
+    - MIDI Advanced Features: advanced-features/midi-advanced-summary.md
     - Display: advanced-features/display.md
     - Settings: advanced-features/settings.md
     - Updating: advanced-features/update.md
