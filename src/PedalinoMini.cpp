@@ -489,7 +489,7 @@ FastLED.show();
   xTaskCreatePinnedToCore(
                     displayTask,      // Task function
                     "DisplayTask",    // Name
-                    4096,             // Stack size
+                    2048,             // Stack size (reduced from 4096)
                     NULL,             // Parameters
                     2,                // Priority (2 is higher than loop1 but still allows MIDI interrupts)
                     &displayTaskHandle,// Task handle
@@ -498,7 +498,7 @@ FastLED.show();
   xTaskCreatePinnedToCore(
                     loop1,       /* Task function. */
                     "loopTask1", /* name of task. */
-                    8192,        /* Stack size of task */
+                    4096,        /* Stack size of task (reduced from 8192) */
                     NULL,        /* parameter of the task */
                     1,           /* priority of the task */
                     &loopCore1,  /* Task handle to keep track of created task */
@@ -507,7 +507,7 @@ FastLED.show();
   xTaskCreatePinnedToCore(
                     loop0,       /* Task function. */
                     "loopTask0", /* name of task. */
-                    8192,        /* Stack size of task */
+                    4096,        /* Stack size of task (reduced from 8192) */
                     NULL,        /* parameter of the task */
                     1,           /* priority of the task */
                     &loopCore0,  /* Task handle to keep track of created task */
@@ -678,6 +678,27 @@ void loop0(void * pvParameters)
         }
         return;
     }
+    // Add memory monitoring
+    static unsigned long lastMemoryCheck = 0;
+    if (millis() - lastMemoryCheck > 30000) {
+      lastMemoryCheck = millis();
+      
+      size_t currentFreeHeap = ESP.getFreeHeap();
+      size_t maxAllocation = ESP.getMaxAllocHeap();
+      
+      // Log only significant changes or periodically
+      static size_t lastReportedHeap = 0;
+      if (abs(currentFreeHeap - lastReportedHeap) > 1000) {
+        DPRINT("Memory status: Free %d bytes, Max block %d bytes\n", 
+               currentFreeHeap, maxAllocation);
+        lastReportedHeap = currentFreeHeap;
+      }
+      
+      // Alert if memory is critically low
+      if (currentFreeHeap < 10000) {
+        DPRINT("WARNING: Memory critically low! %d bytes\n", currentFreeHeap);
+      }
+    }   
   }
 }
 

@@ -24,7 +24,7 @@ AsyncWebServer          httpServer(80);
 
 #ifdef WEBCONFIG
 
-#define WEBPAGE_MEMORY_ALLOCATION 8192    // To avoid memory fragmentation keep web page chunk smaller than allocated space
+#define WEBPAGE_MEMORY_ALLOCATION 8256    // To avoid memory fragmentation keep web page chunk smaller than allocated space
 
 String page          = "";
 String alert         = "";
