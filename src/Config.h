@@ -40,11 +40,17 @@ struct SpiRamAllocator : ArduinoJson::Allocator {
 SpiRamAllocator allocator;
 #endif
 
-bool control_not_defined (unsigned int c) {
+bool control_not_defined(unsigned int c) {
   return (controls[c].pedal1 == PEDALS && controls[c].button1 == LADDER_STEPS &&
-          controls[c].pedal2 == PEDALS && controls[c].button2 == LADDER_STEPS &&
-          controls[c].led    == LEDS);
+          controls[c].pedal2 == PEDALS && controls[c].button2 == LADDER_STEPS);
+  // Remove LED check since a control without input devices isn't usable anyway
 }
+
+// bool control_not_defined (unsigned int c) {
+//   return (controls[c].pedal1 == PEDALS && controls[c].button1 == LADDER_STEPS &&
+//           controls[c].pedal2 == PEDALS && controls[c].button2 == LADDER_STEPS &&
+//           controls[c].led    == LEDS);
+// }
 
 byte ActionStringToEnum (String msg)
 {
