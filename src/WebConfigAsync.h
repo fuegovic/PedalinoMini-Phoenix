@@ -2000,8 +2000,8 @@ void get_pedals_page(unsigned int start, unsigned int len) {
   page += F("<div class='row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 row-cols-xxl-4 g-2 g-md-3 g-xl-4'>");
 
   for (unsigned int i = 1; i <= PEDALS; i++) {
-    page += F("<div class='col'>");
-    page += F("<div class='card'>");
+    page += F("<div class='col d-flex'>"); // Add d-flex to enable flexbox
+    page += F("<div class='card h-100 w-100'>"); // Add h-100 and w-100 for full height/width
     page += F("<h5 class='card-header'>");
     page += F("<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-controller' viewBox='0 0 20 20'>");
     page += F("<path d='M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1v-1z'/>");
