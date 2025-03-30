@@ -64,12 +64,16 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add .
-        git commit -m "Release firmware ${{ github.event.inputs.tag }}"
-        git pull --rebase origin master
-        git push origin HEAD:master
-        git tag ${{ github.event.inputs.tag }}
-        git push --tags
+        git add ./firmware/esp32doit-devkit-v1/*
+        if git diff-index --quiet HEAD --; then
+          echo "No changes to commit"
+        else
+          git commit -m "Release firmware ${{ github.event.inputs.tag }}"
+          git pull --rebase origin master
+          git push origin HEAD:master
+          git tag ${{ github.event.inputs.tag }}
+          git push --tags
+        fi
 
     - name: Create release ${{ github.event.inputs.tag }}
       uses: softprops/action-gh-release@v1
