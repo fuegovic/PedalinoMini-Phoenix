@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+    <title>Install PedalinoMini 🐦‍🔥</title>
+    <style>
+      /* General Styles */
+      body {
+        text-align: center;
+        font-family: verdana, sans-serif;
+        background: #252525;
+        color: #eaeaea; /* Set default text color to light gray */
+        margin: 0; /* Remove default body margins */
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Ensure content fills the screen */
+        font-size: 0.9em; /* Slightly smaller default font size */
+      }
+
+      /* Centering the main content */
+      .container {
+        display: inline-block;
+        min-width: 340px;
+        width: 80%; /* Adjust width for responsiveness */
+        max-width: 600px; /* Maximum width for larger screens */
+        margin: 20px auto; /* Center the container horizontally with some top margin */
+        padding: 20px;
+        background: #333; /* Slightly lighter background for the main content */
+        border-radius: 8px; /* Add some rounding to the container */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
+      }
+
+      h1 {
+        color: #eaeaea;
+        margin-bottom: 20px;
+      }
+
+      /* Form Elements */
+      div, fieldset, input, select {
+        padding: 8px;
+        margin-bottom: 10px; /* Add spacing between form elements */
+      }
+
+      fieldset {
+        background: #4f4f4f;
+        border: none;
+        border-radius: 5px;
+      }
+
+      p {
+        margin: 0.75em 0; /* Adjusted paragraph margins */
+      }
+
+      input, select {
+        background: #dddddd;
+        color: #000000;
+        border: none;
+        border-radius: 4px;
+        width: 95%; /* Make form elements fill the container */
+      }
+
+      input[type=checkbox], input[type=radio] {
+        width: 1em;
+        margin-right: 6px;
+        vertical-align: -1px;
+      }
+
+      input[type=range] {
+        width: 98%;
+      }
+
+      textarea {
+        resize: vertical;
+        width: 98%;
+        height: 200px; /* Reduced height for textarea */
+        padding: 8px;
+        overflow: auto;
+        background: #1f1f1f;
+        color: #65c115;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.8em;
+      }
+
+      /* Button Styles */
+      button {
+        border: 0;
+        border-radius: 0.3rem;
+        background: #1fa3ec;
+        color: #faffff;
+        line-height: 2rem;
+        padding: 0.5rem 1rem;
+        width: 100%;
+        max-width: 350px;
+        transition-duration: 0.4s;
+        cursor: pointer;
+        margin: 0 auto;
+        display: block;
+      }
+
+      button:hover {
+        background: #0e70a4;
+      }
+
+      .bred {
+        background: #d43535;
+      }
+
+      .bred:hover {
+        background: #931f1f;
+      }
+
+      .bgrn {
+        background: #47c266;
+      }
+
+      .bgrn:hover {
+        background: #5aaf6f;
+      }
+
+      /* Link Styles */
+      a {
+        color: #1fa3ec;
+        text-decoration: none;
+      }
+
+      /* Label Styles */
+      label {
+        display: block;
+        margin-top: 10px;
+        color: #eaeaea;
+        text-align: left; /* Align labels to the left */
+      }
+
+      /* Select Styles */
+      select {
+        width: 98%;
+        background: #dddddd;
+        color: #000000;
+        margin: 0 auto;
+        text-align: left; /* Align text in select to the left */
+      }
+
+      .pick-variant {
+        margin-bottom: 16px;
+        text-align: left; /* Align entire pick-variant section to the left */
+      }
+
+      .dropdown-container {
+        margin: 0 auto;
+        display: block;
+        text-align: left;
+        width: 100%;
+      }
+
+      #board-select, #version-select {
+        width: 100%;
+      }
+
+      /* Improv BLE Button */
+      improv-wifi-launch-button {
+        display: block;
+        width: 100%;
+        text-align: center;
+      }
+
+      /* Side-by-side Buttons */
+      .side-by-side {
+        display: flex;
+        justify-content: space-between; /* Distribute space evenly */
+        gap: 10px;
+        width: 100%;
+      }
+
+      .button-half {
+        width: 48%;
+      }
+
+      .button-half button {
+        width: 100%;
+        font-size: 1rem; /* Adjusted button font size */
+        line-height: 1.8rem;
+        padding: 0.5rem 1rem;  /*Increased button padding*/
+      }
+
+       /* USB Button Styling */
+       .usb-button-container button {
+        font-size: 1rem;  /* Make the USB button text same size as BLE/Serial buttons */
+        padding: 0.5rem 1rem;
+      }
+
+      improv-wifi-serial-launch-button {
+        display: block;
+        width: 100%;
+        text-align: center;
+      }
+
+      /* Hidden Class */
+      .hidden {
+        display: none;
+      }
+
+      /* Disabled Button */
+      button:disabled {
+        background: #cccccc !important;
+        color: #666666 !important;
+        cursor: not-allowed;
+      }
+
+      /* Connection Options */
+      .connection-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .connection-option {
+        width: 100%;
+        text-align: center;
+      }
+
+      esp-web-install-button {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+      }
+
+      /* Unsupported Message */
+      .unsupported-message {
+        color: #aaa;
+        font-style: italic;
+        cursor: default;
+        user-select: none;
+        pointer-events: none;
+      }
+
+      /* Section Title */
+      .section-title {
+        color: #eaeaea;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      /* Footer Styles */
+      footer {
+        text-align: right;
+        font-size: 11px;
+        color: #aaa;
+        padding: 10px;
+        margin-top: auto; /* Push footer to the bottom */
+      }
+
+      footer a {
+        color: #aaa;
+      }
+
+      /* List Styles */
+      ol {
+        text-align: left;
+        padding-left: 20px; /* Indent the list for better readability */
+      }
+
+      li {
+        margin-bottom: 8px; /* Add some spacing between list items */
+      }
+
+      /* Pre Styles for Events */
+      pre {
+        background: #1f1f1f;
+        color: #65c115;
+        padding: 10px;
+        border-radius: 4px;
+        overflow: auto;
+        height: 150px; /* Limit the height of the pre element */
+        text-align: left; /* Align text to the left within the pre */
+        font-size: 0.8em; /* Slightly reduce the font size */
+        white-space: pre-wrap; /* Wrap long lines */
+      }
+
+      /* Configuration List Styling */
+      .configuration-list {
+        text-align: left;
+        padding-left: 20px;
+        list-style-type: disc; /* Use bullets for the list */
+      }
+
+      .configuration-list li {
+        margin-bottom: 5px;
+      }
+
+    </style>
+    <script type="module" src="https://unpkg.com/esp-web-tools@latest/dist/web/install-button.js?module"></script>
+    <script type="module" src="./sdk-ble-js/launch-button.js"></script>
+    <script type="module" src="./sdk-serial-js/web/serial-launch-button.js"></script>
+  </head>
+  <body>
+    <div class="container">
+
+    <h1>PedalinoMini 🐦‍🔥 Installer</h1>
+
+    <div class="pick-variant">
+      <ol>
+        <li>Connect the ESP device to your computer using USB, serial-to-USB adapter, or Bluetooth</li>
+        <li>Select the board and firmware variant suitable for your device</li>
+        <li>Hit "Connect" and select the correct port or find help if <a href="https://tasmota.github.io/docs/Getting-Started/" target='_blank'>no device found</a></li>
+      </ol>
+
+      <!-- Dropdown container for boards and versions -->
+      <div class="dropdown-container">
+        <label for="board-select">Select Board:</label>
+        <select id="board-select">
+          <option value="">Select Board</option>
+        </select>
+
+        <label for="version-select">Select Version:</label>
+        <select id="version-select" disabled>
+          <option value="">Select Version</option>
+        </select>
+      </div>
+
+      <!-- Status message element for displaying scanning progress -->
+      <div id="status-message">Scanning not started.</div>
+
+      <!-- Configuration Options Section -->
+      <h3 class="section-title">USB Configuration</h3>
+        <p style="text-align: left;">Use USB to:</p>
+        <ul class="configuration-list">
+          <li>Install/Update Firmware</li>
+          <li>View Logs & Console Output</li>
+          <li>Change WiFi / Provisioning Settings</li>
+          <li>Visit Device Webpage (if available)</li>
+        </ul>
+        <div class="connection-options">
+          <div class="connection-option usb-button-container">
+            <esp-web-install-button manifest=''>
+              <button slot='activate'>Connect via USB</button>
+              <i slot="unsupported" class="unsupported-message">
+                Your browser does not support Web Serial.</br>Open this page in Google Chrome or</br>Microsoft Edge instead
+                <span class="not-supported-i hidden">(but not on your iOS device)</span>.
+              </i>
+            </esp-web-install-button>
+          </div>
+        </div>
+
+        <h3 class="section-title">WiFi Provisioning</h3>
+        <div class="connection-option side-by-side">
+          <div class="button-half">
+            <improv-wifi-launch-button>
+              <button slot="activate">Connect via BLE</button>
+            </improv-wifi-launch-button>
+          </div>
+          <div class="button-half">
+            <improv-wifi-serial-launch-button>
+              <button slot="activate">Connect via Serial</button>
+            </improv-wifi-serial-launch-button>
+          </div>
+        </div>
+
+      <p>Events:</p>
+      <pre id="events"></pre>
+    <script>
+        // Event listener for the version select dropdown
+        document.querySelector('#version-select').addEventListener("change", (event) => {
+            const button = document.querySelector('esp-web-install-button');
+            button.manifest = event.target.value;
+        });
+    </script>
+    </div>
+    </div>
+    <footer >
+      <hr/>
+      <a href="https://esphome.github.io/esp-web-tools/" target='_blank'>PedalinoMini 🐦‍🔥 Installer powered by ESP Web Tools</a>
+    </footer>
+    <script>
+    const GITHUB_REPO = "fuegovic/PedalinoMini-Phoenix";
+    const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
+
+    // Mapping of board keys to their display names
+    const boards = {
+        "esp32doit-devkit-v1": "Esp32 DOIT DevKit v1",
+    };
+
+    // Fetch releases from the GitHub API
+    async function fetchReleases() {
+        try {
+            document.getElementById('status-message').textContent = "Fetching releases from GitHub...";
+            const response = await fetch(GITHUB_API_URL);
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+            }
+            const data = await response.json();
+            document.getElementById('status-message').textContent = `Found ${data.length} releases on GitHub.`;
+            return data;
+        } catch (error) {
+            console.error("Error fetching releases from GitHub:", error);
+            document.getElementById('status-message').textContent = `Error fetching releases: ${error.message}`;
+            return [];
+        }
+    }
+
+    // Check if a specific file exists at the given URL
+    async function checkFileExists(url, version, boardKey) {
+        try {
+            document.getElementById('status-message').textContent = `Checking for firmware ${version} for ${boardKey}...`;
+            const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+            return response.ok;
+        } catch (error) {
+            console.error(`Error checking file existence for ${version}:`, error);
+            return false;
+        }
+    }
+
+    // Populate the board dropdown without auto-selecting
+    function populateBoardDropdown() {
+        const boardSelect = document.getElementById('board-select');
+        for (const [boardKey, boardName] of Object.entries(boards)) {
+            const option = document.createElement('option');
+            option.value = boardKey;
+            option.textContent = boardName;
+            boardSelect.appendChild(option);
+        }
+        // We'll handle the auto-selection separately after attaching event listeners
+    }
+
+    // Sort versions by most recent first
+    function sortVersions(versions) {
+        return versions.sort((a, b) => {
+            const versionA = a.version.split('.').map(Number);
+            const versionB = b.version.split('.').map(Number);
+
+            for (let i = 0; i < Math.max(versionA.length, versionB.length); i++) {
+                const diff = (versionB[i] || 0) - (versionA[i] || 0);
+                if (diff !== 0) return diff;
+            }
+            return 0;
+        });
+    }
+
+    // Generate the version dropdown based on the selected board
+    async function generateVersionDropdown(boardKey) {
+        const versionSelect = document.getElementById('version-select');
+        versionSelect.innerHTML = '<option value="">Loading versions...</option>'; // Clear existing options
+        versionSelect.disabled = true; // Disable initially
+        const statusMessage = document.getElementById('status-message');
+        statusMessage.textContent = "Scanning for firmware versions...";
+
+        const releases = await fetchReleases();
+
+        if (releases.length === 0) {
+            statusMessage.textContent = "No releases found or there was an error.";
+            versionSelect.innerHTML = '<option value="">No versions available</option>';
+            return;
+        }
+
+        let versionObjects = [];
+
+        for (const release of releases) {
+            // Skip draft or prerelease versions if needed
+            if (release.draft || release.prerelease) continue;
+            
+            const tagName = release.tag_name;
+            const version = tagName.replace(/^v/, ''); // Remove leading 'v' if present
+            
+            // Try both URL patterns
+            const url1 = `https://raw.githubusercontent.com/${GITHUB_REPO}/${tagName}/firmware/${boardKey}/${boardKey}-${version}.json`;
+            const url2 = `https://raw.githubusercontent.com/${GITHUB_REPO}/v${version}/firmware/${boardKey}/${boardKey}-${version}.json`;
+            
+            let exists = await checkFileExists(url1, version, boardKey);
+            let url = url1;
+            
+            if (!exists) {
+                exists = await checkFileExists(url2, version, boardKey);
+                url = url2;
+            }
+            
+            if (exists) {
+                versionObjects.push({
+                    version: version,
+                    url: url,
+                    releaseDate: new Date(release.created_at)
+                });
+            }
+        }
+
+        if (versionObjects.length > 0) {
+            versionObjects = sortVersions(versionObjects);
+            
+            // Clear the loading option
+            versionSelect.innerHTML = '';
+            
+            // Populate the version dropdown
+            versionObjects.forEach(vObj => {
+                const option = document.createElement('option');
+                option.value = vObj.url;
+                option.textContent = `${vObj.version} (${vObj.releaseDate.toLocaleDateString()})`;
+                versionSelect.appendChild(option);
+            });
+
+            versionSelect.disabled = false;
+            const button = document.querySelector('esp-web-install-button');
+            button.manifest = versionSelect.options[0].value;
+            statusMessage.textContent = `Found ${versionObjects.length} firmware versions for ${boardKey}.`;
+        } else {
+            versionSelect.innerHTML = '<option value="">No versions found</option>';
+            statusMessage.textContent = "No firmware files found for the selected board.";
+        }
+    }
+
+    // Initialize the dropdowns
+    document.addEventListener('DOMContentLoaded', () => {
+        // Populate the board dropdown without auto-selecting
+        populateBoardDropdown();
+        
+        const boardSelect = document.getElementById('board-select');
+        
+        // First attach the event listener
+        boardSelect.addEventListener('change', () => {
+            const boardKey = boardSelect.value;
+            if (boardKey) {
+                generateVersionDropdown(boardKey);
+            } else {
+                document.getElementById('version-select').disabled = true;
+            }
+        });
+        
+        // Then perform auto-selection after listener is attached
+        if (boardSelect.options.length > 1) {
+            boardSelect.selectedIndex = 1; // Select the first board
+            
+            // Explicitly trigger version fetching with the selected value
+            const selectedBoardKey = boardSelect.value;
+            if (selectedBoardKey) {
+                generateVersionDropdown(selectedBoardKey);
+            }
+        }
+        
+        // Use exactly the same browser detection as the working example
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            document.querySelector(".not-supported-i").classList.remove("hidden");
+            document.querySelector(".not-supported-ble").classList.remove("hidden");
+        }
+        
+        // Override Web Bluetooth detection (if browser supports it but component doesn't detect correctly)
+        if ('bluetooth' in navigator && typeof navigator.bluetooth.requestDevice === 'function') {
+            // Force the component to recognize Bluetooth support
+            const bleButton = document.querySelector('improv-wifi-launch-button');
+            if (bleButton.shadowRoot) {
+                const unsupportedSlot = bleButton.shadowRoot.querySelector('slot[name="unsupported"]');
+                if (unsupportedSlot) {
+                    unsupportedSlot.style.display = 'none';
+                }
+            }
+        }
+        
+        // Log events from the installation process
+        const eventsLog = document.getElementById('events');
+        const logEvent = (message) => {
+            const now = new Date();
+            const timestamp = now.toLocaleTimeString();
+            eventsLog.textContent += `[${timestamp}] ${message}\n`;
+            eventsLog.scrollTop = eventsLog.scrollHeight;
+        };
+        
+        // Ensure only one connection method can be used at a time
+        const usbButton = document.querySelector('esp-web-install-button');
+        const bleButton = document.querySelector('improv-wifi-launch-button');
+        
+        usbButton.addEventListener('connecting', () => {
+            bleButton.setAttribute('disabled', '');
+            logEvent('USB connection initiated');
+        });
+        
+        // Updated to match index.html implementation
+        bleButton.addEventListener('state-changed', (ev) => {
+            const state = ev.detail;
+            logEvent(`Bluetooth state: ${state}`);
+            if (state === 'connecting' || state === 'connected') {
+                usbButton.setAttribute('disabled', '');
+            } else if (state === 'done' || state === 'error') {
+                usbButton.removeAttribute('disabled');
+            }
+        });
+        
+        // Similar to index.html implementation
+        bleButton.addEventListener('click', () => {
+            logEvent('Bluetooth connection initiated');
+        });
+        
+        // Add event listeners for installation progress
+        usbButton.addEventListener('installation-progress', (e) => {
+            logEvent(`Installation progress: ${e.detail.progress}%`);
+        });
+        
+        usbButton.addEventListener('installation-complete', () => {
+            logEvent('Installation completed successfully');
+            bleButton.removeAttribute('disabled');
+        });
+        
+        usbButton.addEventListener('error', (e) => {
+            logEvent(`Error: ${e.detail.message}`);
+            bleButton.removeAttribute('disabled');
+        });
+    });
+    </script>
+  </body>
+</html>

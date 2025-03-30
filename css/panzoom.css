@@ -1,0 +1,30 @@
+#myImageContainer {
+    width: 100%;  
+    max-width: 1000px;
+    height: 600px;
+    border: 1px solid #ccc;
+    overflow: hidden; /* IMPORTANT! */
+    margin: 0 auto 20px auto;
+    cursor: grab;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+#myImageContainer:active {
+    cursor: grabbing;
+}
+
+#myImage {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+.panzoom-instructions {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
