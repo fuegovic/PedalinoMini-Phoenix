@@ -66,6 +66,7 @@ jobs:
         git config user.email github-actions@github.com
         git add .
         git commit -m "Release firmware ${{ github.event.inputs.tag }}"
+        git pull --rebase origin master
         git push origin HEAD:master
         git tag ${{ github.event.inputs.tag }}
         git push --tags
